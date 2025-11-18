@@ -1,0 +1,14 @@
+{
+  "name": "@for/contract",
+  "private": true,
+  "version": "0.0.0",
+  "description": "FoR smart contract workspace",
+  "scripts": {
+    "dev": "echo \"Implement contract dev script\"",
+    "build": "echo \"Implement contract build script\"",
+    "lint": "echo \"Implement contract lint script\"",
+    "test": "echo \"Implement contract test script\"",
+    "clean": "rm -rf cache artifacts node_modules"
+  }
+}
+

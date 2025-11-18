@@ -1,0 +1,14 @@
+{
+  "name": "@for/frontend",
+  "private": true,
+  "version": "0.0.0",
+  "description": "FoR frontend application",
+  "scripts": {
+    "dev": "echo \"Implement frontend dev script\"",
+    "build": "echo \"Implement frontend build script\"",
+    "lint": "echo \"Implement frontend lint script\"",
+    "test": "echo \"Implement frontend test script\"",
+    "clean": "rm -rf dist node_modules"
+  }
+}
+
