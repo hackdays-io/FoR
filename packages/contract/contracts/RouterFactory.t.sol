@@ -23,7 +23,11 @@ contract RouterFactoryTest is Test {
             type(Router).creationCode,
             abi.encode(fundWallet, fundRatio, burnRatio)
         );
-        address expected = Create2.computeAddress(salt, keccak256(bytecode));
+        address expected = Create2.computeAddress(
+            salt,
+            keccak256(bytecode),
+            address(factory)
+        );
 
         address computed = factory.computeAddress(
             salt,
