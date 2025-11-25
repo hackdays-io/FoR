@@ -4,11 +4,8 @@
   "private": true,
   "description": "FoR monorepo managed with pnpm",
   "scripts": {
-    "build": "pnpm -r build",
-    "dev": "pnpm -r dev",
-    "lint": "pnpm -r lint",
-    "test": "pnpm -r test",
-    "clean": "pnpm -r clean"
+    "frontend": "pnpm --filter frontend",
+    "contract": "pnpm --filter contract"
   },
   "keywords": [
     "pnpm",
