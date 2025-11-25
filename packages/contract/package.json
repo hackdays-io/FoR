@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "description": "FoR smart contract workspace",
   "scripts": {
-    "dev": "echo \"Implement contract dev script\"",
-    "build": "echo \"Implement contract build script\"",
-    "lint": "echo \"Implement contract lint script\"",
-    "test": "echo \"Implement contract test script\"",
-    "clean": "rm -rf cache artifacts node_modules"
+    "dev": "hardhat node",
+    "build": "hardhat compile",
+    "test": "hardhat test",
+    "clean": "hardhat clean",
+    "check": "biome check"
   },
   "type": "module",
   "devDependencies": {
