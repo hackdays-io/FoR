@@ -1,0 +1,50 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-2ae137af0fd547d491e151cb114bf8327c424b48",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/RouterFactory.sol": "project/contracts/RouterFactory.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": [
+        "project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.4.0/"
+      ]
+    },
+    "sources": {
+      "npm/@openzeppelin/contracts@5.4.0/utils/Create2.sol": {
+        "content": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/Create2.sol)\n\npragma solidity ^0.8.20;\n\nimport {Errors} from \"./Errors.sol\";\n\n/**\n * @dev Helper to make usage of the `CREATE2` EVM opcode easier and safer.\n * `CREATE2` can be used to compute in advance the address where a smart\n * contract will be deployed, which allows for interesting new mechanisms known\n * as 'counterfactual interactions'.\n *\n * See the https://eips.ethereum.org/EIPS/eip-1014#motivation[EIP] for more\n * information.\n */\nlibrary Create2 {\n    /**\n     * @dev There's no code to deploy.\n     */\n    error Create2EmptyBytecode();\n\n    /**\n     * @dev Deploys a contract using `CREATE2`. The address where the contract\n     * will be deployed can be known in advance via {computeAddress}.\n     *\n     * The bytecode for a contract can be obtained from Solidity with\n     * `type(contractName).creationCode`.\n     *\n     * Requirements:\n     *\n     * - `bytecode` must not be empty.\n     * - `salt` must have not been used for `bytecode` already.\n     * - the factory must have a balance of at least `amount`.\n     * - if `amount` is non-zero, `bytecode` must have a `payable` constructor.\n     */\n    function deploy(uint256 amount, bytes32 salt, bytes memory bytecode) internal returns (address addr) {\n        if (address(this).balance < amount) {\n            revert Errors.InsufficientBalance(address(this).balance, amount);\n        }\n        if (bytecode.length == 0) {\n            revert Create2EmptyBytecode();\n        }\n        assembly (\"memory-safe\") {\n            addr := create2(amount, add(bytecode, 0x20), mload(bytecode), salt)\n            // if no address was created, and returndata is not empty, bubble revert\n            if and(iszero(addr), not(iszero(returndatasize()))) {\n                let p := mload(0x40)\n                returndatacopy(p, 0, returndatasize())\n                revert(p, returndatasize())\n            }\n        }\n        if (addr == address(0)) {\n            revert Errors.FailedDeployment();\n        }\n    }\n\n    /**\n     * @dev Returns the address where a contract will be stored if deployed via {deploy}. Any change in the\n     * `bytecodeHash` or `salt` will result in a new destination address.\n     */\n    function computeAddress(bytes32 salt, bytes32 bytecodeHash) internal view returns (address) {\n        return computeAddress(salt, bytecodeHash, address(this));\n    }\n\n    /**\n     * @dev Returns the address where a contract will be stored if deployed via {deploy} from a contract located at\n     * `deployer`. If `deployer` is this contract's address, returns the same value as {computeAddress}.\n     */\n    function computeAddress(bytes32 salt, bytes32 bytecodeHash, address deployer) internal pure returns (address addr) {\n        assembly (\"memory-safe\") {\n            let ptr := mload(0x40) // Get free memory pointer\n\n            // |                   | ↓ ptr ...  ↓ ptr + 0x0B (start) ...  ↓ ptr + 0x20 ...  ↓ ptr + 0x40 ...   |\n            // |-------------------|---------------------------------------------------------------------------|\n            // | bytecodeHash      |                                                        CCCCCCCCCCCCC...CC |\n            // | salt              |                                      BBBBBBBBBBBBB...BB                   |\n            // | deployer          | 000000...0000AAAAAAAAAAAAAAAAAAA...AA                                     |\n            // | 0xFF              |            FF                                                             |\n            // |-------------------|---------------------------------------------------------------------------|\n            // | memory            | 000000...00FFAAAAAAAAAAAAAAAAAAA...AABBBBBBBBBBBBB...BBCCCCCCCCCCCCC...CC |\n            // | keccak(start, 85) |            ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ |\n\n            mstore(add(ptr, 0x40), bytecodeHash)\n            mstore(add(ptr, 0x20), salt)\n            mstore(ptr, deployer) // Right-aligned with 12 preceding garbage bytes\n            let start := add(ptr, 0x0b) // The hashed data starts at the final garbage byte which we will set to 0xff\n            mstore8(start, 0xff)\n            addr := and(keccak256(start, 85), 0xffffffffffffffffffffffffffffffffffffffff)\n        }\n    }\n}\n"
+      },
+      "npm/@openzeppelin/contracts@5.4.0/utils/Errors.sol": {
+        "content": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/Errors.sol)\n\npragma solidity ^0.8.20;\n\n/**\n * @dev Collection of common custom errors used in multiple contracts\n *\n * IMPORTANT: Backwards compatibility is not guaranteed in future versions of the library.\n * It is recommended to avoid relying on the error API for critical functionality.\n *\n * _Available since v5.1._\n */\nlibrary Errors {\n    /**\n     * @dev The ETH balance of the account is not enough to perform the operation.\n     */\n    error InsufficientBalance(uint256 balance, uint256 needed);\n\n    /**\n     * @dev A call to an address target failed. The target may have reverted.\n     */\n    error FailedCall();\n\n    /**\n     * @dev The deployment failed.\n     */\n    error FailedDeployment();\n\n    /**\n     * @dev A necessary precompile is missing.\n     */\n    error MissingPrecompile(address);\n}\n"
+      },
+      "project/contracts/Router.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\n/**\n * @title Router\n * @dev 寄付金の分配を管理するRouterコントラクト\n * 寄付金を基金、Burn、受取人の3つに分配します\n */\ncontract Router {\n    /// @notice Burnアドレス（0x0）\n    address public constant BURN_ADDRESS = address(0);\n    \n    /// @notice 基金への分配比率（基準: 10000 = 100%）\n    uint256 public fundRatio;\n    \n    /// @notice Burnの分配比率（基準: 10000 = 100%）\n    uint256 public burnRatio;\n    \n    /// @notice 基金ウォレットアドレス\n    address public fundWallet;\n    \n    /**\n     * @dev コンストラクタ\n     * @param _fundWallet 基金ウォレットアドレス\n     * @param _fundRatio 基金への分配比率（基準: 10000 = 100%）\n     * @param _burnRatio Burnの分配比率（基準: 10000 = 100%）\n     */\n    constructor(\n        address _fundWallet,\n        uint256 _fundRatio,\n        uint256 _burnRatio\n    ) {\n        fundWallet = _fundWallet;\n        fundRatio = _fundRatio;\n        burnRatio = _burnRatio;\n    }\n}\n\n"
+      },
+      "project/contracts/RouterFactory.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport {Create2} from \"@openzeppelin/contracts/utils/Create2.sol\";\nimport {Router} from \"./Router.sol\";\n\ncontract RouterFactory {\n    function deploy(\n        bytes32 _salt,\n        address _fundWallet,\n        uint256 _fundRatio,\n        uint256 _burnRatio\n    ) external returns (address addr) {\n        bytes memory bytecode = abi.encodePacked(\n            type(Router).creationCode,\n            abi.encode(_fundWallet, _fundRatio, _burnRatio)\n        );\n        addr = Create2.deploy(0, _salt, bytecode);\n    }\n\n    function computeAddress(\n        bytes32 _salt,\n        address _fundWallet,\n        uint256 _fundRatio,\n        uint256 _burnRatio\n    ) external view returns (address addr) {\n        bytes memory bytecode = abi.encodePacked(\n            type(Router).creationCode,\n            abi.encode(_fundWallet, _fundRatio, _burnRatio)\n        );\n        addr = Create2.computeAddress(_salt, keccak256(bytecode));\n    }\n}\n"
+      }
+    }
+  }
+}
