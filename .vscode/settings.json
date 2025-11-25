@@ -1,0 +1,12 @@
+{
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "[json][css][typescript][typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[solidity]": {
+    "editor.defaultFormatter": "NomicFoundation.hardhat-solidity"
+  }
+}

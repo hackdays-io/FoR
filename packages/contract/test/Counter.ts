@@ -3,11 +3,11 @@ import { describe, it } from "node:test";
 
 import { network } from "hardhat";
 
-describe("Counter", async function () {
+describe("Counter", async () => {
   const { viem } = await network.connect();
   const publicClient = await viem.getPublicClient();
 
-  it("Should emit the Increment event when calling the inc() function", async function () {
+  it("Should emit the Increment event when calling the inc() function", async () => {
     const counter = await viem.deployContract("Counter");
 
     await viem.assertions.emitWithArgs(
@@ -18,7 +18,7 @@ describe("Counter", async function () {
     );
   });
 
-  it("The sum of the Increment events should match the current value", async function () {
+  it("The sum of the Increment events should match the current value", async () => {
     const counter = await viem.deployContract("Counter");
     const deploymentBlockNumber = await publicClient.getBlockNumber();
 
