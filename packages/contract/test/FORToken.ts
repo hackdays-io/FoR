@@ -9,21 +9,22 @@ describe("FORToken", async function () {
     const [deployer, account1, account2] = await viem.getWalletClients();
 
     const INITIAL_SUPPLY = parseEther("1000000"); // 1,000,000 FOR
+    const NAME = "FoR";
+    const SYMBOL = "FOR";
 
     it("Should deploy with correct name, symbol, and decimals", async function () {
-        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY]);
-
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
         const name = await forToken.read.name();
         const symbol = await forToken.read.symbol();
         const decimals = await forToken.read.decimals();
 
-        assert.equal(name, "FoR Token");
+        assert.equal(name, "FoR");
         assert.equal(symbol, "FOR");
         assert.equal(decimals, 18);
     });
 
     it("Should mint initial supply to deployer", async function () {
-        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY]);
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
 
         const deployerBalance = await forToken.read.balanceOf([deployer.account.address]);
         const totalSupply = await forToken.read.totalSupply();
@@ -33,7 +34,7 @@ describe("FORToken", async function () {
     });
 
     it("Should transfer tokens correctly", async function () {
-        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY]);
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
         const transferAmount = parseEther("100");
 
         await forToken.write.transfer([account1.account.address, transferAmount]);
@@ -46,7 +47,7 @@ describe("FORToken", async function () {
     });
 
     it("Should emit Transfer event on transfer", async function () {
-        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY]);
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
         const transferAmount = parseEther("100");
         const publicClient = await viem.getPublicClient();
 
@@ -61,7 +62,7 @@ describe("FORToken", async function () {
     });
 
     it("Should approve and transferFrom correctly", async function () {
-        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY]);
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
         const approveAmount = parseEther("500");
         const transferAmount = parseEther("200");
 
@@ -98,7 +99,7 @@ describe("FORToken", async function () {
     });
 
     it("Should emit Approval event on approve", async function () {
-        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY]);
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
         const approveAmount = parseEther("1000");
         const publicClient = await viem.getPublicClient();
 
@@ -113,7 +114,7 @@ describe("FORToken", async function () {
     });
 
     it("Should fail when transferring more than balance", async function () {
-        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY]);
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
         const tooMuch = INITIAL_SUPPLY + 1n;
 
         await assert.rejects(
@@ -127,7 +128,7 @@ describe("FORToken", async function () {
     });
 
     it("Should fail when transferFrom exceeds allowance", async function () {
-        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY]);
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
         const approveAmount = parseEther("100");
         const transferAmount = parseEther("200");
 
