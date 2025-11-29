@@ -4,10 +4,12 @@
   "version": "0.0.0",
   "description": "FoR smart contract workspace",
   "scripts": {
-    "dev": "echo \"Implement contract dev script\"",
-    "build": "echo \"Implement contract build script\"",
+    "dev": "npx hardhat node",
+    "build": "npx hardhat compile",
     "lint": "echo \"Implement contract lint script\"",
-    "test": "echo \"Implement contract test script\"",
+    "test": "npx hardhat test",
+    "deploy:local": "npx hardhat ignition deploy ignition/modules/FORToken.ts",
+    "deploy:sepolia": "npx hardhat ignition deploy --network sepolia ignition/modules/FORToken.ts",
     "clean": "rm -rf cache artifacts node_modules"
   },
   "type": "module",
