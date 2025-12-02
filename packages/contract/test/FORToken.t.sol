@@ -20,13 +20,15 @@ contract FORTokenTest is Test {
     address public account2 = address(0x2);
     
     uint256 public constant INITIAL_SUPPLY = 1_000_000 ether; // 1,000,000 FOR
+    string public constant NAME = "FoR Token";
+    string public constant SYMBOL = "FOR";
     
     /**
      * @notice Setup function called before each test
      * @dev Deploys a fresh FORToken contract for each test
      */
     function setUp() public {
-        forToken = new FORToken(INITIAL_SUPPLY);
+        forToken = new FORToken(INITIAL_SUPPLY, NAME, SYMBOL);
     }
     
     // ============================================
@@ -312,5 +314,188 @@ contract FORTokenTest is Test {
             forToken.balanceOf(account1) <= forToken.totalSupply(),
             "No single balance should exceed total supply"
         );
+    }
+    
+    // ============================================
+    // ERC2612 Permit Tests
+    // ============================================
+    
+    function testDomainSeparator() public {
+        bytes32 domainSeparator = forToken.DOMAIN_SEPARATOR();
+        assertTrue(domainSeparator != bytes32(0), "DOMAIN_SEPARATOR should not be zero");
+    }
+    
+    function testNonces() public {
+        assertEq(forToken.nonces(deployer), 0, "Initial nonce should be 0");
+        assertEq(forToken.nonces(account1), 0, "Initial nonce should be 0");
+    }
+    
+    function testPermit() public {
+        uint256 ownerPrivateKey = 0xA11CE;
+        address owner = vm.addr(ownerPrivateKey);
+        
+        // Give the owner some tokens
+        forToken.transfer(owner, 1000 ether);
+        
+        uint256 value = 500 ether;
+        uint256 nonce = forToken.nonces(owner);
+        uint256 deadline = block.timestamp + 1 hours;
+        
+        // Create permit digest
+        bytes32 structHash = keccak256(
+            abi.encode(
+                keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+                owner,
+                account1,
+                value,
+                nonce,
+                deadline
+            )
+        );
+        
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                forToken.DOMAIN_SEPARATOR(),
+                structHash
+            )
+        );
+        
+        // Sign the digest
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPrivateKey, digest);
+        
+        // Execute permit
+        forToken.permit(owner, account1, value, deadline, v, r, s);
+        
+        // Verify allowance was set
+        assertEq(
+            forToken.allowance(owner, account1),
+            value,
+            "Allowance should be set via permit"
+        );
+        
+        // Verify nonce was incremented
+        assertEq(
+            forToken.nonces(owner),
+            nonce + 1,
+            "Nonce should be incremented after permit"
+        );
+    }
+    
+    function testPermitExpiredDeadline() public {
+        uint256 ownerPrivateKey = 0xA11CE;
+        address owner = vm.addr(ownerPrivateKey);
+        
+        uint256 value = 500 ether;
+        uint256 nonce = 0;
+        uint256 deadline = block.timestamp - 1; // Expired
+        
+        bytes32 structHash = keccak256(
+            abi.encode(
+                keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+                owner,
+                account1,
+                value,
+                nonce,
+                deadline
+            )
+        );
+        
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                forToken.DOMAIN_SEPARATOR(),
+                structHash
+            )
+        );
+        
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPrivateKey, digest);
+        
+        vm.expectRevert();
+        forToken.permit(owner, account1, value, deadline, v, r, s);
+    }
+    
+    function testPermitInvalidSignature() public {
+        uint256 value = 500 ether;
+        uint256 deadline = block.timestamp + 1 hours;
+        
+        // Invalid signature (all zeros)
+        uint8 v = 27;
+        bytes32 r = bytes32(0);
+        bytes32 s = bytes32(0);
+        
+        vm.expectRevert();
+        forToken.permit(deployer, account1, value, deadline, v, r, s);
+    }
+    
+    function testPermitWrongNonce() public {
+        uint256 ownerPrivateKey = 0xA11CE;
+        address owner = vm.addr(ownerPrivateKey);
+        
+        uint256 value = 500 ether;
+        uint256 wrongNonce = 5; // Should be 0
+        uint256 deadline = block.timestamp + 1 hours;
+        
+        bytes32 structHash = keccak256(
+            abi.encode(
+                keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+                owner,
+                account1,
+                value,
+                wrongNonce,
+                deadline
+            )
+        );
+        
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                forToken.DOMAIN_SEPARATOR(),
+                structHash
+            )
+        );
+        
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPrivateKey, digest);
+        
+        vm.expectRevert();
+        forToken.permit(owner, account1, value, deadline, v, r, s);
+    }
+    
+    function testFuzzPermit(uint256 value, uint256 timeOffset) public {
+        // Bound inputs to reasonable ranges
+        value = bound(value, 0, type(uint128).max);
+        timeOffset = bound(timeOffset, 1, 365 days);
+        
+        uint256 ownerPrivateKey = 0xA11CE;
+        address owner = vm.addr(ownerPrivateKey);
+        
+        uint256 nonce = forToken.nonces(owner);
+        uint256 deadline = block.timestamp + timeOffset;
+        
+        bytes32 structHash = keccak256(
+            abi.encode(
+                keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+                owner,
+                account1,
+                value,
+                nonce,
+                deadline
+            )
+        );
+        
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                forToken.DOMAIN_SEPARATOR(),
+                structHash
+            )
+        );
+        
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPrivateKey, digest);
+        
+        forToken.permit(owner, account1, value, deadline, v, r, s);
+        
+        assertEq(forToken.allowance(owner, account1), value, "Allowance should match permit value");
+        assertEq(forToken.nonces(owner), nonce + 1, "Nonce should increment");
     }
 }
