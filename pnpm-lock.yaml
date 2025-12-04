@@ -17,7 +17,7 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(ye47snynn2vkjptssf6ncwqpnq)
       '@openzeppelin/contracts':
-        specifier: ^5.0.0
+        specifier: ^5.4.0
         version: 5.4.0
       '@types/node':
         specifier: ^22.8.5

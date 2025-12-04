@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+
 /**
  * @title Router
  * @dev 寄付金の分配を管理するRouterコントラクト
  * 寄付金を基金、Burn、受取人の3つに分配します
  */
-contract Router {
+contract Router is AccessControl {
     /// @notice Burnアドレス（0x0）
     address public constant BURN_ADDRESS = address(0);
     
