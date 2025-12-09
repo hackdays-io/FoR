@@ -2,10 +2,10 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {FORToken} from "./FORToken.sol";
+import {FoRToken} from "./FoRToken.sol";
 
-contract FORTokenTest is Test {
-    FORToken token;
+contract FoRTokenTest is Test {
+    FoRToken token;
 
     address deployer = address(this);
     address user1 = address(0x1);
@@ -16,7 +16,7 @@ contract FORTokenTest is Test {
     string constant SYMBOL = "FOR";
 
     function setUp() public {
-        token = new FORToken(INITIAL_SUPPLY, NAME, SYMBOL);
+        token = new FoRToken(INITIAL_SUPPLY, NAME, SYMBOL);
     }
 
     function test_InitialMetadata() public view {

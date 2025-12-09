@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { network } from "hardhat";
 import { encodeAbiParameters, keccak256, parseEther, toHex } from "viem";
 
-describe("FORToken", async () => {
+describe("FoRToken", async () => {
   const { viem } = await network.connect();
   const [deployer, account1, account2] = await viem.getWalletClients();
 
@@ -37,7 +37,7 @@ describe("FORToken", async () => {
     );
 
   it("Should deploy with correct name, symbol, and decimals", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -52,7 +52,7 @@ describe("FORToken", async () => {
   });
 
   it("Should mint initial supply to deployer", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -68,7 +68,7 @@ describe("FORToken", async () => {
   });
 
   it("Should transfer tokens correctly", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -89,7 +89,7 @@ describe("FORToken", async () => {
   });
 
   it("Should emit Transfer event on transfer", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -113,7 +113,7 @@ describe("FORToken", async () => {
   });
 
   it("Should approve and transferFrom correctly", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -132,7 +132,7 @@ describe("FORToken", async () => {
 
     // Account1 transfers from deployer to account2
     const forTokenAsAccount1 = await viem.getContractAt(
-      "FORToken",
+      "FoRToken",
       forToken.address,
       { client: { wallet: account1 } },
     );
@@ -156,7 +156,7 @@ describe("FORToken", async () => {
   });
 
   it("Should emit Approval event on approve", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -180,7 +180,7 @@ describe("FORToken", async () => {
   });
 
   it("Should fail when transferring more than balance", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -198,7 +198,7 @@ describe("FORToken", async () => {
   });
 
   it("Should fail when transferFrom exceeds allowance", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -209,7 +209,7 @@ describe("FORToken", async () => {
     await forToken.write.approve([account1.account.address, approveAmount]);
 
     const forTokenAsAccount1 = await viem.getContractAt(
-      "FORToken",
+      "FoRToken",
       forToken.address,
       { client: { wallet: account1 } },
     );
@@ -233,7 +233,7 @@ describe("FORToken", async () => {
   // ============================================
 
   it("Should have correct DOMAIN_SEPARATOR", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -261,7 +261,7 @@ describe("FORToken", async () => {
   });
 
   it("Should return correct nonces", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -272,7 +272,7 @@ describe("FORToken", async () => {
   });
 
   it("Should permit with valid signature", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -361,7 +361,7 @@ describe("FORToken", async () => {
   });
 
   it("Should fail permit with expired deadline", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
@@ -430,7 +430,7 @@ describe("FORToken", async () => {
   });
 
   it("Should fail permit with invalid signature", async () => {
-    const forToken = await viem.deployContract("FORToken", [
+    const forToken = await viem.deployContract("FoRToken", [
       INITIAL_SUPPLY,
       NAME,
       SYMBOL,
