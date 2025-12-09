@@ -35,4 +35,11 @@ export default defineConfig({
       accounts: [configVariable("SEPOLIA_PRIVATE_KEY")],
     },
   },
+  ignition: {
+    strategyConfig: {
+      create2: {
+        salt: `0x${"00".repeat(32)}`,
+      },
+    },
+  },
 });

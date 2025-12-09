@@ -8,7 +8,11 @@
     "build": "hardhat compile",
     "test": "hardhat test",
     "clean": "hardhat clean",
-    "check": "biome check"
+    "check": "biome check",
+    "deploy:local:RouterFactory": "hardhat ignition deploy ignition/modules/RouterFactory.ts --network localhost --strategy create2 --parameters ignition/parameters.local.json",
+    "deploy:local:FoRToken": "hardhat ignition deploy ignition/modules/FoRToken.ts --network localhost --parameters ignition/parameters.local.json",
+    "deploy:sepolia:RouterFactory": "hardhat ignition deploy ignition/modules/RouterFactory.ts --network sepolia --strategy create2 --parameters ignition/parameters.sepolia.json",
+    "deploy:sepolia:FoRToken": "hardhat ignition deploy ignition/modules/FoRToken.ts --network sepolia --parameters ignition/parameters.sepolia.json"
   },
   "type": "module",
   "devDependencies": {
