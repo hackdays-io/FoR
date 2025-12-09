@@ -1,11 +1,11 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import { parseEther } from "viem";
 
-export default buildModule("FORTokenModule", (m) => {
-    // Initial supply: 1,000,000 FOR tokens
-    const initialSupply = m.getParameter("initialSupply", parseEther("1000000"));
+export default buildModule("FoRTokenModule", (m) => {
+  const forToken = m.contract("FoRToken", [
+    m.getParameter("initialSupply"),
+    m.getParameter("name"),
+    m.getParameter("symbol"),
+  ]);
 
-    const forToken = m.contract("FORToken", [initialSupply]);
-
-    return { forToken };
+  return { forToken };
 });

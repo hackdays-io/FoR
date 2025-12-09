@@ -1,0 +1,13 @@
+{
+  "FoRTokenModule": {
+    "initialSupply": "1000000000000000000000000",
+    "name": "FoR Token",
+    "symbol": "FOR"
+  },
+  "RouterModule": {
+    "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "fundWallet": "0x8c713bb047edcc200427f7605e66e0329258dac9",
+    "fundRatio": 1500,
+    "burnRatio": 500
+  }
+}
