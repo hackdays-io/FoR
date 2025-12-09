@@ -153,4 +153,192 @@ describe("FORToken", async function () {
             },
         );
     });
+
+    // ============================================
+    // ERC2612 Permit Tests
+    // ============================================
+
+    it("Should have correct DOMAIN_SEPARATOR", async function () {
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
+        const domainSeparator = await forToken.read.DOMAIN_SEPARATOR();
+
+        assert.ok(domainSeparator, "DOMAIN_SEPARATOR should exist");
+        assert.equal(domainSeparator.length, 66, "DOMAIN_SEPARATOR should be 32 bytes (0x + 64 hex chars)");
+    });
+
+    it("Should return correct nonces", async function () {
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
+
+        const initialNonce = await forToken.read.nonces([deployer.account.address]);
+        assert.equal(initialNonce, 0n, "Initial nonce should be 0");
+    });
+
+    it("Should permit with valid signature", async function () {
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
+        const publicClient = await viem.getPublicClient();
+
+        const spender = account1.account.address;
+        const value = parseEther("1000");
+        const nonce = await forToken.read.nonces([deployer.account.address]);
+        const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600); // 1 hour from now
+
+        // Get domain separator
+        const domainSeparator = await forToken.read.DOMAIN_SEPARATOR();
+        const chainId = await publicClient.getChainId();
+
+        // Create EIP-712 domain
+        const domain = {
+            name: NAME,
+            version: "1",
+            chainId: chainId,
+            verifyingContract: forToken.address,
+        };
+
+        // Create permit message
+        const types = {
+            Permit: [
+                { name: "owner", type: "address" },
+                { name: "spender", type: "address" },
+                { name: "value", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+                { name: "deadline", type: "uint256" },
+            ],
+        };
+
+        const message = {
+            owner: deployer.account.address,
+            spender: spender,
+            value: value,
+            nonce: nonce,
+            deadline: deadline,
+        };
+
+        // Sign the permit
+        const signature = await deployer.signTypedData({
+            domain,
+            types,
+            primaryType: "Permit",
+            message,
+        });
+
+        // Split signature
+        const r = `0x${signature.slice(2, 66)}` as `0x${string}`;
+        const s = `0x${signature.slice(66, 130)}` as `0x${string}`;
+        const v = parseInt(signature.slice(130, 132), 16);
+
+        // Execute permit
+        await forToken.write.permit([
+            deployer.account.address,
+            spender,
+            value,
+            deadline,
+            v,
+            r,
+            s,
+        ]);
+
+        // Check allowance was set
+        const allowance = await forToken.read.allowance([deployer.account.address, spender]);
+        assert.equal(allowance, value, "Allowance should be set via permit");
+
+        // Check nonce was incremented
+        const newNonce = await forToken.read.nonces([deployer.account.address]);
+        assert.equal(newNonce, nonce + 1n, "Nonce should be incremented");
+    });
+
+    it("Should fail permit with expired deadline", async function () {
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
+        const publicClient = await viem.getPublicClient();
+
+        const spender = account1.account.address;
+        const value = parseEther("1000");
+        const nonce = await forToken.read.nonces([deployer.account.address]);
+        const deadline = BigInt(Math.floor(Date.now() / 1000) - 3600); // 1 hour ago (expired)
+
+        const chainId = await publicClient.getChainId();
+
+        const domain = {
+            name: NAME,
+            version: "1",
+            chainId: chainId,
+            verifyingContract: forToken.address,
+        };
+
+        const types = {
+            Permit: [
+                { name: "owner", type: "address" },
+                { name: "spender", type: "address" },
+                { name: "value", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+                { name: "deadline", type: "uint256" },
+            ],
+        };
+
+        const message = {
+            owner: deployer.account.address,
+            spender: spender,
+            value: value,
+            nonce: nonce,
+            deadline: deadline,
+        };
+
+        const signature = await deployer.signTypedData({
+            domain,
+            types,
+            primaryType: "Permit",
+            message,
+        });
+
+        const r = `0x${signature.slice(2, 66)}` as `0x${string}`;
+        const s = `0x${signature.slice(66, 130)}` as `0x${string}`;
+        const v = parseInt(signature.slice(130, 132), 16);
+
+        await assert.rejects(
+            async () => {
+                await forToken.write.permit([
+                    deployer.account.address,
+                    spender,
+                    value,
+                    deadline,
+                    v,
+                    r,
+                    s,
+                ]);
+            },
+            (error: Error) => {
+                return error.message.includes("ERC2612ExpiredSignature");
+            },
+        );
+    });
+
+    it("Should fail permit with invalid signature", async function () {
+        const forToken = await viem.deployContract("FORToken", [INITIAL_SUPPLY, NAME, SYMBOL]);
+
+        const spender = account1.account.address;
+        const value = parseEther("1000");
+        const nonce = 0n;
+        const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+
+        // Use invalid signature components
+        const v = 27;
+        const r = "0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`;
+        const s = "0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`;
+
+        await assert.rejects(
+            async () => {
+                await forToken.write.permit([
+                    deployer.account.address,
+                    spender,
+                    value,
+                    deadline,
+                    v,
+                    r,
+                    s,
+                ]);
+            },
+            (error: Error) => {
+                return error.message.includes("ECDSAInvalidSignature");
+            },
+        );
+    });
 });
