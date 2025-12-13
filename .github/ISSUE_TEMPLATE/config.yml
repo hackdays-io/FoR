@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Discord でディスカッション
+    url: https://discord.gg/hackdays
+    about: 質問や議論は Discord でもお気軽にどうぞ
+  - name: 📖 ドキュメント
+    url: https://github.com/hackdays-io/FoR/blob/main/CLAUDE.md
+    about: 開発ガイドはこちら
