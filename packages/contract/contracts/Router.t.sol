@@ -40,10 +40,10 @@ contract RouterTest {
         );
     }
 
-    function test_BurnAddressIsZero() public view {
+    function test_BurnAddressIsCorrect() public view {
         require(
-            router.BURN_ADDRESS() == address(0),
-            "BURN_ADDRESS should be address(0)"
+            router.BURN_ADDRESS() == 0x000000000000000000000000000000000000dEaD,
+            "BURN_ADDRESS should be 0xdEaD"
         );
     }
 

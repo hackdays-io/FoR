@@ -25,8 +25,8 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
     bytes32 public constant RATIO_MANAGER_ROLE =
         keccak256("RATIO_MANAGER_ROLE");
 
-    /// @notice Burnアドレス（0x0）
-    address public constant BURN_ADDRESS = address(0);
+    /// @notice Burnアドレス（0xdEaD...）
+    address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
     /// @notice FORTokenコントラクトアドレス
     address public immutable forToken;

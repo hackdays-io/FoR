@@ -28,7 +28,7 @@ describe("Router", async () => {
 		assert.equal(await router.read.burnRatio(), burnRatio);
 		assert.equal(
 			await router.read.BURN_ADDRESS(),
-			"0x0000000000000000000000000000000000000000",
+			"0x000000000000000000000000000000000000dEaD",
 		);
 	});
 
