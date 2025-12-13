@@ -37,6 +37,7 @@ describe("RouterFactory", async () => {
     // Compute the expected address for the Router
     const computedAddress = await routerFactory.read.computeAddress([
       SALT,
+      deployer.account.address,
       FUND_WALLET,
       FUND_RATIO,
       BURN_RATIO,
@@ -53,6 +54,7 @@ describe("RouterFactory", async () => {
     // Compute expected address before deployment
     const expectedAddress = await routerFactory.read.computeAddress([
       SALT,
+      deployer.account.address,
       FUND_WALLET,
       FUND_RATIO,
       BURN_RATIO,
@@ -60,7 +62,7 @@ describe("RouterFactory", async () => {
 
     // Deploy Router contract via CREATE2
     const deployHash = await routerFactory.write.deploy(
-      [SALT, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      [SALT, deployer.account.address, FUND_WALLET, FUND_RATIO, BURN_RATIO],
       { account: deployer.account },
     );
 
@@ -84,13 +86,14 @@ describe("RouterFactory", async () => {
     // First deployment
     const computedAddress1 = await routerFactory.read.computeAddress([
       SALT_1,
+      deployer.account.address,
       FUND_WALLET,
       FUND_RATIO,
       BURN_RATIO,
     ]);
 
     const deployHash1 = await routerFactory.write.deploy(
-      [SALT_1, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      [SALT_1, deployer.account.address, FUND_WALLET, FUND_RATIO, BURN_RATIO],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash1 });
@@ -99,6 +102,7 @@ describe("RouterFactory", async () => {
     const SALT_2 = keccak256(toHex("test-deterministic-2"));
     const computedAddress2 = await routerFactory.read.computeAddress([
       SALT_2,
+      deployer.account.address,
       FUND_WALLET,
       FUND_RATIO,
       BURN_RATIO,
@@ -113,6 +117,7 @@ describe("RouterFactory", async () => {
     // Same salt with same parameters should give same address
     const computedAddress3 = await routerFactory.read.computeAddress([
       SALT_1,
+      deployer.account.address,
       FUND_WALLET,
       FUND_RATIO,
       BURN_RATIO,
@@ -133,6 +138,7 @@ describe("RouterFactory", async () => {
 
     const address1 = await routerFactory.read.computeAddress([
       SALT_1,
+      deployer.account.address,
       FUND_WALLET,
       FUND_RATIO_1,
       BURN_RATIO_1,
@@ -145,6 +151,7 @@ describe("RouterFactory", async () => {
 
     const address2 = await routerFactory.read.computeAddress([
       SALT_2,
+      deployer.account.address,
       FUND_WALLET,
       FUND_RATIO_2,
       BURN_RATIO_2,
@@ -158,13 +165,13 @@ describe("RouterFactory", async () => {
 
     // Deploy actual contracts
     const deployHash1 = await routerFactory.write.deploy(
-      [SALT_1, FUND_WALLET, FUND_RATIO_1, BURN_RATIO_1],
+      [SALT_1, deployer.account.address, FUND_WALLET, FUND_RATIO_1, BURN_RATIO_1],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash1 });
 
     const deployHash2 = await routerFactory.write.deploy(
-      [SALT_2, FUND_WALLET, FUND_RATIO_2, BURN_RATIO_2],
+      [SALT_2, deployer.account.address, FUND_WALLET, FUND_RATIO_2, BURN_RATIO_2],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash2 });
@@ -192,13 +199,14 @@ describe("RouterFactory", async () => {
     // Compute and deploy
     const routerAddress = await routerFactory.read.computeAddress([
       SALT_TEST,
+      deployer.account.address,
       TEST_FUND_WALLET,
       TEST_FUND_RATIO,
       TEST_BURN_RATIO,
     ]);
 
     const deployHash = await routerFactory.write.deploy(
-      [SALT_TEST, TEST_FUND_WALLET, TEST_FUND_RATIO, TEST_BURN_RATIO],
+      [SALT_TEST, deployer.account.address, TEST_FUND_WALLET, TEST_FUND_RATIO, TEST_BURN_RATIO],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash });
@@ -221,5 +229,252 @@ describe("RouterFactory", async () => {
 
     // Verify the address is not zero
     assert.notEqual(routerAddress.toLowerCase(), zeroAddress.toLowerCase());
+  });
+
+  it("should verify deployed Router has correct AccessControl roles", async () => {
+    const SALT_ACCESS = keccak256(toHex("test-access-control"));
+
+    // Deploy Router via Factory
+    const routerAddress = await routerFactory.read.computeAddress([
+      SALT_ACCESS,
+      deployer.account.address,
+      FUND_WALLET,
+      FUND_RATIO,
+      BURN_RATIO,
+    ]);
+
+    const deployHash = await routerFactory.write.deploy(
+      [SALT_ACCESS, deployer.account.address, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      { account: deployer.account },
+    );
+    await publicClient.waitForTransactionReceipt({ hash: deployHash });
+
+    // Get Router contract instance
+    const router = await viem.getContractAt("Router", routerAddress);
+
+    // Get role identifiers
+    const DEFAULT_ADMIN_ROLE = await router.read.DEFAULT_ADMIN_ROLE();
+    const FUND_MANAGER_ROLE = await router.read.FUND_MANAGER_ROLE();
+    const RATIO_MANAGER_ROLE = await router.read.RATIO_MANAGER_ROLE();
+
+    // Verify deployer has all initial roles
+    const hasAdminRole = await router.read.hasRole([
+      DEFAULT_ADMIN_ROLE,
+      deployer.account.address,
+    ]);
+    const hasFundManagerRole = await router.read.hasRole([
+      FUND_MANAGER_ROLE,
+      deployer.account.address,
+    ]);
+    const hasRatioManagerRole = await router.read.hasRole([
+      RATIO_MANAGER_ROLE,
+      deployer.account.address,
+    ]);
+
+    assert.equal(
+      hasAdminRole,
+      true,
+      "Deployer should have DEFAULT_ADMIN_ROLE",
+    );
+    assert.equal(
+      hasFundManagerRole,
+      true,
+      "Deployer should have FUND_MANAGER_ROLE",
+    );
+    assert.equal(
+      hasRatioManagerRole,
+      true,
+      "Deployer should have RATIO_MANAGER_ROLE",
+    );
+  });
+
+  it("should verify deployed Router Pausable functionality works", async () => {
+    const SALT_PAUSABLE = keccak256(toHex("test-pausable"));
+
+    // Deploy Router via Factory
+    const routerAddress = await routerFactory.read.computeAddress([
+      SALT_PAUSABLE,
+      deployer.account.address,
+      FUND_WALLET,
+      FUND_RATIO,
+      BURN_RATIO,
+    ]);
+
+    const deployHash = await routerFactory.write.deploy(
+      [SALT_PAUSABLE, deployer.account.address, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      { account: deployer.account },
+    );
+    await publicClient.waitForTransactionReceipt({ hash: deployHash });
+
+    // Get Router contract instance
+    const router = await viem.getContractAt("Router", routerAddress);
+
+    // Verify initial state is not paused
+    const initialPausedState = await router.read.paused();
+    assert.equal(initialPausedState, false, "Router should not be paused initially");
+
+    // Pause the contract
+    const pauseHash = await router.write.pause({ account: deployer.account });
+    await publicClient.waitForTransactionReceipt({ hash: pauseHash });
+
+    // Verify paused state
+    const pausedState = await router.read.paused();
+    assert.equal(pausedState, true, "Router should be paused");
+
+    // Unpause the contract
+    const unpauseHash = await router.write.unpause({
+      account: deployer.account,
+    });
+    await publicClient.waitForTransactionReceipt({ hash: unpauseHash });
+
+    // Verify unpaused state
+    const unpausedState = await router.read.paused();
+    assert.equal(unpausedState, false, "Router should be unpaused");
+  });
+
+  it("should reject operations when deployed Router is paused", async () => {
+    const SALT_PAUSED_OPS = keccak256(toHex("test-paused-operations"));
+
+    // Deploy Router via Factory
+    const routerAddress = await routerFactory.read.computeAddress([
+      SALT_PAUSED_OPS,
+      deployer.account.address,
+      FUND_WALLET,
+      FUND_RATIO,
+      BURN_RATIO,
+    ]);
+
+    const deployHash = await routerFactory.write.deploy(
+      [SALT_PAUSED_OPS, deployer.account.address, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      { account: deployer.account },
+    );
+    await publicClient.waitForTransactionReceipt({ hash: deployHash });
+
+    // Get Router contract instance
+    const router = await viem.getContractAt("Router", routerAddress);
+
+    // Pause the contract
+    const pauseHash = await router.write.pause({ account: deployer.account });
+    await publicClient.waitForTransactionReceipt({ hash: pauseHash });
+
+    // Try to set fund ratio while paused - should fail
+    await assert.rejects(
+      async () => {
+        await router.write.setFundRatio([200n], { account: deployer.account });
+      },
+      (error: Error) => {
+        return error.message.includes("EnforcedPause");
+      },
+      "setFundRatio should fail when paused",
+    );
+
+    // Try to set burn ratio while paused - should fail
+    await assert.rejects(
+      async () => {
+        await router.write.setBurnRatio([100n], { account: deployer.account });
+      },
+      (error: Error) => {
+        return error.message.includes("EnforcedPause");
+      },
+      "setBurnRatio should fail when paused",
+    );
+
+    // Try to set fund wallet while paused - should fail
+    await assert.rejects(
+      async () => {
+        await router.write.setFundWallet([deployer.account.address], {
+          account: deployer.account,
+        });
+      },
+      (error: Error) => {
+        return error.message.includes("EnforcedPause");
+      },
+      "setFundWallet should fail when paused",
+    );
+  });
+
+  it("should verify deployed Router AccessControl enforces permissions", async () => {
+    const SALT_PERMISSIONS = keccak256(toHex("test-permissions"));
+    const [, , unauthorizedUser] = await viem.getWalletClients();
+
+    // Deploy Router via Factory
+    const routerAddress = await routerFactory.read.computeAddress([
+      SALT_PERMISSIONS,
+      deployer.account.address,
+      FUND_WALLET,
+      FUND_RATIO,
+      BURN_RATIO,
+    ]);
+
+    const deployHash = await routerFactory.write.deploy(
+      [SALT_PERMISSIONS, deployer.account.address, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      { account: deployer.account },
+    );
+    await publicClient.waitForTransactionReceipt({ hash: deployHash });
+
+    // Get Router contract instance as unauthorized user
+    const router = await viem.getContractAt("Router", routerAddress);
+    const routerAsUnauthorized = await viem.getContractAt(
+      "Router",
+      routerAddress,
+      {
+        client: { wallet: unauthorizedUser },
+      },
+    );
+
+    // Verify unauthorized user cannot set fund ratio
+    await assert.rejects(
+      async () => {
+        await routerAsUnauthorized.write.setFundRatio([300n]);
+      },
+      (error: Error) => {
+        return error.message.includes("AccessControl");
+      },
+      "Unauthorized user should not be able to set fund ratio",
+    );
+
+    // Verify unauthorized user cannot set burn ratio
+    await assert.rejects(
+      async () => {
+        await routerAsUnauthorized.write.setBurnRatio([150n]);
+      },
+      (error: Error) => {
+        return error.message.includes("AccessControl");
+      },
+      "Unauthorized user should not be able to set burn ratio",
+    );
+
+    // Verify unauthorized user cannot pause
+    await assert.rejects(
+      async () => {
+        await routerAsUnauthorized.write.pause();
+      },
+      (error: Error) => {
+        return error.message.includes("AccessControl");
+      },
+      "Unauthorized user should not be able to pause",
+    );
+
+    // Grant RATIO_MANAGER_ROLE to unauthorized user
+    const RATIO_MANAGER_ROLE = await router.read.RATIO_MANAGER_ROLE();
+    const grantHash = await router.write.grantRole(
+      [RATIO_MANAGER_ROLE, unauthorizedUser.account.address],
+      { account: deployer.account },
+    );
+    await publicClient.waitForTransactionReceipt({ hash: grantHash });
+
+    // Now the user should be able to set fund ratio
+    const newFundRatio = 300n;
+    const setRatioHash = await routerAsUnauthorized.write.setFundRatio([
+      newFundRatio,
+    ]);
+    await publicClient.waitForTransactionReceipt({ hash: setRatioHash });
+
+    const updatedRatio = await router.read.fundRatio();
+    assert.equal(
+      updatedRatio,
+      newFundRatio,
+      "Fund ratio should be updated after granting role",
+    );
   });
 });
