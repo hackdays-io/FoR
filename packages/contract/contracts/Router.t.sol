@@ -6,6 +6,7 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 
 contract RouterTest {
     Router router;
+    address initialAdmin = address(this);
     address fundWallet = address(0x1234);
     uint256 fundRatio = 2000; // 20%
     uint256 burnRatio = 1000; // 10%
@@ -14,7 +15,7 @@ contract RouterTest {
     address user2 = address(0x9ABC);
 
     function setUp() public {
-        router = new Router(fundWallet, fundRatio, burnRatio);
+        router = new Router(initialAdmin, fundWallet, fundRatio, burnRatio);
     }
 
     function test_InitialFundWallet() public view {

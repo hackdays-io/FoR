@@ -31,19 +31,26 @@ contract Router is AccessControl, Pausable {
 
     /**
      * @dev コンストラクタ
+     * @param _initialAdmin 初期管理者アドレス（全ロールを付与）
      * @param _fundWallet 基金ウォレットアドレス
      * @param _fundRatio 基金への分配比率（基準: 10000 = 100%）
      * @param _burnRatio Burnの分配比率（基準: 10000 = 100%）
      */
-    constructor(address _fundWallet, uint256 _fundRatio, uint256 _burnRatio) {
+    constructor(
+        address _initialAdmin,
+        address _fundWallet,
+        uint256 _fundRatio,
+        uint256 _burnRatio
+    ) {
+        require(_initialAdmin != address(0), "Invalid initial admin address");
         fundWallet = _fundWallet;
         fundRatio = _fundRatio;
         burnRatio = _burnRatio;
 
         // デフォルト管理者ロールの設定
-        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _grantRole(FUND_MANAGER_ROLE, _msgSender());
-        _grantRole(RATIO_MANAGER_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, _initialAdmin);
+        _grantRole(FUND_MANAGER_ROLE, _initialAdmin);
+        _grantRole(RATIO_MANAGER_ROLE, _initialAdmin);
     }
 
     /**
