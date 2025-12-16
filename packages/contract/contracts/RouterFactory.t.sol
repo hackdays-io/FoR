@@ -8,6 +8,8 @@ import {Test} from "forge-std/Test.sol";
 
 contract RouterFactoryTest is Test {
     RouterFactory factory;
+    address initialAdmin = address(this);
+    address forToken = address(0x1234); // Dummy FORToken address
     address fundWallet = address(0x5678);
     uint256 fundRatio = 1500; // 15%
     uint256 burnRatio = 500; // 5%
@@ -21,7 +23,7 @@ contract RouterFactoryTest is Test {
 
         bytes memory bytecode = abi.encodePacked(
             type(Router).creationCode,
-            abi.encode(fundWallet, fundRatio, burnRatio)
+            abi.encode(initialAdmin, forToken, fundWallet, fundRatio, burnRatio)
         );
         address expected = Create2.computeAddress(
             salt,
@@ -31,6 +33,8 @@ contract RouterFactoryTest is Test {
 
         address computed = factory.computeAddress(
             salt,
+            initialAdmin,
+            forToken,
             fundWallet,
             fundRatio,
             burnRatio
@@ -44,6 +48,8 @@ contract RouterFactoryTest is Test {
 
         address expected = factory.computeAddress(
             salt,
+            initialAdmin,
+            forToken,
             fundWallet,
             fundRatio,
             burnRatio
@@ -51,6 +57,8 @@ contract RouterFactoryTest is Test {
 
         address deployed = factory.deploy(
             salt,
+            initialAdmin,
+            forToken,
             fundWallet,
             fundRatio,
             burnRatio

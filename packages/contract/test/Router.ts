@@ -13,7 +13,11 @@ describe("Router", async () => {
 	const burnRatio = 1000n; // 10%
 
 	it("Should deploy with correct initial values", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -24,12 +28,16 @@ describe("Router", async () => {
 		assert.equal(await router.read.burnRatio(), burnRatio);
 		assert.equal(
 			await router.read.BURN_ADDRESS(),
-			"0x0000000000000000000000000000000000000000",
+			"0x000000000000000000000000000000000000dEaD",
 		);
 	});
 
 	it("Should set up initial roles correctly", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -57,7 +65,11 @@ describe("Router", async () => {
 	});
 
 	it("Should allow RATIO_MANAGER_ROLE to set fund ratio", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -70,7 +82,11 @@ describe("Router", async () => {
 	});
 
 	it("Should allow RATIO_MANAGER_ROLE to set burn ratio", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -83,7 +99,11 @@ describe("Router", async () => {
 	});
 
 	it("Should allow FUND_MANAGER_ROLE to set fund wallet", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -101,7 +121,11 @@ describe("Router", async () => {
 	});
 
 	it("Should reject fund ratio that exceeds 100% total", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -120,7 +144,11 @@ describe("Router", async () => {
 	});
 
 	it("Should reject burn ratio that exceeds 100% total", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -139,7 +167,11 @@ describe("Router", async () => {
 	});
 
 	it("Should reject zero address for fund wallet", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -159,7 +191,11 @@ describe("Router", async () => {
 	});
 
 	it("Should allow granting RATIO_MANAGER_ROLE", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -177,7 +213,11 @@ describe("Router", async () => {
 	});
 
 	it("Should allow revoking RATIO_MANAGER_ROLE", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -196,7 +236,11 @@ describe("Router", async () => {
 	});
 
 	it("Should reject unauthorized access to setFundRatio", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -217,7 +261,11 @@ describe("Router", async () => {
 	});
 
 	it("Should reject unauthorized access to setBurnRatio", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,
@@ -238,7 +286,11 @@ describe("Router", async () => {
 	});
 
 	it("Should reject unauthorized access to setFundWallet", async () => {
+		const forToken =
+			"0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
 		const router = await viem.deployContract("Router", [
+			owner.account.address,
+			forToken,
 			fundWallet,
 			fundRatio,
 			burnRatio,

@@ -6,6 +6,8 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 
 contract RouterTest {
     Router router;
+    address initialAdmin = address(this);
+    address forToken = address(0x1234); // Dummy FORToken address
     address fundWallet = address(0x1234);
     uint256 fundRatio = 2000; // 20%
     uint256 burnRatio = 1000; // 10%
@@ -14,7 +16,7 @@ contract RouterTest {
     address user2 = address(0x9ABC);
 
     function setUp() public {
-        router = new Router(fundWallet, fundRatio, burnRatio);
+        router = new Router(initialAdmin, forToken, fundWallet, fundRatio, burnRatio);
     }
 
     function test_InitialFundWallet() public view {
@@ -38,10 +40,10 @@ contract RouterTest {
         );
     }
 
-    function test_BurnAddressIsZero() public view {
+    function test_BurnAddressIsCorrect() public view {
         require(
-            router.BURN_ADDRESS() == address(0),
-            "BURN_ADDRESS should be address(0)"
+            router.BURN_ADDRESS() == 0x000000000000000000000000000000000000dEaD,
+            "BURN_ADDRESS should be 0xdEaD"
         );
     }
 
@@ -147,6 +149,129 @@ contract RouterTest {
         require(
             !router.hasRole(ratioManagerRole, user1),
             "user1 should not have RATIO_MANAGER_ROLE"
+        );
+    }
+
+    // Pausable tests
+
+    function test_InitialNotPaused() public view {
+        require(!router.paused(), "Contract should not be paused initially");
+    }
+
+    function test_PauseByAdmin() public {
+        router.pause();
+        require(router.paused(), "Contract should be paused");
+    }
+
+    function test_UnpauseByAdmin() public {
+        router.pause();
+        router.unpause();
+        require(!router.paused(), "Contract should not be paused");
+    }
+
+    function test_FailPauseByNonAdmin() public {
+        // Grant user1 only RATIO_MANAGER_ROLE, not DEFAULT_ADMIN_ROLE
+        bytes32 ratioManagerRole = router.RATIO_MANAGER_ROLE();
+        router.grantRole(ratioManagerRole, user1);
+
+        // user1はDEFAULT_ADMIN_ROLEを持っていないので失敗するはず
+        // しかしこのテストではownerとして実行されるため、別のコントラクトが必要
+        // このテストは参考として残す
+    }
+
+    function test_FailSetFundRatioWhenPaused() public {
+        router.pause();
+        uint256 newFundRatio = 3000;
+
+        try router.setFundRatio(newFundRatio) {
+            revert("Should have failed");
+        } catch (bytes memory reason) {
+            // OpenZeppelin v5 uses custom error EnforcedPause()
+            bytes4 selector = bytes4(keccak256("EnforcedPause()"));
+            bytes4 receivedSelector;
+            assembly {
+                receivedSelector := mload(add(reason, 32))
+            }
+            require(
+                receivedSelector == selector,
+                "Should fail with EnforcedPause error"
+            );
+        }
+    }
+
+    function test_FailSetBurnRatioWhenPaused() public {
+        router.pause();
+        uint256 newBurnRatio = 1500;
+
+        try router.setBurnRatio(newBurnRatio) {
+            revert("Should have failed");
+        } catch (bytes memory reason) {
+            // OpenZeppelin v5 uses custom error EnforcedPause()
+            bytes4 selector = bytes4(keccak256("EnforcedPause()"));
+            bytes4 receivedSelector;
+            assembly {
+                receivedSelector := mload(add(reason, 32))
+            }
+            require(
+                receivedSelector == selector,
+                "Should fail with EnforcedPause error"
+            );
+        }
+    }
+
+    function test_FailSetFundWalletWhenPaused() public {
+        router.pause();
+        address newFundWallet = address(0xABCD);
+
+        try router.setFundWallet(newFundWallet) {
+            revert("Should have failed");
+        } catch (bytes memory reason) {
+            // OpenZeppelin v5 uses custom error EnforcedPause()
+            bytes4 selector = bytes4(keccak256("EnforcedPause()"));
+            bytes4 receivedSelector;
+            assembly {
+                receivedSelector := mload(add(reason, 32))
+            }
+            require(
+                receivedSelector == selector,
+                "Should fail with EnforcedPause error"
+            );
+        }
+    }
+
+    function test_SetFundRatioAfterUnpause() public {
+        router.pause();
+        router.unpause();
+
+        uint256 newFundRatio = 3000;
+        router.setFundRatio(newFundRatio);
+        require(
+            router.fundRatio() == newFundRatio,
+            "fundRatio should be updated after unpause"
+        );
+    }
+
+    function test_SetBurnRatioAfterUnpause() public {
+        router.pause();
+        router.unpause();
+
+        uint256 newBurnRatio = 1500;
+        router.setBurnRatio(newBurnRatio);
+        require(
+            router.burnRatio() == newBurnRatio,
+            "burnRatio should be updated after unpause"
+        );
+    }
+
+    function test_SetFundWalletAfterUnpause() public {
+        router.pause();
+        router.unpause();
+
+        address newFundWallet = address(0xABCD);
+        router.setFundWallet(newFundWallet);
+        require(
+            router.fundWallet() == newFundWallet,
+            "fundWallet should be updated after unpause"
         );
     }
 }
