@@ -61,6 +61,60 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
     );
 
     /**
+     * @dev 分配額を計算する内部関数
+     * @param amount 分配前の総額
+     * @return fundAmount 基金への額
+     * @return burnAmount Burnへの額
+     * @return recipientAmount 受取人への額
+     */
+    function _calculateDistribution(
+        uint256 amount
+    ) internal view returns (uint256 fundAmount, uint256 burnAmount, uint256 recipientAmount) {
+        fundAmount = (amount * fundRatio) / 10000;
+        burnAmount = (amount * burnRatio) / 10000;
+        recipientAmount = amount - fundAmount - burnAmount;
+    }
+
+    /**
+     * @dev 分配送金を実行する内部関数（transferFromを実行）
+     * @param from 送金元アドレス
+     * @param recipient 受取人アドレス
+     * @param fundAmount 基金への額
+     * @param burnAmount Burnへの額
+     * @param recipientAmount 受取人への額
+     */
+    function _executeDistribution(
+        address from,
+        address recipient,
+        uint256 fundAmount,
+        uint256 burnAmount,
+        uint256 recipientAmount
+    ) internal {
+        IERC20 token = IERC20(forToken);
+
+        if (fundAmount > 0) {
+            require(
+                token.transferFrom(from, fundWallet, fundAmount),
+                "Fund transfer failed"
+            );
+        }
+
+        if (burnAmount > 0) {
+            require(
+                token.transferFrom(from, BURN_ADDRESS, burnAmount),
+                "Burn transfer failed"
+            );
+        }
+
+        if (recipientAmount > 0) {
+            require(
+                token.transferFrom(from, recipient, recipientAmount),
+                "Recipient transfer failed"
+            );
+        }
+    }
+
+    /**
      * @dev コンストラクタ
      * @param _initialAdmin 初期管理者アドレス（全ロールを付与）
      * @param _forToken FORTokenコントラクトアドレス
@@ -173,33 +227,46 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
         );
 
         // 分配額を計算
-        uint256 fundAmount = (amount * fundRatio) / 10000;
-        uint256 burnAmount = (amount * burnRatio) / 10000;
-        uint256 recipientAmount = amount - fundAmount - burnAmount;
+        (uint256 fundAmount, uint256 burnAmount, uint256 recipientAmount) =
+            _calculateDistribution(amount);
 
         // 送金を実行
-        IERC20 token = IERC20(forToken);
+        _executeDistribution(from, recipient, fundAmount, burnAmount, recipientAmount);
 
-        if (fundAmount > 0) {
-            require(
-                token.transferFrom(from, fundWallet, fundAmount),
-                "Fund transfer failed"
-            );
-        }
+        // イベントを発行
+        emit TransferWithDistribution(
+            msg.sender,
+            from,
+            recipient,
+            amount,
+            fundAmount,
+            burnAmount,
+            recipientAmount
+        );
+    }
 
-        if (burnAmount > 0) {
-            require(
-                token.transferFrom(from, BURN_ADDRESS, burnAmount),
-                "Burn transfer failed"
-            );
-        }
+    /**
+     * @notice 事前承認を前提とした分配送金
+     * @dev AAユーザーやEOAの事前approve後の実行用。permitは使用しない。
+     * @param from トークン所有者アドレス（approve済みであること）
+     * @param recipient 分配後の残りトークンを受け取るアドレス
+     * @param amount 送金総額（分配前）
+     */
+    function transferWithDistribution(
+        address from,
+        address recipient,
+        uint256 amount
+    ) external whenNotPaused nonReentrant {
+        // 入力値の検証
+        if (amount == 0) revert InvalidAmount();
+        if (recipient == address(0)) revert InvalidRecipient();
 
-        if (recipientAmount > 0) {
-            require(
-                token.transferFrom(from, recipient, recipientAmount),
-                "Recipient transfer failed"
-            );
-        }
+        // 分配額を計算
+        (uint256 fundAmount, uint256 burnAmount, uint256 recipientAmount) =
+            _calculateDistribution(amount);
+
+        // 送金を実行（approve前提）
+        _executeDistribution(from, recipient, fundAmount, burnAmount, recipientAmount);
 
         // イベントを発行
         emit TransferWithDistribution(
