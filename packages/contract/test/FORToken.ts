@@ -2,15 +2,30 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { network } from "hardhat";
-import { encodeAbiParameters, keccak256, parseEther, toHex } from "viem";
+import {
+  encodeAbiParameters,
+  getAddress,
+  keccak256,
+  parseEther,
+  toHex,
+} from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 describe("FoRToken", async () => {
+  // ============ Setup ============
   const { viem } = await network.connect();
   const [deployer, account1, account2] = await viem.getWalletClients();
 
+  // ============ Constants ============
   const INITIAL_SUPPLY = parseEther("1000000"); // 1,000,000 FOR
   const NAME = "FoR";
   const SYMBOL = "FOR";
+
+  // Role constants
+  const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`;
+  const ADMIN_ROLE = keccak256(toHex("ADMIN_ROLE"));
+
+  // EIP712 constants
   const DOMAIN_TYPE_HASH = keccak256(
     toHex(
       "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)",
@@ -19,6 +34,7 @@ describe("FoRToken", async () => {
   const NAME_HASH = keccak256(toHex(NAME));
   const VERSION_HASH = keccak256(toHex("1"));
 
+  // ============ Helper Functions ============
   const computeDomainSeparator = (
     chainId: bigint,
     verifyingContract: `0x${string}`,
@@ -35,6 +51,10 @@ describe("FoRToken", async () => {
         [DOMAIN_TYPE_HASH, NAME_HASH, VERSION_HASH, chainId, verifyingContract],
       ),
     );
+
+  // ============================================
+  // Basic ERC20 Tests
+  // ============================================
 
   it("Should deploy with correct name, symbol, and decimals", async () => {
     const forToken = await viem.deployContract("FoRToken", [
@@ -75,6 +95,9 @@ describe("FoRToken", async () => {
     ]);
     const transferAmount = parseEther("100");
 
+    // Add account1 to allow list before transfer
+    await forToken.write.addToAllowList([account1.account.address]);
+
     await forToken.write.transfer([account1.account.address, transferAmount]);
 
     const account1Balance = await forToken.read.balanceOf([
@@ -96,6 +119,9 @@ describe("FoRToken", async () => {
     ]);
     const transferAmount = parseEther("100");
     const publicClient = await viem.getPublicClient();
+
+    // Add account1 to allow list before transfer
+    await forToken.write.addToAllowList([account1.account.address]);
 
     const hash = await forToken.write.transfer([
       account1.account.address,
@@ -120,6 +146,10 @@ describe("FoRToken", async () => {
     ]);
     const approveAmount = parseEther("500");
     const transferAmount = parseEther("200");
+
+    // Add account1 and account2 to allow list
+    await forToken.write.addToAllowList([account1.account.address]);
+    await forToken.write.addToAllowList([account2.account.address]);
 
     // Approve account1 to spend deployer's tokens
     await forToken.write.approve([account1.account.address, approveAmount]);
@@ -187,6 +217,9 @@ describe("FoRToken", async () => {
     ]);
     const tooMuch = INITIAL_SUPPLY + 1n;
 
+    // Add account1 to allow list
+    await forToken.write.addToAllowList([account1.account.address]);
+
     await assert.rejects(
       async () => {
         await forToken.write.transfer([account1.account.address, tooMuch]);
@@ -205,6 +238,10 @@ describe("FoRToken", async () => {
     ]);
     const approveAmount = parseEther("100");
     const transferAmount = parseEther("200");
+
+    // Add account1 and account2 to allow list
+    await forToken.write.addToAllowList([account1.account.address]);
+    await forToken.write.addToAllowList([account2.account.address]);
 
     await forToken.write.approve([account1.account.address, approveAmount]);
 
@@ -226,6 +263,92 @@ describe("FoRToken", async () => {
         return error.message.includes("ERC20InsufficientAllowance");
       },
     );
+  });
+
+  // ============================================
+  // AllowList Integration Tests
+  // ============================================
+
+  it("Should complete full AllowList flow with EIP712 signature", async () => {
+    const forToken = await viem.deployContract("FoRToken", [
+      INITIAL_SUPPLY,
+      NAME,
+      SYMBOL,
+    ]);
+    const publicClient = await viem.getPublicClient();
+
+    // 1. Create admin signer (simulating backend/admin wallet)
+    const adminPrivateKey = generatePrivateKey();
+    const adminAccount = privateKeyToAccount(adminPrivateKey);
+
+    // 2. Grant ADMIN_ROLE to admin signer
+    await forToken.write.grantRole([ADMIN_ROLE, adminAccount.address]);
+
+    // 3. Admin signs AllowList request for a new user
+    const newUser = account1.account.address;
+    const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+    const chainId = await publicClient.getChainId();
+
+    const domain = {
+      name: NAME,
+      version: "1",
+      chainId: chainId,
+      verifyingContract: forToken.address,
+    };
+
+    const types = {
+      AddToAllowList: [
+        { name: "account", type: "address" },
+        { name: "deadline", type: "uint256" },
+      ],
+    };
+
+    const message = {
+      account: newUser,
+      deadline: deadline,
+    };
+
+    const signature = await adminAccount.signTypedData({
+      domain,
+      types,
+      primaryType: "AddToAllowList",
+      message,
+    });
+
+    // 4. New user (or anyone) submits the signature to join AllowList
+    const forTokenAsNewUser = await viem.getContractAt(
+      "FoRToken",
+      forToken.address,
+      { client: { wallet: account1 } },
+    );
+
+    await forTokenAsNewUser.write.addToAllowListWithSignature([
+      newUser,
+      deadline,
+      signature,
+    ]);
+
+    // 5. Verify user is now in AllowList
+    const isAllowListed = await forToken.read.isAllowListed([newUser]);
+    assert.equal(isAllowListed, true, "User should be in AllowList");
+
+    // 6. User can now receive tokens from deployer
+    const transferAmount = parseEther("100");
+    await forToken.write.transfer([newUser, transferAmount]);
+
+    const userBalance = await forToken.read.balanceOf([newUser]);
+    assert.equal(userBalance, transferAmount, "User should have received tokens");
+
+    // 7. Add another user to AllowList and verify token transfer between users
+    await forToken.write.addToAllowList([account2.account.address]);
+
+    await forTokenAsNewUser.write.transfer([
+      account2.account.address,
+      parseEther("50"),
+    ]);
+
+    const account2Balance = await forToken.read.balanceOf([account2.account.address]);
+    assert.equal(account2Balance, parseEther("50"), "Account2 should have received tokens from user");
   });
 
   // ============================================
@@ -463,5 +586,23 @@ describe("FoRToken", async () => {
         return error.message.includes("ECDSAInvalidSignature");
       },
     );
+  });
+
+  // ============================================
+  // AccessControl Interface Tests
+  // ============================================
+
+  it("Should support AccessControl interface", async () => {
+    const forToken = await viem.deployContract("FoRToken", [
+      INITIAL_SUPPLY,
+      NAME,
+      SYMBOL,
+    ]);
+
+    // IAccessControl interface ID: 0x7965db0b
+    const supportsInterface = await forToken.read.supportsInterface([
+      "0x7965db0b",
+    ]);
+    assert.equal(supportsInterface, true, "Should support IAccessControl interface");
   });
 });
