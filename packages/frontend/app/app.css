@@ -1,15 +1,193 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+:root {
+  color-scheme: light;
+
+  /* Semantic Color: Text */
+  --for-text-primary: #161c18;
+  --for-text-secondary: #4f5a54;
+  --for-text-tertiary: #6d7872;
+  --for-text-inverse: #f7faf8;
+
+  /* Semantic Color: Background */
+  --for-bg-canvas: #f3f5f1;
+  --for-bg-surface: #ffffff;
+  --for-bg-elevated: #edf1eb;
+  --for-bg-inverse: #101513;
+
+  /* Semantic Color: Stroke */
+  --for-stroke-subtle: #d5ddd7;
+  --for-stroke-default: #b4c0b8;
+  --for-stroke-strong: #8a968f;
+  --for-stroke-focus: #f44250;
+
+  /* Semantic Color: Button */
+  --for-button-primary-bg: #121212;
+  --for-button-primary-fg: #ffffff;
+  --for-button-secondary-bg: #e7ece8;
+  --for-button-secondary-fg: #161c18;
+  --for-button-destructive-bg: #b42335;
+  --for-button-destructive-fg: #ffffff;
+  --for-button-disabled-bg: #d3d9d4;
+  --for-button-disabled-fg: #8c9790;
+
+  /* Semantic Color: Visual Accent */
+  --for-accent-brand: #f44250;
+  --for-accent-success: #2f9e60;
+  --for-accent-warning: #f59e0b;
+  --for-accent-danger: #d92d20;
+
+  /* Semantic spacing tokens (source of truth) */
+  --for-space-0: 0px;
+  --for-space-2: 2px;
+  --for-space-4: 4px;
+  --for-space-6: 6px;
+  --for-space-8: 8px;
+  --for-space-12: 12px;
+  --for-space-16: 16px;
+  --for-space-20: 20px;
+  --for-space-24: 24px;
+  --for-space-28: 28px;
+  --for-space-32: 32px;
+  --for-space-40: 40px;
+
+  /* shadcn/ui compatible tokens mapped from FoR semantics */
+  --background: var(--for-bg-canvas);
+  --foreground: var(--for-text-primary);
+  --card: var(--for-bg-surface);
+  --card-foreground: var(--for-text-primary);
+  --popover: var(--for-bg-elevated);
+  --popover-foreground: var(--for-text-primary);
+  --primary: var(--for-button-primary-bg);
+  --primary-foreground: var(--for-button-primary-fg);
+  --secondary: var(--for-button-secondary-bg);
+  --secondary-foreground: var(--for-button-secondary-fg);
+  --muted: var(--for-bg-elevated);
+  --muted-foreground: var(--for-text-secondary);
+  --accent: var(--for-accent-brand);
+  --accent-foreground: var(--for-text-inverse);
+  --destructive: var(--for-button-destructive-bg);
+  --destructive-foreground: var(--for-button-destructive-fg);
+  --border: var(--for-stroke-default);
+  --input: var(--for-stroke-subtle);
+  --ring: var(--for-stroke-focus);
+  --radius: 12px;
 }
 
-html,
-body {
-  @apply bg-white dark:bg-gray-950;
-
-  @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
+  :root {
     color-scheme: dark;
+
+    --for-text-primary: #ecf2ed;
+    --for-text-secondary: #b7c2ba;
+    --for-text-tertiary: #8d9b92;
+    --for-text-inverse: #121714;
+
+    --for-bg-canvas: #101512;
+    --for-bg-surface: #171d19;
+    --for-bg-elevated: #1d241f;
+    --for-bg-inverse: #f3f6f4;
+
+    --for-stroke-subtle: #28312b;
+    --for-stroke-default: #36433b;
+    --for-stroke-strong: #6a776f;
+    --for-stroke-focus: #ff6f7a;
+
+    --for-button-primary-bg: #f3f6f4;
+    --for-button-primary-fg: #101512;
+    --for-button-secondary-bg: #2b342e;
+    --for-button-secondary-fg: #ecf2ed;
+    --for-button-destructive-bg: #e35b6b;
+    --for-button-destructive-fg: #101512;
+    --for-button-disabled-bg: #29322c;
+    --for-button-disabled-fg: #657168;
+
+    --for-accent-brand: #ff7681;
+    --for-accent-success: #48c07f;
+    --for-accent-warning: #f6b344;
+    --for-accent-danger: #f37a72;
+  }
+}
+
+@theme inline {
+  /* Typography */
+  --font-ui:
+    "Zen Kaku Gothic New", "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-latin: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-ui);
+
+  --text-ui-10: 10px;
+  --text-ui-10--line-height: 1.3;
+  --text-ui-12: 12px;
+  --text-ui-12--line-height: 1.3;
+  --text-ui-14: 14px;
+  --text-ui-14--line-height: 1.3;
+  --text-ui-16: 16px;
+  --text-ui-16--line-height: 1.3;
+  --text-ui-18: 18px;
+  --text-ui-18--line-height: 1.3;
+  --text-ui-20: 20px;
+  --text-ui-20--line-height: 1.3;
+  --text-ui-24: 24px;
+  --text-ui-24--line-height: 1.3;
+  --text-ui-28: 28px;
+  --text-ui-28--line-height: 1.3;
+  --text-ui-32: 32px;
+  --text-ui-32--line-height: 1.3;
+
+  /* shadcn/ui color namespace */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-button-disabled-bg: var(--for-button-disabled-bg);
+  --color-button-disabled-fg: var(--for-button-disabled-fg);
+  --color-accent-brand: var(--for-accent-brand);
+  --color-accent-success: var(--for-accent-success);
+  --color-accent-warning: var(--for-accent-warning);
+  --color-accent-danger: var(--for-accent-danger);
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /*
+    Spacing operation rule:
+    - Tailwind spacing utilities are px-based via --spacing: 1px.
+    - Use only 0,2,4,6,8,12,16,20,24,28,32,40.
+    - Disallow arbitrary spacing values like p-[14px], m-[3px], gap-[22px].
+  */
+  --spacing: 1px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-ui text-ui-14 antialiased;
   }
 }
