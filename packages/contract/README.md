@@ -1,57 +1,63 @@
-# Sample Hardhat 3 Beta Project (`node:test` and `viem`)
+# FoR Contract
 
-This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
+FoR のスマートコントラクトパッケージです（Hardhat v3 / Ignition）。
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+## 必要な環境変数
 
-## Project Overview
+Sepolia へデプロイする場合のみ、実行時に以下を設定します。
 
-This example project includes:
+- `SEPOLIA_RPC_URL`
+- `SEPOLIA_PRIVATE_KEY`（`0x` + 64桁hex）
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using [`node:test`](nodejs.org/api/test.html), the new Node.js native test runner, and [`viem`](https://viem.sh/).
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+## 開発コマンド
 
-## Usage
-
-### Running Tests
-
-To run all the tests in the project, execute the following command:
-
-```shell
-npx hardhat test
+```bash
+pnpm --filter @for/contract build
+pnpm --filter @for/contract test
+pnpm --filter @for/contract dev
 ```
 
-You can also selectively run the Solidity or `node:test` tests:
+## デプロイコマンド
 
-```shell
-npx hardhat test solidity
-npx hardhat test nodejs
+```bash
+pnpm --filter @for/contract deploy:local:FoRToken
+pnpm --filter @for/contract deploy:local:RouterFactory
+pnpm --filter @for/contract deploy:local:Router
+pnpm --filter @for/contract deploy:sepolia:FoRToken
+pnpm --filter @for/contract deploy:sepolia:RouterFactory
+pnpm --filter @for/contract deploy:sepolia:Router
 ```
 
-### Make a deployment to Sepolia
+## Sepolia への推奨手順
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+`Router` モジュール実行で依存する `FoRToken` / `RouterFactory` も一緒に処理されます。
 
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
+```bash
+export SEPOLIA_RPC_URL="..."
+export SEPOLIA_PRIVATE_KEY="0x..."
+pnpm --filter @for/contract deploy:sepolia:Router
 ```
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+過去の Ignition state と不整合がある場合は `--reset` を使います。
 
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+```bash
+pnpm --filter @for/contract exec hardhat ignition deploy \
+  ignition/modules/Router.ts \
+  --network sepolia \
+  --parameters ignition/parameters.sepolia.json \
+  --reset
 ```
 
-After setting the variable, you can run the deployment with the Sepolia network:
+## デプロイ結果の確認
 
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+成果物:
+
+- `packages/contract/ignition/deployments/chain-11155111/deployed_addresses.json`
+- `packages/contract/ignition/deployments/chain-11155111/journal.jsonl`
+
+参照方法:
+
+- `deployed_addresses.json`: `FoRToken` / `RouterFactory` のアドレス
+- `journal.jsonl`: `RouterModule#RouterFactoryModule~RouterFactory.deploy` の `TRANSACTION_CONFIRM` から `Router` の実アドレスと `blockNumber`（=`startBlock`）
+
+`Router address` と `startBlock` は `packages/indexer/config/sepolia.json` に反映して、indexer 側デプロイで利用します。
