@@ -1,0 +1,34 @@
+type Transfer @entity(immutable: true) {
+  id: ID!
+  sender: User!
+  from: User!
+  to: User!
+  totalAmount: BigInt!
+  fundAmount: BigInt!
+  burnAmount: BigInt!
+  recipientAmount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DistributionRatio @entity(immutable: true) {
+  id: ID!
+  changedBy: User!
+  fundRatio: BigInt!
+  burnRatio: BigInt!
+  recipientRatio: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+  logIndex: BigInt!
+}
+
+type User @entity(immutable: false) {
+  id: ID!
+  sentTransfers: [Transfer!]! @derivedFrom(field: "from")
+  receivedTransfers: [Transfer!]! @derivedFrom(field: "to")
+  executedTransfers: [Transfer!]! @derivedFrom(field: "sender")
+  ratioChanges: [DistributionRatio!]! @derivedFrom(field: "changedBy")
+}

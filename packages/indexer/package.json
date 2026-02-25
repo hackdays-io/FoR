@@ -1,0 +1,29 @@
+{
+  "name": "@for/indexer",
+  "private": true,
+  "version": "0.0.0",
+  "description": "FoR Goldsky subgraph/indexer workspace",
+  "scripts": {
+    "generate:sepolia": "mustache ./config/sepolia.json subgraph.template.yaml > subgraph.sepolia.yaml",
+    "generate:base": "mustache ./config/base.json subgraph.template.yaml > subgraph.base.yaml",
+    "generate:manifests": "pnpm run generate:sepolia && pnpm run generate:base",
+    "codegen:sepolia": "pnpm run generate:sepolia && graph codegen subgraph.sepolia.yaml",
+    "build:sepolia": "pnpm run codegen:sepolia && graph build subgraph.sepolia.yaml",
+    "codegen:base": "pnpm run generate:base && graph codegen subgraph.base.yaml",
+    "build:base": "pnpm run codegen:base && graph build subgraph.base.yaml",
+    "codegen:local": "pnpm run generate:sepolia && graph codegen subgraph.sepolia.yaml",
+    "build:local": "pnpm run codegen:local && graph build subgraph.sepolia.yaml",
+    "deploy:local": "goldsky subgraph deploy for-local/latest --path ./subgraph.sepolia.yaml --rpc hardhat:http://127.0.0.1:8545",
+    "deploy:sepolia": "goldsky subgraph deploy for-sepolia/latest --path ./subgraph.sepolia.yaml --network sepolia",
+    "deploy:base": "goldsky subgraph deploy for-base/latest --path ./subgraph.base.yaml --network base",
+    "query:sample": "node scripts/query-sample.mjs",
+    "check": "biome check"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.98.1",
+    "@graphprotocol/graph-ts": "^0.38.2",
+    "@types/node": "^25.3.0",
+    "mustache": "^4.2.0",
+    "typescript": "^5.9.3"
+  }
+}

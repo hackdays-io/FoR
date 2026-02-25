@@ -2,13 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { network } from "hardhat";
-import {
-  encodeAbiParameters,
-  getAddress,
-  keccak256,
-  parseEther,
-  toHex,
-} from "viem";
+import { encodeAbiParameters, keccak256, parseEther, toHex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 describe("FoRToken", async () => {
@@ -22,7 +16,6 @@ describe("FoRToken", async () => {
   const SYMBOL = "FOR";
 
   // Role constants
-  const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`;
   const ADMIN_ROLE = keccak256(toHex("ADMIN_ROLE"));
 
   // EIP712 constants
@@ -337,7 +330,11 @@ describe("FoRToken", async () => {
     await forToken.write.transfer([newUser, transferAmount]);
 
     const userBalance = await forToken.read.balanceOf([newUser]);
-    assert.equal(userBalance, transferAmount, "User should have received tokens");
+    assert.equal(
+      userBalance,
+      transferAmount,
+      "User should have received tokens",
+    );
 
     // 7. Add another user to AllowList and verify token transfer between users
     await forToken.write.addToAllowList([account2.account.address]);
@@ -347,8 +344,14 @@ describe("FoRToken", async () => {
       parseEther("50"),
     ]);
 
-    const account2Balance = await forToken.read.balanceOf([account2.account.address]);
-    assert.equal(account2Balance, parseEther("50"), "Account2 should have received tokens from user");
+    const account2Balance = await forToken.read.balanceOf([
+      account2.account.address,
+    ]);
+    assert.equal(
+      account2Balance,
+      parseEther("50"),
+      "Account2 should have received tokens from user",
+    );
   });
 
   // ============================================
@@ -603,6 +606,10 @@ describe("FoRToken", async () => {
     const supportsInterface = await forToken.read.supportsInterface([
       "0x7965db0b",
     ]);
-    assert.equal(supportsInterface, true, "Should support IAccessControl interface");
+    assert.equal(
+      supportsInterface,
+      true,
+      "Should support IAccessControl interface",
+    );
   });
 });

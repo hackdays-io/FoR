@@ -1,0 +1,29 @@
+specVersion: 1.3.0
+schema:
+  file: ./schema.graphql
+
+dataSources:
+  - kind: ethereum/contract
+    name: Router
+    network: {{network}}
+    source:
+      address: "{{address}}"
+      abi: Router
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+        - DistributionRatio
+        - User
+      abis:
+        - name: Router
+          file: ../contract/artifacts/contracts/Router.sol/Router.json
+      eventHandlers:
+        - event: TransferWithDistribution(indexed address,indexed address,indexed address,uint256,uint256,uint256,uint256)
+          handler: handleTransferWithDistribution
+        - event: DistributionRatioUpdated(indexed address,uint256,uint256,uint256)
+          handler: handleDistributionRatioUpdated
+      file: ./src/mapping.ts
