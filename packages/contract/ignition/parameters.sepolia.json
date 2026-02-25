@@ -6,6 +6,7 @@
   },
   "RouterModule": {
     "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "initialAdmin": "0x8c713bb047edcc200427f7605e66e0329258dac9",
     "fundWallet": "0x8c713bb047edcc200427f7605e66e0329258dac9",
     "fundRatio": 1500,
     "burnRatio": 500

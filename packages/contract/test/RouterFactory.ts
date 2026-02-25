@@ -16,7 +16,8 @@ describe("RouterFactory", async () => {
   });
 
   // Test parameters
-  const FOR_TOKEN = "0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
+  const FOR_TOKEN =
+    "0x0000000000000000000000000000000000001234" as `0x${string}`; // Dummy FORToken address
   const FUND_WALLET = deployer.account.address;
   const FUND_RATIO = 100n; // 1%
   const BURN_RATIO = 50n; // 0.5%
@@ -65,7 +66,14 @@ describe("RouterFactory", async () => {
 
     // Deploy Router contract via CREATE2
     const deployHash = await routerFactory.write.deploy(
-      [SALT, deployer.account.address, FOR_TOKEN, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      [
+        SALT,
+        deployer.account.address,
+        FOR_TOKEN,
+        FUND_WALLET,
+        FUND_RATIO,
+        BURN_RATIO,
+      ],
       { account: deployer.account },
     );
 
@@ -97,7 +105,14 @@ describe("RouterFactory", async () => {
     ]);
 
     const deployHash1 = await routerFactory.write.deploy(
-      [SALT_1, deployer.account.address, FOR_TOKEN, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      [
+        SALT_1,
+        deployer.account.address,
+        FOR_TOKEN,
+        FUND_WALLET,
+        FUND_RATIO,
+        BURN_RATIO,
+      ],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash1 });
@@ -173,13 +188,27 @@ describe("RouterFactory", async () => {
 
     // Deploy actual contracts
     const deployHash1 = await routerFactory.write.deploy(
-      [SALT_1, deployer.account.address, FOR_TOKEN, FUND_WALLET, FUND_RATIO_1, BURN_RATIO_1],
+      [
+        SALT_1,
+        deployer.account.address,
+        FOR_TOKEN,
+        FUND_WALLET,
+        FUND_RATIO_1,
+        BURN_RATIO_1,
+      ],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash1 });
 
     const deployHash2 = await routerFactory.write.deploy(
-      [SALT_2, deployer.account.address, FOR_TOKEN, FUND_WALLET, FUND_RATIO_2, BURN_RATIO_2],
+      [
+        SALT_2,
+        deployer.account.address,
+        FOR_TOKEN,
+        FUND_WALLET,
+        FUND_RATIO_2,
+        BURN_RATIO_2,
+      ],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash2 });
@@ -215,7 +244,14 @@ describe("RouterFactory", async () => {
     ]);
 
     const deployHash = await routerFactory.write.deploy(
-      [SALT_TEST, deployer.account.address, FOR_TOKEN, TEST_FUND_WALLET, TEST_FUND_RATIO, TEST_BURN_RATIO],
+      [
+        SALT_TEST,
+        deployer.account.address,
+        FOR_TOKEN,
+        TEST_FUND_WALLET,
+        TEST_FUND_RATIO,
+        TEST_BURN_RATIO,
+      ],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash });
@@ -254,7 +290,14 @@ describe("RouterFactory", async () => {
     ]);
 
     const deployHash = await routerFactory.write.deploy(
-      [SALT_ACCESS, deployer.account.address, FOR_TOKEN, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      [
+        SALT_ACCESS,
+        deployer.account.address,
+        FOR_TOKEN,
+        FUND_WALLET,
+        FUND_RATIO,
+        BURN_RATIO,
+      ],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash });
@@ -281,11 +324,7 @@ describe("RouterFactory", async () => {
       deployer.account.address,
     ]);
 
-    assert.equal(
-      hasAdminRole,
-      true,
-      "Deployer should have DEFAULT_ADMIN_ROLE",
-    );
+    assert.equal(hasAdminRole, true, "Deployer should have DEFAULT_ADMIN_ROLE");
     assert.equal(
       hasFundManagerRole,
       true,
@@ -312,7 +351,14 @@ describe("RouterFactory", async () => {
     ]);
 
     const deployHash = await routerFactory.write.deploy(
-      [SALT_PAUSABLE, deployer.account.address, FOR_TOKEN, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      [
+        SALT_PAUSABLE,
+        deployer.account.address,
+        FOR_TOKEN,
+        FUND_WALLET,
+        FUND_RATIO,
+        BURN_RATIO,
+      ],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash });
@@ -322,7 +368,11 @@ describe("RouterFactory", async () => {
 
     // Verify initial state is not paused
     const initialPausedState = await router.read.paused();
-    assert.equal(initialPausedState, false, "Router should not be paused initially");
+    assert.equal(
+      initialPausedState,
+      false,
+      "Router should not be paused initially",
+    );
 
     // Pause the contract
     const pauseHash = await router.write.pause({ account: deployer.account });
@@ -357,7 +407,14 @@ describe("RouterFactory", async () => {
     ]);
 
     const deployHash = await routerFactory.write.deploy(
-      [SALT_PAUSED_OPS, deployer.account.address, FOR_TOKEN, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      [
+        SALT_PAUSED_OPS,
+        deployer.account.address,
+        FOR_TOKEN,
+        FUND_WALLET,
+        FUND_RATIO,
+        BURN_RATIO,
+      ],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash });
@@ -420,7 +477,14 @@ describe("RouterFactory", async () => {
     ]);
 
     const deployHash = await routerFactory.write.deploy(
-      [SALT_PERMISSIONS, deployer.account.address, FOR_TOKEN, FUND_WALLET, FUND_RATIO, BURN_RATIO],
+      [
+        SALT_PERMISSIONS,
+        deployer.account.address,
+        FOR_TOKEN,
+        FUND_WALLET,
+        FUND_RATIO,
+        BURN_RATIO,
+      ],
       { account: deployer.account },
     );
     await publicClient.waitForTransactionReceipt({ hash: deployHash });

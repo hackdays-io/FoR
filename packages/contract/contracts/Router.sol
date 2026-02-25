@@ -61,6 +61,20 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
     );
 
     /**
+     * @notice 分配比率が更新された際に発行されるイベント
+     * @param changedBy 比率を更新したアドレス
+     * @param fundRatio 更新後の基金への分配比率
+     * @param burnRatio 更新後のBurnへの分配比率
+     * @param recipientRatio 更新後の受取人への分配比率
+     */
+    event DistributionRatioUpdated(
+        address indexed changedBy,
+        uint256 fundRatio,
+        uint256 burnRatio,
+        uint256 recipientRatio
+    );
+
+    /**
      * @dev コンストラクタ
      * @param _initialAdmin 初期管理者アドレス（全ロールを付与）
      * @param _forToken FORTokenコントラクトアドレス
@@ -97,6 +111,12 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
     ) external onlyRole(RATIO_MANAGER_ROLE) whenNotPaused {
         require(_fundRatio + burnRatio <= 10000, "Total ratio exceeds 100%");
         fundRatio = _fundRatio;
+        emit DistributionRatioUpdated(
+            msg.sender,
+            fundRatio,
+            burnRatio,
+            10000 - fundRatio - burnRatio
+        );
     }
 
     /**
@@ -108,6 +128,12 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
     ) external onlyRole(RATIO_MANAGER_ROLE) whenNotPaused {
         require(fundRatio + _burnRatio <= 10000, "Total ratio exceeds 100%");
         burnRatio = _burnRatio;
+        emit DistributionRatioUpdated(
+            msg.sender,
+            fundRatio,
+            burnRatio,
+            10000 - fundRatio - burnRatio
+        );
     }
 
     /**
