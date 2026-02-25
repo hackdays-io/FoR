@@ -68,6 +68,30 @@ describe("Router.transferWithPermit", async () => {
 		return { v, r, s, nonce };
 	}
 
+	const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as Address;
+
+	async function ensureAllowListed(token: any, addresses: Address[]) {
+		for (const address of addresses) {
+			if (address === ZERO_ADDRESS) {
+				continue;
+			}
+
+			const isAllowed = await token.read.isAllowListed([address]);
+			if (!isAllowed) {
+				await token.write.addToAllowList([address]);
+			}
+		}
+	}
+
+	async function allowListBase(token: any, extra: Address[] = []) {
+		await ensureAllowListed(token, [
+			account1.account.address,
+			fundWallet.account.address,
+			BURN_ADDRESS,
+			...extra,
+		]);
+	}
+
 	// A. Happy Path Tests
 	describe("Happy Path", () => {
 		it("Should transfer with permit and distribute correctly with standard ratios", async () => {
@@ -84,6 +108,8 @@ describe("Router.transferWithPermit", async () => {
 				fundRatio,
 				burnRatio,
 			]);
+
+			await allowListBase(forToken, [account2.account.address]);
 
 			// Give account1 tokens
 			await forToken.write.transfer([
@@ -153,6 +179,8 @@ describe("Router.transferWithPermit", async () => {
 				0n, // 0% burn
 			]);
 
+			await allowListBase(forToken, [account2.account.address]);
+
 			await forToken.write.transfer([
 				account1.account.address,
 				parseEther("1000"),
@@ -199,6 +227,8 @@ describe("Router.transferWithPermit", async () => {
 				5000n, // 50% fund
 				5000n, // 50% burn
 			]);
+
+			await allowListBase(forToken, [account2.account.address]);
 
 			await forToken.write.transfer([
 				account1.account.address,
@@ -256,6 +286,8 @@ describe("Router.transferWithPermit", async () => {
 				burnRatio,
 			]);
 
+			await allowListBase(forToken, [account2.account.address]);
+
 			await forToken.write.transfer([
 				account1.account.address,
 				parseEther("1000"),
@@ -311,6 +343,8 @@ describe("Router.transferWithPermit", async () => {
 				burnRatio,
 			]);
 
+			await allowListBase(forToken, [account2.account.address]);
+
 			await forToken.write.transfer([account1.account.address, 1000n]);
 
 			const amount = 10n; // Very small amount
@@ -365,6 +399,8 @@ describe("Router.transferWithPermit", async () => {
 				burnRatio,
 			]);
 
+			await allowListBase(forToken, [account2.account.address]);
+
 			await forToken.write.transfer([
 				account1.account.address,
 				parseEther("1000"),
@@ -413,6 +449,8 @@ describe("Router.transferWithPermit", async () => {
 				burnRatio,
 			]);
 
+			await allowListBase(forToken, [account2.account.address]);
+
 			await forToken.write.transfer([
 				account1.account.address,
 				parseEther("1000"),
@@ -460,6 +498,8 @@ describe("Router.transferWithPermit", async () => {
 				fundRatio,
 				burnRatio,
 			]);
+
+			await allowListBase(forToken, [account2.account.address]);
 
 			await forToken.write.transfer([
 				account1.account.address,
@@ -524,6 +564,8 @@ describe("Router.transferWithPermit", async () => {
 				burnRatio,
 			]);
 
+			await allowListBase(forToken, [account2.account.address]);
+
 			const amount = 0n;
 			const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
 			const { v, r, s } = await createPermitSignature(
@@ -566,6 +608,8 @@ describe("Router.transferWithPermit", async () => {
 				fundRatio,
 				burnRatio,
 			]);
+
+			await allowListBase(forToken, [account2.account.address]);
 
 			await forToken.write.transfer([
 				account1.account.address,
@@ -615,6 +659,8 @@ describe("Router.transferWithPermit", async () => {
 				burnRatio,
 			]);
 
+			await allowListBase(forToken, [account2.account.address]);
+
 			// Don't give account1 any tokens
 			const amount = parseEther("100");
 			const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
@@ -661,6 +707,8 @@ describe("Router.transferWithPermit", async () => {
 				fundRatio,
 				burnRatio,
 			]);
+
+			await allowListBase(forToken, [account2.account.address]);
 
 			await forToken.write.transfer([
 				account1.account.address,
@@ -716,6 +764,8 @@ describe("Router.transferWithPermit", async () => {
 				burnRatio,
 			]);
 
+			await allowListBase(forToken, [account2.account.address]);
+
 			await forToken.write.transfer([
 				account1.account.address,
 				parseEther("1000"),
@@ -770,6 +820,8 @@ describe("Router.transferWithPermit", async () => {
 				fundRatio,
 				burnRatio,
 			]);
+
+			await allowListBase(forToken, [account2.account.address]);
 
 			await forToken.write.transfer([
 				account1.account.address,
@@ -827,6 +879,8 @@ describe("Router.transferWithPermit", async () => {
 				burnRatio,
 			]);
 
+			await allowListBase(forToken, [account2.account.address]);
+
 			const largeAmount = parseEther("500000");
 			await forToken.write.transfer([account1.account.address, largeAmount]);
 
@@ -878,6 +932,8 @@ describe("Router.transferWithPermit", async () => {
 				fundRatio,
 				burnRatio,
 			]);
+
+			await allowListBase(forToken, [account2.account.address]);
 
 			await forToken.write.transfer([
 				account1.account.address,

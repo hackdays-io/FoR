@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {FoRToken} from "./FORToken.sol";
+import {FoRToken} from "./FoRToken.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
 contract FoRTokenTest is Test {
