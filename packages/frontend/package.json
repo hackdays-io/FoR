@@ -7,7 +7,9 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typegen": "react-router typegen",
-    "check": "biome check"
+    "check": "biome check",
+    "ladle:serve": "ladle serve --viteConfig .ladle/vite.config.ts",
+    "ladle:build": "ladle build --viteConfig .ladle/vite.config.ts"
   },
   "dependencies": {
     "@privy-io/react-auth": "^3.10.1",
@@ -21,6 +23,7 @@
     "viem": "^2.43.5"
   },
   "devDependencies": {
+    "@ladle/react": "^5.1.1",
     "@react-router/dev": "^7.9.2",
     "@tailwindcss/vite": "^4.1.13",
     "@types/node": "^22",
