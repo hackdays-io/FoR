@@ -8,7 +8,7 @@ const buttonVariantClasses = {
   secondary:
     "border-button-secondary-stroke bg-button-secondary-frame text-button-secondary-text hover:border-button-secondary-stroke-hover hover:bg-button-secondary-frame-hover hover:text-button-secondary-text-hover active:border-button-secondary-stroke-hover active:bg-button-secondary-frame-hover active:text-button-secondary-text-hover disabled:border-button-secondary-stroke-disabled disabled:bg-button-secondary-frame-disabled disabled:text-button-secondary-text-disabled",
   ghost:
-    "border-transparent bg-button-tertiary-frame text-button-tertiary-text hover:text-button-tertiary-text-hover active:text-button-tertiary-text-hover disabled:bg-button-tertiary-frame-disabled disabled:text-button-tertiary-text-disabled",
+    "border-transparent bg-button-tertiary-frame text-button-tertiary-text hover:bg-button-tertiary-frame-hover hover:text-button-tertiary-text-hover active:bg-button-tertiary-frame-hover active:text-button-tertiary-text-hover disabled:bg-button-tertiary-frame-disabled disabled:text-button-tertiary-text-disabled",
   destructive:
     "border-transparent bg-button-danger-frame text-button-danger-text-invert hover:bg-button-danger-frame-hover active:bg-button-danger-frame-pressed disabled:bg-button-danger-frame-disabled disabled:text-button-danger-text-disabled",
 } as const;

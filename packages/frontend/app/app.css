@@ -41,10 +41,11 @@
   --for-button-secondary-text-hover: #1a1a1a;
   --for-button-secondary-text-disabled: #b4b4b4;
 
-  /* Tertiary values are taken from screenshot labels; hover frame was not shown */
+  /* Tertiary: adjusted for contrast on white background */
   --for-button-tertiary-frame-default: #757b7f;
+  --for-button-tertiary-frame-hover: #5a5f63;
   --for-button-tertiary-frame-disabled: #aeaeae;
-  --for-button-tertiary-text-default: #e0e0e0;
+  --for-button-tertiary-text-default: #ffffff;
   --for-button-tertiary-text-hover: #ffffff;
   --for-button-tertiary-text-disabled: #cfcfcf;
 
@@ -213,6 +214,7 @@
   );
 
   --color-button-tertiary-frame: var(--for-button-tertiary-frame-default);
+  --color-button-tertiary-frame-hover: var(--for-button-tertiary-frame-hover);
   --color-button-tertiary-frame-disabled: var(
     --for-button-tertiary-frame-disabled
   );
@@ -256,7 +258,8 @@
 
   /*
     Spacing operation rule:
-    - Tailwind spacing utilities are px-based via --spacing: 1px.
+    - --spacing: 1px overrides Tailwind default (1rem = 4px step).
+    - This means p-4 = 4px (NOT 16px). All utilities become px-based.
     - Use only 0,2,4,6,8,12,16,20,24,28,32,40.
     - Disallow arbitrary spacing values like p-[14px], m-[3px], gap-[22px].
   */
@@ -264,10 +267,6 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
   html,
   body {
     min-height: 100%;

@@ -172,15 +172,13 @@ function ColorChip({
   );
 }
 
-const typographyRows = [
+const uiTypographyRows = [
   { className: "text-ui-10", label: "UI 10" },
   { className: "text-ui-12", label: "UI 12" },
   { className: "text-ui-13", label: "UI 13" },
   { className: "text-ui-16", label: "UI 16" },
   { className: "text-ui-20", label: "UI 20" },
 ];
-
-const uiTypographyRows = typographyRows;
 
 const contentTypographyRows = [
   {
