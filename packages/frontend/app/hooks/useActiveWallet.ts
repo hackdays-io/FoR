@@ -32,11 +32,7 @@ interface ActiveWalletResult {
  * Selects Smart Account for embedded wallets, EOA otherwise
  */
 export function useActiveWallet(): ActiveWalletResult {
-  const {
-    walletClient,
-    connectedWallet,
-    address: eoaAddress,
-  } = useWallet();
+  const { walletClient, connectedWallet, address: eoaAddress } = useWallet();
   const {
     smartAccountClient,
     smartAccountAddress,
