@@ -17,6 +17,7 @@ Key values reflected from screenshots:
 
 - Text Default/Subtle/Hint: `rgba(0,0,0,0.8/0.6/0.3)`, Invert: `#ffffff`
 - Background Default/Subtle: `#ffffff` / `#f2f3f0`
+- Background Alpha White 60 / Black 25: `rgba(255,255,255,0.6)` / `rgba(0,0,0,0.25)`
 - Stroke Default: `rgba(0,0,0,0.05)`
 - Primary Button Frame: `#454545` (hover `#1a1a1a`, disabled `#b4b4b4`)
 - Danger Base: `#eb3d3d` (hover/pressed `#8b1d1d`, disabled `#fbbdbf`)
@@ -31,6 +32,9 @@ Components should consume only the shadcn/Tailwind theme layer:
 - `bg-destructive`, `text-destructive-foreground`
 
 Do not reference `--for-*` values directly inside component files.
+
+If a utility class is insufficient for a tokenized value, inline styles may
+reference mapped `--color-*` variables, but never `--for-*` directly.
 
 ## 3) Typography rule
 
@@ -66,6 +70,12 @@ Allowed examples:
 Disallowed examples:
 
 - `p-[14px]`, `m-[3px]`, `gap-[22px]`
+
+This rule applies to layout spacing utilities such as margin, padding, gap, and
+inset.
+
+Fixed component dimensions or component-specific radii that come directly from a
+design spec may use exact values until dedicated component tokens are defined.
 
 ## 5) Icon policy
 
