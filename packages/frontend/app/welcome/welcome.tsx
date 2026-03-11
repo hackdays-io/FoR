@@ -1,6 +1,11 @@
 import { ArrowRight, Leaf, ShieldAlert, Wallet } from "lucide-react";
 
+import promoCardBackground from "~/assets/images/cards/promo-card-background.jpg";
+import walletCardBackground from "~/assets/images/cards/wallet-card-background.png";
+import walletCardBadgePlaceholder from "~/assets/images/cards/wallet-card-badge-placeholder.svg";
+import walletCardQrPlaceholder from "~/assets/images/cards/wallet-card-qr-placeholder.svg";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 
 export function Welcome() {
@@ -19,6 +24,45 @@ export function Welcome() {
           can be done in one place.
         </p>
       </header>
+
+      <section className="rounded-lg border bg-card p-24">
+        <h2 className="text-content-headline-l font-semibold">
+          Card Theme Preview
+        </h2>
+        <p className="mt-8 text-content-body-s text-muted-foreground"></p>
+        <div className="mt-16 flex flex-col gap-12">
+          <Card
+            variant="wallet"
+            backgroundImage={walletCardBackground}
+            amount={34393}
+            topProps={{
+              badgeImage: walletCardBadgePlaceholder,
+              qrCodeImage: walletCardQrPlaceholder,
+            }}
+          ></Card>
+          <div className="grid gap-16 grid-cols-2">
+            <Card
+              variant="promo"
+              backgroundImage={promoCardBackground}
+              amount={500}
+              to="/promo-demo-1"
+              topProps={{
+                title: "森のお茶会",
+              }}
+            ></Card>
+            <Card
+              isNew
+              variant="promo"
+              backgroundImage={promoCardBackground}
+              amount={500}
+              to="/promo-demo-2"
+              topProps={{
+                title: "風のテラスでひらくコミュニティマーケット",
+              }}
+            ></Card>
+          </div>
+        </div>
+      </section>
 
       <section className="rounded-lg border bg-card p-24">
         <h2 className="text-content-headline-l font-semibold">

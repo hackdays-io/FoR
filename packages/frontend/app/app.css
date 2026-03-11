@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "./**/*.{js,jsx,ts,tsx,mdx}";
 
 :root {
   color-scheme: light;
@@ -19,7 +20,11 @@
   --for-bg-alpha-white-30: rgb(255 255 255 / 0.3);
   --for-bg-alpha-white-60: rgb(255 255 255 / 0.6);
   --for-bg-alpha-black-10: rgb(0 0 0 / 0.1);
+  --for-bg-alpha-black-25: rgb(0 0 0 / 0.25);
   --for-bg-modal: rgb(0 0 0 / 0.5);
+
+  /* Semantic Shadow */
+  --for-shadow-elevation-1: 0px 1px 2px 0px rgb(0 0 0 / 0.2);
 
   /* Semantic Color: Stroke */
   --for-stroke-default: rgb(0 0 0 / 0.05);
@@ -182,6 +187,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-alpha-white-60: var(--for-bg-alpha-white-60);
+  --color-alpha-black-25: var(--for-bg-alpha-black-25);
 
   --color-text-danger-default: var(--for-text-danger-default);
   --color-text-danger-subtle: var(--for-text-danger-subtle);
@@ -255,6 +262,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Shadow */
+  --shadow-elevation-1: var(--for-shadow-elevation-1);
 
   /*
     Spacing operation rule:
