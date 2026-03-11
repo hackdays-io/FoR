@@ -1,5 +1,5 @@
-import * as React from "react";
 import { ArrowLeft } from "lucide-react";
+import * as React from "react";
 
 import { cn } from "~/lib/utils";
 
@@ -35,8 +35,7 @@ export const AppBarItem = React.forwardRef<HTMLDivElement, AppBarItemProps>(
   ({ className, position, ...props }, ref) => {
     const positionClasses = {
       left: "absolute left-0 z-10 flex items-center",
-      center:
-        "flex w-full items-center justify-center px-40 text-ui-16 font-bold text-foreground",
+      center: "flex w-full min-w-0 items-center justify-center px-40",
       right: "absolute right-0 z-10 flex items-center",
     } as const;
 

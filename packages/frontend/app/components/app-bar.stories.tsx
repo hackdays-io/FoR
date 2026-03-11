@@ -1,5 +1,5 @@
-import type * as React from "react";
 import { Share } from "lucide-react";
+import type * as React from "react";
 
 import "~/app.css";
 import {
@@ -32,7 +32,7 @@ export const WithAvatar = () => {
       <AppBar>
         <AppBarItem position="left">
           <AppBarAvatar
-            src="https://api.dicebear.com/9.x/shapes/svg?seed=placeholder"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23E5E7EB'/%3E%3Ccircle cx='32' cy='26' r='10' fill='%239CA3AF'/%3E%3Cpath d='M16 50c2.667-8 8-12 16-12s13.333 4 16 12' fill='%239CA3AF'/%3E%3C/svg%3E"
             alt="ユーザーアバター"
           />
         </AppBarItem>
@@ -51,7 +51,7 @@ export const WithBackButton = () => {
     <StoryFrame>
       <AppBar>
         <AppBarItem position="left">
-          <AppBarBackButton onClick={() => window.history.back()} />
+          <AppBarBackButton onClick={() => console.log("back")} />
         </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>プロフィール入力</AppBarTitle>
@@ -68,7 +68,7 @@ export const WithBackAndAction = () => {
     <StoryFrame>
       <AppBar>
         <AppBarItem position="left">
-          <AppBarBackButton onClick={() => window.history.back()} />
+          <AppBarBackButton onClick={() => console.log("back")} />
         </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>プロフィール入力</AppBarTitle>
@@ -94,10 +94,12 @@ export const LongTitle = () => {
     <StoryFrame>
       <AppBar>
         <AppBarItem position="left">
-          <AppBarBackButton onClick={() => window.history.back()} />
+          <AppBarBackButton onClick={() => console.log("back")} />
         </AppBarItem>
         <AppBarItem position="center">
-          <AppBarTitle>テキストが入り切らない場合それ以降の文字を省略すること確認用の長いタイトルテキストです</AppBarTitle>
+          <AppBarTitle>
+            テキストが入り切らない場合それ以降の文字を省略すること確認用の長いタイトルテキストです
+          </AppBarTitle>
         </AppBarItem>
         <AppBarItem position="right">
           <button
