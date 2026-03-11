@@ -44,15 +44,7 @@ export const BottomNavigationItem = React.forwardRef<
   BottomNavigationItemProps
 >(
   (
-    {
-      "aria-label": ariaLabel,
-      className,
-      disabled = false,
-      icon,
-      label,
-      to,
-      ...props
-    },
+    { "aria-label": ariaLabel, className, disabled = false, icon, label, to },
     ref,
   ) => {
     if (disabled) {
@@ -82,19 +74,9 @@ export const BottomNavigationItem = React.forwardRef<
             className,
           )
         }
-        {...props}
       >
-        {({ isActive }) => (
-          <>
-            {icon}
-            <span
-              aria-current={isActive ? "page" : undefined}
-              className="text-ui-10 font-medium"
-            >
-              {label}
-            </span>
-          </>
-        )}
+        {icon}
+        <span className="text-ui-10 font-medium">{label}</span>
       </NavLink>
     );
   },
