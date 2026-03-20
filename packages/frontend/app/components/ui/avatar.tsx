@@ -1,9 +1,10 @@
 import { Plus } from "lucide-react";
 import * as React from "react";
 
+import avatarDefault from "~/assets/images/avatar-default.png";
 import { cn } from "~/lib/utils";
 
-const AVATAR_DEFAULT_SRC = "/avatar-default.png";
+const AVATAR_DEFAULT_SRC = avatarDefault;
 
 const avatarSizeClasses = {
   sm: "size-24",

@@ -1,4 +1,5 @@
 import "~/app.css";
+import avatarMock from "~/assets/images/avatar-mock.png";
 import { Avatar, AvatarUpload } from "~/components/ui/avatar";
 
 export default {
@@ -44,17 +45,17 @@ export const WithImage = () => {
       <div className="flex items-center gap-16">
         <Avatar
           size="sm"
-          src="/avatar-mock.png"
+          src={avatarMock}
           alt="ユーザーA"
         />
         <Avatar
           size="md"
-          src="/avatar-mock.png"
+          src={avatarMock}
           alt="ユーザーB"
         />
         <Avatar
           size="lg"
-          src="/avatar-mock.png"
+          src={avatarMock}
           alt="ユーザーC"
         />
       </div>
@@ -119,7 +120,7 @@ export const Upload = () => {
         </div>
         <div className="flex flex-col items-center gap-8">
           <AvatarUpload
-            src="/avatar-mock.png"
+            src={avatarMock}
             alt="アップロード済み"
           />
           <span className="text-ui-12 text-text-secondary">画像あり</span>

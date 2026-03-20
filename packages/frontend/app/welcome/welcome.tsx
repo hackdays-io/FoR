@@ -1,5 +1,6 @@
 import { ArrowRight, Leaf, ShieldAlert, Wallet } from "lucide-react";
 
+import avatarMock from "~/assets/images/avatar-mock.png";
 import promoCardBackground from "~/assets/images/cards/promo-card-background.jpg";
 import walletCardBackground from "~/assets/images/cards/wallet-card-background.png";
 import walletCardBadgePlaceholder from "~/assets/images/cards/wallet-card-badge-placeholder.svg";
@@ -9,7 +10,7 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 
-const AVATAR_DEMO_IMAGE = "/avatar-mock.png";
+const AVATAR_DEMO_IMAGE = avatarMock;
 
 export function Welcome() {
   return (
