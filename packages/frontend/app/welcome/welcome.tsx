@@ -4,9 +4,12 @@ import promoCardBackground from "~/assets/images/cards/promo-card-background.jpg
 import walletCardBackground from "~/assets/images/cards/wallet-card-background.png";
 import walletCardBadgePlaceholder from "~/assets/images/cards/wallet-card-badge-placeholder.svg";
 import walletCardQrPlaceholder from "~/assets/images/cards/wallet-card-qr-placeholder.svg";
+import { Avatar, AvatarUpload } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
+
+const AVATAR_DEMO_IMAGE = "/avatar-mock.png";
 
 export function Welcome() {
   return (
@@ -24,6 +27,25 @@ export function Welcome() {
           can be done in one place.
         </p>
       </header>
+
+      <section className="rounded-lg border bg-card p-24">
+        <h2 className="text-content-headline-l font-semibold">
+          Avatar Preview
+        </h2>
+        <p className="mt-8 text-content-body-s text-muted-foreground">
+          sm / md / lg sizes with image and placeholder variants, plus
+          AvatarUpload.
+        </p>
+        <div className="mt-16 flex flex-wrap items-end gap-12">
+          <Avatar size="sm" />
+          <Avatar size="md" />
+          <Avatar size="lg" />
+          <Avatar size="sm" src={AVATAR_DEMO_IMAGE} alt="demo" />
+          <Avatar size="md" src={AVATAR_DEMO_IMAGE} alt="demo" />
+          <Avatar size="lg" src={AVATAR_DEMO_IMAGE} alt="demo" />
+          <AvatarUpload />
+        </div>
+      </section>
 
       <section className="rounded-lg border bg-card p-24">
         <h2 className="text-content-headline-l font-semibold">
