@@ -29,11 +29,26 @@ type StaticLabelProps = React.ComponentPropsWithoutRef<"span"> & {
   variant: "new" | "date";
 };
 
-type TagLabelProps = Omit<React.ComponentPropsWithoutRef<"button">, "type"> & {
+type TagLabelBaseProps = {
   selected?: boolean;
   variant?: "tag";
-  type?: "button" | "reset" | "submit";
 };
+
+type StaticTagLabelProps = React.ComponentPropsWithoutRef<"span"> &
+  TagLabelBaseProps & {
+    interactive?: false;
+  };
+
+type InteractiveTagLabelProps = Omit<
+  React.ComponentPropsWithoutRef<"button">,
+  "type"
+> &
+  TagLabelBaseProps & {
+    interactive: true;
+    type?: "button" | "reset" | "submit";
+  };
+
+type TagLabelProps = StaticTagLabelProps | InteractiveTagLabelProps;
 
 export type LabelProps = StaticLabelProps | TagLabelProps;
 
@@ -48,21 +63,39 @@ export const Label = React.forwardRef<
     const {
       children,
       className,
+      interactive = false,
       selected = false,
-      type = "button",
-      ...buttonProps
+      ...tagProps
     } = props as TagLabelProps;
+
+    const tagClassName = cn(
+      labelBaseClassName,
+      interactive && labelVariantClasses.tag.rootInteractive,
+      variantClasses.root,
+      selected && labelVariantClasses.tag.rootSelected,
+      className,
+    );
+
+    if (!interactive) {
+      return (
+        <span
+          className={tagClassName}
+          data-slot="label"
+          ref={ref as React.ForwardedRef<HTMLSpanElement>}
+          {...(tagProps as React.ComponentPropsWithoutRef<"span">)}
+        >
+          <span className={variantClasses.primary}>{children}</span>
+        </span>
+      );
+    }
+
+    const { type = "button", ...buttonProps } =
+      tagProps as InteractiveTagLabelProps;
 
     return (
       <button
         aria-pressed={selected}
-        className={cn(
-          labelBaseClassName,
-          labelVariantClasses.tag.rootInteractive,
-          variantClasses.root,
-          selected && labelVariantClasses.tag.rootSelected,
-          className,
-        )}
+        className={tagClassName}
         data-slot="label"
         ref={ref as React.ForwardedRef<HTMLButtonElement>}
         type={type}
