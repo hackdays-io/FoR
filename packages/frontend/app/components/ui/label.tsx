@@ -8,7 +8,7 @@ const labelBaseClassName =
 const labelVariantClasses = {
   new: {
     primary: "font-latin text-right text-ui-10 font-bold text-foreground",
-    root: "h-15 w-32 justify-end rounded-[10px] bg-visual-green-3 px-6 py-px",
+    root: "h-15 w-32 justify-end rounded-[10px] bg-visual-green-3 px-6 py-0",
   },
   date: {
     primary:
@@ -19,8 +19,8 @@ const labelVariantClasses = {
     primary: "font-ui text-center text-ui-13 font-normal text-foreground",
     rootInteractive:
       "cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
-    root: "h-32 min-w-45 items-center justify-center rounded-[8px] border border-black/30 bg-card px-16 py-6",
-    rootSelected: "border-black/30 bg-[#A5FFE1]",
+    root: "h-32 min-w-45 items-center justify-center rounded-[8px] border border-alpha-black-25 bg-card px-16 py-6",
+    rootSelected: "border-alpha-black-25 bg-visual-green-1",
   },
 } as const;
 
