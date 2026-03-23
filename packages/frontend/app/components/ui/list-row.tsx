@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { formatAmount } from "~/lib/format";
 import { cn } from "~/lib/utils";
 
 export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -21,8 +22,9 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   divider?: boolean;
 }
 
-function formatAmount(amount: number): string {
-  return amount >= 0 ? `+${amount}` : `${amount}`;
+function formatSignedAmount(amount: number): string {
+  const formatted = formatAmount(amount);
+  return amount >= 0 ? `+${formatted}` : formatted;
 }
 
 export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
@@ -90,7 +92,7 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
                   amount >= 0 ? "text-foreground" : "text-text-danger-default",
                 )}
               >
-                {formatAmount(amount)}{" "}
+                {formatSignedAmount(amount)}{" "}
                 <span className="text-ui-13 font-medium">{unit}</span>
               </span>
             ) : null}
