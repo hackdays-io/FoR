@@ -190,6 +190,7 @@
   --color-alpha-white-60: var(--for-bg-alpha-white-60);
   --color-alpha-black-25: var(--for-bg-alpha-black-25);
 
+  --color-text-hint: var(--for-text-hint);
   --color-text-danger-default: var(--for-text-danger-default);
   --color-text-danger-subtle: var(--for-text-danger-subtle);
   --color-text-danger-strong: var(--for-text-danger-strong);

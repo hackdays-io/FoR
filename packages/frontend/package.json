@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@privy-io/react-auth": "^3.10.1",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@react-router/node": "^7.9.2",
     "@react-router/serve": "^7.9.2",
     "isbot": "^5.1.31",
