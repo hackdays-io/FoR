@@ -3,6 +3,7 @@ import { Link, type To } from "react-router";
 
 import promoCardBackground from "~/assets/images/cards/promo-card-background.jpg";
 import walletCardBackground from "~/assets/images/cards/wallet-card-background.png";
+import { Label } from "~/components/ui/label";
 import { formatAmount } from "~/lib/format";
 import { cn } from "~/lib/utils";
 
@@ -126,11 +127,7 @@ function PromoCardTop({ className, isNew = false, title }: PromoCardTopProps) {
         <p className="line-clamp-2 font-ui text-ui-16 font-bold text-primary-foreground">
           {title}
         </p>
-        {isNew && (
-          <span className="inline-flex items-center rounded-[15px] bg-visual-green-3 px-8 py-4 font-latin text-ui-10 font-bold text-foreground">
-            New
-          </span>
-        )}
+        {isNew && <Label variant="new">New</Label>}
       </div>
     </div>
   );
