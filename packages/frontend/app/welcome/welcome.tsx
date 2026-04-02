@@ -8,6 +8,7 @@ import walletCardQrPlaceholder from "~/assets/images/cards/wallet-card-qr-placeh
 import { Avatar, AvatarUpload } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 
 const AVATAR_DEMO_IMAGE = avatarMock;
@@ -28,6 +29,28 @@ export function Welcome() {
           can be done in one place.
         </p>
       </header>
+
+      <section className="rounded-lg border bg-card p-24">
+        <h2 className="text-content-headline-l font-semibold">
+          Label Theme Preview
+        </h2>
+        <p className="mt-8 text-content-body-s text-muted-foreground">
+          Small status labels can be switched with <code>variant</code>.
+        </p>
+        <div className="mt-16 flex flex-col items-start gap-24">
+          <div className="flex flex-wrap items-center gap-12">
+            <Label variant="new">New</Label>
+            <Label variant="date">10/29 (水)</Label>
+          </div>
+          <div className="flex flex-wrap items-center gap-12">
+            <Label variant="tag">森</Label>
+            <Label selected variant="tag">
+              川
+            </Label>
+            <Label variant="tag">コミュニティ</Label>
+          </div>
+        </div>
+      </section>
 
       <section className="rounded-lg border bg-card p-24">
         <h2 className="text-content-headline-l font-semibold">
