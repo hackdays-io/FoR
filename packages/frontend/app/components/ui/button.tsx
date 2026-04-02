@@ -14,10 +14,10 @@ const buttonVariantClasses = {
 } as const;
 
 const buttonSizeClasses = {
-  default: "h-40 px-16",
+  default: "h-48 w-[320px] px-16",
   sm: "h-32 px-12 text-ui-10",
-  lg: "h-40 px-20 text-ui-16",
-  icon: "size-40 p-0",
+  lg: "h-48 px-20",
+  icon: "size-48 p-0",
 } as const;
 
 type ButtonVariant = keyof typeof buttonVariantClasses;
@@ -25,6 +25,7 @@ type ButtonSize = keyof typeof buttonSizeClasses;
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  icon?: React.ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
 }
@@ -36,6 +37,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = "default",
       size = "default",
       type = "button",
+      icon,
+      children,
       ...props
     },
     ref,
@@ -43,7 +46,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          "inline-flex shrink-0 items-center justify-center gap-8 whitespace-nowrap rounded-md border text-ui-13 font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
+          "inline-flex shrink-0 items-center justify-center gap-8 whitespace-nowrap rounded-full border font-ui text-ui-16 font-bold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
           buttonVariantClasses[variant],
           buttonSizeClasses[size],
           className,
@@ -51,8 +54,47 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         type={type}
         ref={ref}
         {...props}
-      />
+      >
+        {children}
+        {icon && <span className="inline-flex shrink-0">{icon}</span>}
+      </button>
     );
   },
 );
 Button.displayName = "Button";
+
+/* ------------------------------------------------------------------ */
+/*  LinkedButton – リンク風のテキストボタン                              */
+/* ------------------------------------------------------------------ */
+
+const linkedButtonVariantClasses = {
+  default: "text-button-primary-frame hover:text-button-primary-frame-hover",
+  danger:
+    "text-button-danger-text hover:text-button-danger-text-hover active:text-button-danger-text-pressed",
+} as const;
+
+type LinkedButtonVariant = keyof typeof linkedButtonVariantClasses;
+
+export interface LinkedButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: LinkedButtonVariant;
+}
+
+export const LinkedButton = React.forwardRef<
+  HTMLButtonElement,
+  LinkedButtonProps
+>(({ className, variant = "default", type = "button", ...props }, ref) => {
+  return (
+    <button
+      className={cn(
+        "inline-flex items-center gap-4 text-ui-13 font-medium underline underline-offset-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40",
+        linkedButtonVariantClasses[variant],
+        className,
+      )}
+      type={type}
+      ref={ref}
+      {...props}
+    />
+  );
+});
+LinkedButton.displayName = "LinkedButton";
