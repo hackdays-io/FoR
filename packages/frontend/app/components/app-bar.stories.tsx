@@ -4,11 +4,11 @@ import type * as React from "react";
 import "~/app.css";
 import {
   AppBar,
-  AppBarAvatar,
   AppBarBackButton,
   AppBarItem,
   AppBarTitle,
 } from "~/components/ui/app-bar";
+import { Avatar } from "~/components/ui/avatar";
 
 export default {
   title: "Components/AppBar",
@@ -31,10 +31,7 @@ export const WithAvatar = () => {
     <StoryFrame>
       <AppBar>
         <AppBarItem position="left">
-          <AppBarAvatar
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23E5E7EB'/%3E%3Ccircle cx='32' cy='26' r='10' fill='%239CA3AF'/%3E%3Cpath d='M16 50c2.667-8 8-12 16-12s13.333 4 16 12' fill='%239CA3AF'/%3E%3C/svg%3E"
-            alt="ユーザーアバター"
-          />
+          <Avatar size="sm" alt="ユーザーアバター" />
         </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>ニックネーム</AppBarTitle>

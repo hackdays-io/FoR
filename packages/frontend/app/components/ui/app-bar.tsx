@@ -96,25 +96,3 @@ export const AppBarTitle = React.forwardRef<
   );
 });
 AppBarTitle.displayName = "AppBarTitle";
-
-export interface AppBarAvatarProps
-  extends React.ImgHTMLAttributes<HTMLImageElement> {
-  src: string;
-  alt: string;
-}
-
-export const AppBarAvatar = React.forwardRef<
-  HTMLImageElement,
-  AppBarAvatarProps
->(({ className, src, alt, ...props }, ref) => {
-  return (
-    <img
-      ref={ref}
-      src={src}
-      alt={alt}
-      className={cn("size-32 rounded-full object-cover", className)}
-      {...props}
-    />
-  );
-});
-AppBarAvatar.displayName = "AppBarAvatar";
