@@ -13,6 +13,7 @@
     "ladle:build": "ladle build --viteConfig .ladle/vite.config.ts"
   },
   "dependencies": {
+    "@adraffy/ens-normalize": "^1.11.1",
     "@privy-io/react-auth": "^3.10.1",
     "@radix-ui/react-tabs": "^1.1.13",
     "@react-router/node": "^7.9.2",
@@ -20,11 +21,14 @@
     "@tanstack/react-query": "^5.96.2",
     "graphql": "^16.13.2",
     "graphql-request": "^7.4.0",
+    "html5-qrcode": "^2.3.8",
     "isbot": "^5.1.31",
     "lucide-react": "^0.554.0",
     "permissionless": "^0.2.57",
+    "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-markdown": "^10.1.0",
     "react-router": "^7.9.2",
     "tailwind-merge": "^3.5.0",
     "viem": "^2.43.5"

@@ -47,7 +47,9 @@ export default function App() {
   return (
     <QueryProvider>
       <AppPrivyProvider>
-        <Outlet />
+        <div className="mx-auto w-full max-w-md min-h-screen">
+          <Outlet />
+        </div>
       </AppPrivyProvider>
     </QueryProvider>
   );

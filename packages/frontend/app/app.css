@@ -168,6 +168,7 @@
   --text-content-caption--line-height: 1.6;
 
   /* shadcn/ui color namespace */
+  --color-bg-default: #ffffff;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

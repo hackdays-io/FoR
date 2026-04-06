@@ -34,9 +34,13 @@ export default [
   // ユーザープロフィール
   route("users/:address", "routes/users.$address.tsx"),
 
-  // トークン送信・受取
+  // API
+  route("api/profile/:address", "routes/api.profile.$address.tsx"),
+
+  // トークン送信・受取・スキャン
   route("send", "routes/send.tsx"),
   route("receive", "routes/receive.tsx"),
+  route("scan", "routes/scan.tsx"),
 
   // おすそ分け
   route("osusowake", "routes/osusowake.tsx"),

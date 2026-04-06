@@ -1,4 +1,4 @@
-import type { ConnectedWallet } from "@privy-io/react-auth";
+import { type ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import type { Address } from "viem";
 
 import {
@@ -28,6 +28,15 @@ interface ActiveWalletResult {
 }
 
 /**
+ * Check if the Privy user has an embedded wallet via user object.
+ * This is available immediately on reload, unlike useWallets().
+ */
+function useHasEmbeddedWalletFromUser(): boolean {
+  const { user } = usePrivy();
+  return user?.wallet?.walletClientType === "privy";
+}
+
+/**
  * Unified wallet interface hook
  * Selects Smart Account for embedded wallets, EOA otherwise
  */
@@ -38,10 +47,19 @@ export function useActiveWallet(): ActiveWalletResult {
     smartAccountAddress,
     isLoading: isSmartAccountLoading,
   } = useSmartAccount();
-  const isConnectingEmbeddedWallet = useHasEmbeddedWallet();
+  const { ready: walletsReady } = useWallets();
+  const hasEmbeddedFromWallets = useHasEmbeddedWallet();
+  const hasEmbeddedFromUser = useHasEmbeddedWalletFromUser();
+
+  // Use user object for immediate detection, wallets hook as fallback
+  const isConnectingEmbeddedWallet = hasEmbeddedFromWallets || hasEmbeddedFromUser;
 
   const wallet = isConnectingEmbeddedWallet ? smartAccountClient : walletClient;
   const address = isConnectingEmbeddedWallet ? smartAccountAddress : eoaAddress;
+
+  // Loading if: wallets SDK not ready, or embedded wallet detected but smart account still initializing
+  const isLoading =
+    !walletsReady || (isConnectingEmbeddedWallet && isSmartAccountLoading);
 
   return {
     wallet,
@@ -49,6 +67,6 @@ export function useActiveWallet(): ActiveWalletResult {
     connectedWallet,
     isSmartWallet: !!smartAccountClient,
     isConnectingEmbeddedWallet,
-    isLoading: isConnectingEmbeddedWallet && isSmartAccountLoading,
+    isLoading,
   };
 }

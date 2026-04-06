@@ -18,6 +18,7 @@ export function AppPrivyProvider({ children }: Props): ReactNode {
     <BasePrivyProvider
       appId={appId}
       config={{
+        loginMethods: ["google", "email", "wallet"],
         embeddedWallets: {
           ethereum: {
             createOnLogin: "users-without-wallets",
