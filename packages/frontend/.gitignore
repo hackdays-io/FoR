@@ -3,6 +3,9 @@
 .env*.local
 /node_modules/
 
+# GraphQL Codegen
+/app/gql/
+
 # React Router
 /.react-router/
 /build/

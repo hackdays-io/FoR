@@ -1,0 +1,90 @@
+scalar BigInt
+scalar BigDecimal
+scalar Bytes
+scalar Int8
+
+enum OrderDirection {
+  asc
+  desc
+}
+
+enum Transfer_orderBy {
+  id
+  sender
+  from
+  to
+  totalAmount
+  fundAmount
+  burnAmount
+  recipientAmount
+  blockNumber
+  timestamp
+  transactionHash
+  logIndex
+}
+
+enum DistributionRatio_orderBy {
+  id
+  changedBy
+  fundRatio
+  burnRatio
+  recipientRatio
+  blockNumber
+  timestamp
+  transactionHash
+  logIndex
+}
+
+enum User_orderBy {
+  id
+}
+
+type Transfer {
+  id: ID!
+  sender: User!
+  from: User!
+  to: User!
+  totalAmount: BigInt!
+  fundAmount: BigInt!
+  burnAmount: BigInt!
+  recipientAmount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DistributionRatio {
+  id: ID!
+  changedBy: User!
+  fundRatio: BigInt!
+  burnRatio: BigInt!
+  recipientRatio: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+  logIndex: BigInt!
+}
+
+type User {
+  id: ID!
+  sentTransfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection): [Transfer!]!
+  receivedTransfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection): [Transfer!]!
+  executedTransfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection): [Transfer!]!
+  ratioChanges(first: Int, skip: Int, orderBy: DistributionRatio_orderBy, orderDirection: OrderDirection): [DistributionRatio!]!
+}
+
+type Query {
+  transfer(id: ID!): Transfer
+  transfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection, where: Transfer_filter): [Transfer!]!
+  user(id: ID!): User
+  users(first: Int, skip: Int, orderBy: User_orderBy, orderDirection: OrderDirection): [User!]!
+  distributionRatio(id: ID!): DistributionRatio
+  distributionRatios(first: Int, skip: Int, orderBy: DistributionRatio_orderBy, orderDirection: OrderDirection): [DistributionRatio!]!
+}
+
+input Transfer_filter {
+  from: String
+  to: String
+  sender: String
+}

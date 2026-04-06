@@ -39,6 +39,8 @@ async function createSmartAccountClientFromWallet(
     );
   }
 
+  const client = pimlicoClient;
+
   const smartAccount = await toThirdwebSmartAccount({
     owner: owner as Parameters<typeof toThirdwebSmartAccount>[0]["owner"],
     client: publicClient,
@@ -52,10 +54,10 @@ async function createSmartAccountClientFromWallet(
     account: smartAccount,
     chain: currentChain,
     bundlerTransport: http(pimlicoUrl),
-    paymaster: pimlicoClient,
+    paymaster: client,
     userOperation: {
       estimateFeesPerGas: async () =>
-        (await pimlicoClient.getUserOperationGasPrice()).standard,
+        (await client.getUserOperationGasPrice()).standard,
     },
   });
 }

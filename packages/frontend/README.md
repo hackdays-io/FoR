@@ -78,6 +78,44 @@ Make sure to deploy the output of `npm run build`
 │   └── server/    # Server-side code
 ```
 
+## GraphQL Codegen
+
+サブグラフのスキーマから型安全なコードを自動生成しています。
+
+### 型の再生成
+
+```bash
+pnpm codegen
+```
+
+### indexer（サブグラフ）が更新された場合
+
+`packages/indexer/schema.graphql` のエンティティやフィールドが変更された場合、以下の手順で対応してください。
+
+1. **`packages/frontend/schema.graphql` を更新する**
+   - indexer の `schema.graphql` の変更に合わせて、フロントエンド用スキーマファイルを更新する
+   - このファイルには The Graph のカスタムスカラー（`BigInt`, `Bytes` 等）、`OrderDirection` enum、`Query` 型の定義が含まれる
+   - indexer のスキーマにエンティティが追加された場合、対応する `_orderBy` enum と `Query` フィールドも追加する
+
+2. **`app/graphql/queries.ts` を更新する**
+   - 新しいエンティティやフィールドに対応するクエリを追加・修正する
+
+3. **`pnpm codegen` を実行する**
+   - `app/gql/` 以下に型定義ファイルが再生成される
+
+4. **hooks を確認する**
+   - `app/hooks/` 内の各hookが生成された型を使用しているか確認する
+   - 手動の型定義ではなく `~/gql/graphql` からインポートした型を使用すること
+
+### ファイル構成
+
+```
+schema.graphql          # フロントエンド用スキーマ（indexerのスキーマ + カスタムスカラー + Query型）
+codegen.ts              # graphql-codegen 設定
+app/gql/                # 自動生成ファイル（.gitignore済み、手動編集禁止）
+app/graphql/queries.ts  # GraphQLクエリ定義（集約ファイル）
+```
+
 ## Styling
 
 This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.

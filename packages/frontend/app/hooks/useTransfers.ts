@@ -1,67 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import { gql } from "graphql-request";
+import type { GetTransfersQuery } from "~/gql/graphql";
+import { OrderDirection } from "~/gql/graphql";
+import { GET_TRANSFERS } from "~/graphql/queries";
 import { getGraphQLClient } from "~/lib/graphql";
 
-const TRANSFERS_QUERY = gql`
-  query GetTransfers($first: Int!, $skip: Int!, $orderDirection: String!) {
-    transfers(
-      first: $first
-      skip: $skip
-      orderBy: timestamp
-      orderDirection: $orderDirection
-    ) {
-      id
-      sender {
-        id
-      }
-      from {
-        id
-      }
-      to {
-        id
-      }
-      totalAmount
-      fundAmount
-      burnAmount
-      recipientAmount
-      timestamp
-      transactionHash
-      blockNumber
-    }
-  }
-`;
-
-export interface Transfer {
-  id: string;
-  sender: { id: string };
-  from: { id: string };
-  to: { id: string };
-  totalAmount: string;
-  fundAmount: string;
-  burnAmount: string;
-  recipientAmount: string;
-  timestamp: string;
-  transactionHash: string;
-  blockNumber: string;
-}
-
-interface TransfersResponse {
-  transfers: Transfer[];
-}
+export type Transfer = GetTransfersQuery["transfers"][number];
 
 export function useTransfers(
-  first = 20,
-  skip = 0,
-  orderDirection: "asc" | "desc" = "desc",
+	first = 20,
+	skip = 0,
+	orderDirection: OrderDirection = OrderDirection.Desc,
 ) {
-  return useQuery({
-    queryKey: ["transfers", first, skip, orderDirection],
-    queryFn: () =>
-      getGraphQLClient().request<TransfersResponse>(TRANSFERS_QUERY, {
-        first,
-        skip,
-        orderDirection,
-      }),
-    select: (data) => data.transfers,
-  });
+	return useQuery({
+		queryKey: ["transfers", first, skip, orderDirection],
+		queryFn: () =>
+			getGraphQLClient().request<GetTransfersQuery>(GET_TRANSFERS, {
+				first,
+				skip,
+				orderDirection,
+			}),
+		select: (data) => data.transfers,
+	});
 }
