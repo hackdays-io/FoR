@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { AppPrivyProvider } from "./providers/AppPrivyProvider";
+import { QueryProvider } from "./providers/QueryProvider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -44,9 +45,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <AppPrivyProvider>
-      <Outlet />
-    </AppPrivyProvider>
+    <QueryProvider>
+      <AppPrivyProvider>
+        <Outlet />
+      </AppPrivyProvider>
+    </QueryProvider>
   );
 }
 

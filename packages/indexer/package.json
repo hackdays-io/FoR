@@ -12,6 +12,11 @@
     "codegen:base": "pnpm run generate:base && graph codegen subgraph.base.yaml",
     "build:base": "pnpm run codegen:base && graph build subgraph.base.yaml",
     "deploy:base": "pnpm run build:base && goldsky subgraph deploy for-base/0.0.0 --path ./build",
+    "generate:localhost": "mustache ./config/localhost.json subgraph.template.yaml > subgraph.localhost.yaml",
+    "codegen:localhost": "pnpm run generate:localhost && graph codegen subgraph.localhost.yaml",
+    "build:localhost": "pnpm run codegen:localhost && graph build subgraph.localhost.yaml",
+    "create:localhost": "graph create --node http://localhost:8020 for/localhost",
+    "deploy:localhost": "pnpm run build:localhost && graph deploy --node http://localhost:8020 --ipfs http://localhost:5001 --version-label v0.0.1 for/localhost subgraph.localhost.yaml",
     "check": "biome check"
   },
   "devDependencies": {

@@ -1,11 +1,12 @@
 import { type Chain, createPublicClient, fallback, http } from "viem";
-import { base, mainnet, optimism, sepolia } from "viem/chains";
+import { base, hardhat, mainnet, optimism, sepolia } from "viem/chains";
 
 const CHAIN_MAP: Record<number, Chain> = {
   [mainnet.id]: mainnet,
   [optimism.id]: optimism,
   [base.id]: base,
   [sepolia.id]: sepolia,
+  [hardhat.id]: hardhat,
 };
 
 const ALCHEMY_RPC_HOSTS: Record<number, string> = {

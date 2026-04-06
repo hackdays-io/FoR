@@ -62,6 +62,72 @@ pnpm dev
 
 詳細な開発手順は [CLAUDE.md](./CLAUDE.md) をご確認ください。
 
+### ローカル開発環境構築
+
+コントラクト → Graph Node → インデクサー → フロントエンドを一気通貫で動かす手順です。
+
+**���提**: Docker が起動していること
+
+#### 1. Hardhat ローカルノード起動
+
+```bash
+pnpm dev:node
+```
+
+#### 2. コントラクトデプロイ & セットアップ
+
+```bash
+cd packages/contract
+pnpm deploy:local        # FoRToken, RouterFactory, Router を順にデプロイ
+pnpm setup:local         # AllowList 設定 & Indexer の config 更新
+```
+
+#### 3. Graph Node 起動 & サブグラフデプロイ
+
+```bash
+pnpm dev:graph           # graph-node + PostgreSQL + IPFS をバックグラウンド起動
+
+cd packages/indexer
+pnpm create:localhost    # サブグラフ作成
+pnpm deploy:localhost    # サブグラフデプロイ
+```
+
+GraphQL Playground: http://localhost:8000/subgraphs/name/for/localhost
+
+#### 4. フロントエンド起動
+
+```bash
+# packages/frontend/.env に VITE_CHAIN_ID=31337 を設定
+pnpm dev:frontend
+```
+
+#### MetaMask にローカルネットワークを追加
+
+| 項目 | 値 |
+|---|---|
+| ネットワーク名 | `Hardhat Local` |
+| RPC URL | `http://127.0.0.1:8545` |
+| チェーン ID | `31337` |
+| 通貨シンボル | `ETH` |
+
+テスト用アカウント（Hardhat #0）の秘密鍵:
+
+```
+0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+```
+
+> ⚠️ この秘密鍵は Hardhat の公開テスト用です。本番環境やテストネットでは絶対に使わないでください。
+
+#### リセット
+
+Hardhat ノードを再起動した場合は、Graph Node のデータもクリーンアップが必要です。
+
+```bash
+pnpm dev:graph:clean     # docker compose down -v & データ削除
+```
+
+その後、手順 1 からやり直してください。
+
 ## Issue と Pull Request について
 
 ### Issue について

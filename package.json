@@ -5,7 +5,13 @@
   "description": "FoR monorepo managed with pnpm",
   "scripts": {
     "frontend": "pnpm --filter frontend",
-    "contract": "pnpm --filter contract"
+    "contract": "pnpm --filter contract",
+    "indexer": "pnpm --filter @for/indexer",
+    "dev:node": "pnpm --filter @for/contract dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:graph": "docker compose up -d",
+    "dev:graph:down": "docker compose down",
+    "dev:graph:clean": "docker compose down -v && rm -rf data/"
   },
   "keywords": [
     "pnpm",
