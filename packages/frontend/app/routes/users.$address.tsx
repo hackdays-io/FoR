@@ -7,6 +7,7 @@ import {
 } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
 import { getNamesByAddress } from "~/lib/namestone.server";
+import { Typography } from "~/components/ui/typography";
 import type { Route } from "./+types/users.$address";
 
 export function meta(_args: Route.MetaArgs) {
@@ -55,29 +56,29 @@ export default function UserProfile({ loaderData }: Route.ComponentProps) {
         />
 
         <div className="flex flex-col items-center gap-4">
-          <p className="text-content-headline-m font-bold text-text-default">
+          <Typography variant="headline-m" className="text-text-default">
             {displayName}
-          </p>
+          </Typography>
           {profile?.name && (
-            <p className="text-ui-13 text-text-subtle">
+            <Typography variant="ui-13" className="text-text-subtle">
               {profile.name}.{profile.domain}
-            </p>
+            </Typography>
           )}
-          <p className="text-ui-10 text-text-hint">
+          <Typography variant="ui-10" className="text-text-hint">
             {shortenAddress(address)}
-          </p>
+          </Typography>
         </div>
 
         {profile?.text_records?.description && (
-          <p className="w-full text-content-body-m text-text-default">
+          <Typography variant="body-m" className="w-full text-text-default">
             {profile.text_records.description}
-          </p>
+          </Typography>
         )}
 
         {!profile && (
-          <p className="text-ui-13 text-text-hint">
+          <Typography variant="ui-13" className="text-text-hint">
             プロフィールが設定されていません
-          </p>
+          </Typography>
         )}
       </div>
     </div>

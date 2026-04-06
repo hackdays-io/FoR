@@ -8,6 +8,7 @@ import {
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { formatAmount } from "~/lib/format";
+import { Typography } from "~/components/ui/typography";
 import { getNamesByAddress } from "~/lib/namestone.server";
 import type { Route } from "./+types/transactions.$address";
 
@@ -76,18 +77,18 @@ function MessageBubble({
           isSent ? "bg-background" : "bg-background"
         }`}
       >
-        <p className="text-ui-13 font-bold text-foreground">{title}</p>
-        <p className="text-ui-13 text-muted-foreground">{message}</p>
+        <Typography variant="ui-13" weight="bold">{title}</Typography>
+        <Typography variant="ui-13" className="text-muted-foreground">{message}</Typography>
         <div className="flex items-end justify-end gap-4">
-          <span className="font-latin text-content-number-m font-bold text-foreground">
+          <Typography variant="number-m">
             {formatAmount(amount)}
-          </span>
-          <span className="font-latin text-ui-16 font-bold text-foreground">
+          </Typography>
+          <Typography variant="ui-16" weight="bold">
             FoR
-          </span>
+          </Typography>
         </div>
       </div>
-      <span className="shrink-0 text-ui-10 text-muted-foreground">{time}</span>
+      <Typography variant="ui-10" as="span" className="shrink-0 text-muted-foreground">{time}</Typography>
     </div>
   );
 }
@@ -95,9 +96,9 @@ function MessageBubble({
 function DateSeparator({ date }: { date: string }) {
   return (
     <div className="flex justify-center py-8">
-      <span className="rounded-full bg-primary px-16 py-4 text-ui-12 font-medium text-primary-foreground">
+      <Typography variant="ui-12" as="span" className="rounded-full bg-primary px-16 py-4 text-primary-foreground">
         {date}
-      </span>
+      </Typography>
     </div>
   );
 }

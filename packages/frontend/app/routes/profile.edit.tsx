@@ -17,6 +17,7 @@ import { AvatarUpload } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { TextField } from "~/components/ui/text-field";
 import { getNamesByAddress, setName } from "~/lib/namestone.server";
+import { Typography } from "~/components/ui/typography";
 import type { Route } from "./+types/profile.edit";
 
 export function meta(_args: Route.MetaArgs) {
@@ -155,9 +156,9 @@ export default function ProfileEdit() {
         />
 
         {errors?.address && (
-          <p className="text-ui-13 text-text-danger-default">
+          <Typography variant="ui-13" className="text-text-danger-default">
             {errors.address}
-          </p>
+          </Typography>
         )}
 
         <Button

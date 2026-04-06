@@ -9,6 +9,7 @@ import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import type { NameStoneProfile } from "~/lib/namestone.server";
+import { Typography } from "~/components/ui/typography";
 import type { Route } from "./+types/mypage";
 
 export function meta(_args: Route.MetaArgs) {
@@ -41,7 +42,7 @@ export default function Mypage() {
           </AppBarItem>
         </AppBar>
         <div className="flex items-center justify-center py-32">
-          <p className="text-ui-13 text-text-hint">読み込み中...</p>
+          <Typography variant="ui-13" className="text-text-hint">読み込み中...</Typography>
         </div>
       </div>
     );
@@ -56,9 +57,9 @@ export default function Mypage() {
           </AppBarItem>
         </AppBar>
         <div className="flex flex-col items-center gap-16 px-20 py-32">
-          <p className="text-ui-13 text-text-hint">
+          <Typography variant="ui-13" className="text-text-hint">
             ウォレットが接続されていません
-          </p>
+          </Typography>
           <Link to="/">
             <Button>ログインへ</Button>
           </Link>
@@ -86,23 +87,23 @@ export default function Mypage() {
         />
 
         <div className="flex flex-col items-center gap-4">
-          <p className="text-content-headline-m font-bold text-text-default">
+          <Typography variant="headline-m" className="text-text-default">
             {displayName}
-          </p>
+          </Typography>
           {profile?.name && (
-            <p className="text-ui-13 text-text-subtle">
+            <Typography variant="ui-13" className="text-text-subtle">
               {profile.name}.{profile.domain}
-            </p>
+            </Typography>
           )}
-          <p className="text-ui-10 text-text-hint">
+          <Typography variant="ui-10" className="text-text-hint">
             {shortenAddress(address)}
-          </p>
+          </Typography>
         </div>
 
         {profile?.text_records?.description && (
-          <p className="w-full text-content-body-m text-text-default">
+          <Typography variant="body-m" className="w-full text-text-default">
             {profile.text_records.description}
-          </p>
+          </Typography>
         )}
 
         {profile ? (

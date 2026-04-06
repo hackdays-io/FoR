@@ -7,6 +7,7 @@ import {
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Button } from "~/components/ui/button";
+import { Typography } from "~/components/ui/typography";
 import type { Route } from "./+types/osusowake.new";
 
 export function meta(_args: Route.MetaArgs) {
@@ -33,13 +34,13 @@ export default function OsusowakeNew() {
         <Gift size={80} className="text-muted-foreground/50" />
 
         <div className="mt-32">
-          <p className="text-content-body-l leading-relaxed text-foreground">
+          <Typography variant="body-l" className="leading-relaxed">
             おすそわけをしますか？
             <br />
             以下のリンクより、Google Formで
             <br />
             おすそわけの内容を入力しましょう。
-          </p>
+          </Typography>
         </div>
       </div>
 

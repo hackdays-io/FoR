@@ -19,6 +19,7 @@ import { Button } from "~/components/ui/button";
 import { TextField } from "~/components/ui/text-field";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { searchNames, setName } from "~/lib/namestone.server";
+import { Typography } from "~/components/ui/typography";
 import type { Route } from "./+types/profile.create";
 
 export function meta(_args: Route.MetaArgs) {
@@ -254,9 +255,9 @@ export default function ProfileCreate() {
         />
 
         {errors?.address && (
-          <p className="text-ui-13 text-text-danger-default">
+          <Typography variant="ui-13" className="text-text-danger-default">
             {errors.address}
-          </p>
+          </Typography>
         )}
 
         <Button

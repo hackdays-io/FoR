@@ -12,6 +12,7 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { TextField } from "~/components/ui/text-field";
 import { formatAmount } from "~/lib/format";
+import { Typography } from "~/components/ui/typography";
 import { getNamesByAddress } from "~/lib/namestone.server";
 import type { Route } from "./+types/send";
 
@@ -56,18 +57,20 @@ function AmountRow({
 }) {
   return (
     <div className="flex items-center justify-between rounded-lg bg-background px-16 py-12">
-      <span
-        className={`text-ui-13 text-foreground ${bold ? "font-bold" : "font-medium"}`}
+      <Typography
+        variant="ui-13"
+        weight={bold ? "bold" : "normal"}
+        as="span"
       >
         {label}
-      </span>
+      </Typography>
       <div className="flex items-baseline gap-4">
-        <span className="font-latin text-content-number-m font-bold text-foreground">
+        <Typography variant="number-m">
           {formatAmount(amount)}
-        </span>
-        <span className="font-latin text-ui-20 font-bold text-foreground">
+        </Typography>
+        <Typography variant="ui-20" weight="bold">
           FoR
-        </span>
+        </Typography>
       </div>
     </div>
   );
@@ -122,18 +125,18 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           {recipient && (
             <div className="flex flex-col items-center gap-8">
               <Avatar src={avatarSrc} alt={displayName} size="md" />
-              <p className="text-ui-16 font-bold text-foreground">
+              <Typography variant="ui-16" weight="bold">
                 {displayName}
-              </p>
+              </Typography>
             </div>
           )}
 
           {/* Amount Card */}
           <div className="rounded-lg bg-background p-16">
             <div className="flex items-baseline gap-8">
-              <span className="shrink-0 text-ui-13 font-medium text-foreground">
+              <Typography variant="ui-13" as="span" className="shrink-0">
                 送るFoR
-              </span>
+              </Typography>
               <input
                 type="number"
                 inputMode="numeric"
@@ -142,34 +145,34 @@ export default function Send({ loaderData }: Route.ComponentProps) {
                 placeholder="0"
                 className="min-w-0 flex-1 rounded-md border border-border bg-card px-8 py-6 text-right font-latin text-content-number-m font-bold text-foreground outline-none"
               />
-              <span className="shrink-0 font-latin text-ui-20 font-bold text-foreground">
+              <Typography variant="ui-20" weight="bold" as="span" className="shrink-0">
                 FoR
-              </span>
+              </Typography>
             </div>
 
             <div className="mt-12 flex items-center justify-between border-b border-border pb-12">
-              <span className="text-ui-13 font-medium text-foreground">
+              <Typography variant="ui-13" as="span">
                 森の貯金箱
-              </span>
+              </Typography>
               <div className="flex items-baseline gap-4">
-                <span className="font-latin text-content-number-m font-bold text-foreground">
+                <Typography variant="number-m">
                   {formatAmount(fundAmount)}
-                </span>
-                <span className="font-latin text-ui-20 font-bold text-foreground">
+                </Typography>
+                <Typography variant="ui-20" weight="bold">
                   FoR
-                </span>
+                </Typography>
               </div>
             </div>
 
             <div className="mt-12 flex items-center justify-between">
-              <span className="text-ui-13 font-bold text-foreground">合計</span>
+              <Typography variant="ui-13" weight="bold" as="span">合計</Typography>
               <div className="flex items-baseline gap-4">
-                <span className="font-latin text-content-number-l font-bold text-foreground">
+                <Typography variant="number-l">
                   {formatAmount(totalAmount)}
-                </span>
-                <span className="font-latin text-ui-20 font-bold text-foreground">
+                </Typography>
+                <Typography variant="ui-20" weight="bold">
                   FoR
-                </span>
+                </Typography>
               </div>
             </div>
           </div>
@@ -187,9 +190,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
 
           {/* Purpose */}
           <div>
-            <p className="text-ui-16 font-bold text-foreground">
+            <Typography variant="ui-16" weight="bold">
               FoRの交換用途
-            </p>
+            </Typography>
             <div className="mt-8 flex flex-wrap gap-8">
               {PURPOSE_OPTIONS.map((purpose) => (
                 <Label
@@ -210,7 +213,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
 
           {/* Story */}
           <div>
-            <p className="text-ui-16 font-bold text-foreground">ストーリー</p>
+            <Typography variant="ui-16" weight="bold">ストーリー</Typography>
             <div className="mt-8">
               <TextField
                 placeholder="ストーリーをシェア"
@@ -261,51 +264,51 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           {recipient && (
             <div className="flex flex-col items-center gap-8">
               <Avatar src={avatarSrc} alt={displayName} size="md" />
-              <p className="text-ui-16 font-bold text-foreground">
+              <Typography variant="ui-16" weight="bold">
                 {displayName}
-              </p>
+              </Typography>
             </div>
           )}
 
           {/* Amount Summary */}
           <div className="flex flex-col gap-4 rounded-lg bg-background p-16">
             <div className="flex items-center justify-between">
-              <span className="text-ui-13 font-medium text-foreground">
+              <Typography variant="ui-13" as="span">
                 送るFoR
-              </span>
+              </Typography>
               <div className="flex items-baseline gap-4">
-                <span className="font-latin text-content-number-m font-bold text-foreground">
+                <Typography variant="number-m">
                   {formatAmount(numAmount)}
-                </span>
-                <span className="font-latin text-ui-20 font-bold text-foreground">
+                </Typography>
+                <Typography variant="ui-20" weight="bold">
                   FoR
-                </span>
+                </Typography>
               </div>
             </div>
 
             <div className="flex items-center justify-between border-b border-border pb-12">
-              <span className="text-ui-13 font-medium text-foreground">
+              <Typography variant="ui-13" as="span">
                 森の貯金箱
-              </span>
+              </Typography>
               <div className="flex items-baseline gap-4">
-                <span className="font-latin text-content-number-m font-bold text-foreground">
+                <Typography variant="number-m">
                   {formatAmount(fundAmount)}
-                </span>
-                <span className="font-latin text-ui-20 font-bold text-foreground">
+                </Typography>
+                <Typography variant="ui-20" weight="bold">
                   FoR
-                </span>
+                </Typography>
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-4">
-              <span className="text-ui-13 font-bold text-foreground">合計</span>
+              <Typography variant="ui-13" weight="bold" as="span">合計</Typography>
               <div className="flex items-baseline gap-4">
-                <span className="font-latin text-content-number-l font-bold text-foreground">
+                <Typography variant="number-l">
                   {formatAmount(totalAmount)}
-                </span>
-                <span className="font-latin text-ui-20 font-bold text-foreground">
+                </Typography>
+                <Typography variant="ui-20" weight="bold">
                   FoR
-                </span>
+                </Typography>
               </div>
             </div>
           </div>
@@ -313,9 +316,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           {/* Remaining Balance */}
           <AmountRow label="残高" amount={remainingBalance} bold />
 
-          <p className="text-ui-13 text-muted-foreground">
+          <Typography variant="ui-13" className="text-muted-foreground">
             ※ この取引は、キャンセルできません。
-          </p>
+          </Typography>
         </div>
 
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
@@ -344,13 +347,13 @@ export default function Send({ loaderData }: Route.ComponentProps) {
         {recipient && (
           <div className="flex flex-col items-center gap-8">
             <Avatar src={avatarSrc} alt={displayName} size="md" />
-            <p className="text-ui-16 font-bold text-foreground">
+            <Typography variant="ui-16" weight="bold">
               {displayName}
-            </p>
+            </Typography>
           </div>
         )}
 
-        <p className="text-ui-16 text-foreground">FoRを送りました。</p>
+        <Typography variant="ui-16">FoRを送りました。</Typography>
 
         {/* Amount Summary */}
         <div className="flex flex-col gap-8">
@@ -360,14 +363,14 @@ export default function Send({ loaderData }: Route.ComponentProps) {
 
         {/* Rank */}
         <div className="flex flex-col items-center gap-8 pt-8">
-          <p className="w-full text-ui-16 font-bold text-foreground">
+          <Typography variant="ui-16" weight="bold" className="w-full">
             あなたのランク
-          </p>
+          </Typography>
           <div className="h-[100px] w-[100px] rounded-lg bg-background" />
-          <p className="text-ui-16 font-bold text-foreground">ランク2</p>
-          <p className="text-ui-13 text-visual-green-4">
+          <Typography variant="ui-16" weight="bold">ランク2</Typography>
+          <Typography variant="ui-13" className="text-visual-green-4">
             あと○回交換すると、ランク3にアップ！
-          </p>
+          </Typography>
         </div>
       </div>
 

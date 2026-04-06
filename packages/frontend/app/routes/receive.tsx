@@ -9,6 +9,7 @@ import {
 } from "~/components/ui/app-bar";
 import { Button } from "~/components/ui/button";
 import { formatAmount } from "~/lib/format";
+import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import type { NameStoneProfile } from "~/lib/namestone.server";
 import type { Route } from "./+types/receive";
@@ -70,9 +71,9 @@ export default function Receive() {
       </AppBar>
 
       <div className="flex flex-1 flex-col gap-24 px-20 pt-20">
-        <p className="text-content-body-l text-foreground">
+        <Typography variant="body-l">
           相手にQRコードをスキャンしてもらうと、FoRを受け取ることができます。
-        </p>
+        </Typography>
 
         {/* QR Card */}
         <div className="rounded-lg bg-background p-20">
@@ -88,15 +89,15 @@ export default function Receive() {
           </div>
 
           {/* Name */}
-          <p className="mt-12 text-center text-ui-16 font-bold text-foreground">
+          <Typography variant="ui-16" weight="bold" className="mt-12 text-center">
             {displayName}
-          </p>
+          </Typography>
 
           {/* Amount input */}
           <div className="mt-16 flex items-baseline gap-8">
-            <span className="shrink-0 text-ui-13 font-medium text-foreground">
+            <Typography variant="ui-13" as="span" className="shrink-0">
               依頼FoR
-            </span>
+            </Typography>
             <input
               type="number"
               inputMode="numeric"
@@ -105,36 +106,36 @@ export default function Receive() {
               placeholder="0"
               className="min-w-0 flex-1 rounded-md border border-border bg-card px-8 py-6 text-right font-latin text-content-number-m font-bold text-foreground outline-none"
             />
-            <span className="shrink-0 font-latin text-ui-20 font-bold text-foreground">
+            <Typography variant="ui-20" weight="bold" as="span" className="shrink-0">
               FoR
-            </span>
+            </Typography>
           </div>
 
           {/* Fund */}
           <div className="mt-12 flex items-baseline justify-between border-b border-border pb-12">
-            <span className="text-ui-13 font-medium text-foreground">
+            <Typography variant="ui-13" as="span">
               森の貯金箱
-            </span>
+            </Typography>
             <div className="flex items-baseline gap-4">
-              <span className="font-latin text-content-number-m font-bold text-foreground">
+              <Typography variant="number-m">
                 {formatAmount(fundAmount)}
-              </span>
-              <span className="font-latin text-ui-20 font-bold text-foreground">
+              </Typography>
+              <Typography variant="ui-20" weight="bold">
                 FoR
-              </span>
+              </Typography>
             </div>
           </div>
 
           {/* Total */}
           <div className="mt-12 flex items-baseline justify-between">
-            <span className="text-ui-13 font-bold text-foreground">合計</span>
+            <Typography variant="ui-13" weight="bold" as="span">合計</Typography>
             <div className="flex items-baseline gap-4">
-              <span className="font-latin text-content-number-l font-bold text-foreground">
+              <Typography variant="number-l">
                 {formatAmount(totalAmount)}
-              </span>
-              <span className="font-latin text-ui-20 font-bold text-foreground">
+              </Typography>
+              <Typography variant="ui-20" weight="bold">
                 FoR
-              </span>
+              </Typography>
             </div>
           </div>
         </div>

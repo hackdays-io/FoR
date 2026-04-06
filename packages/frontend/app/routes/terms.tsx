@@ -6,6 +6,7 @@ import {
   AppBarItem,
   AppBarTitle,
 } from "~/components/ui/app-bar";
+import { Typography } from "~/components/ui/typography";
 import type { Route } from "./+types/terms";
 import content from "~/content/terms.md?raw";
 
@@ -31,14 +32,14 @@ export default function Terms() {
         <Markdown
           components={{
             h2: ({ children }) => (
-              <h2 className="mt-32 mb-12 text-content-headline-m font-bold text-text-default">
+              <Typography variant="headline-m" as="h2" className="mt-32 mb-12 text-text-default">
                 {children}
-              </h2>
+              </Typography>
             ),
             p: ({ children }) => (
-              <p className="mb-12 text-content-body-m leading-relaxed text-text-default">
+              <Typography variant="body-m" as="p" className="mb-12 leading-relaxed text-text-default">
                 {children}
-              </p>
+              </Typography>
             ),
             ul: ({ children }) => (
               <ul className="mb-12 list-disc pl-20 text-content-body-m leading-relaxed text-text-default">

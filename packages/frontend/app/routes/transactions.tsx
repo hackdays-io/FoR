@@ -10,6 +10,7 @@ import {
 import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { TextField } from "~/components/ui/text-field";
+import { Typography } from "~/components/ui/typography";
 import { searchNames, type NameStoneProfile } from "~/lib/namestone.server";
 import type { Route } from "./+types/transactions";
 
@@ -101,7 +102,7 @@ export default function Transactions() {
             <SectionTitle>検索結果</SectionTitle>
             <div className="mt-8">
               {fetcher.state === "loading" ? (
-                <p className="py-12 text-ui-13 text-text-hint">検索中...</p>
+                <Typography variant="ui-13" className="py-12 text-text-hint">検索中...</Typography>
               ) : searchResults && searchResults.length > 0 ? (
                 searchResults.map((profile: NameStoneProfile, i: number) => (
                   <ListRow
@@ -114,9 +115,9 @@ export default function Transactions() {
                   />
                 ))
               ) : searchResults ? (
-                <p className="py-12 text-ui-13 text-text-hint">
+                <Typography variant="ui-13" className="py-12 text-text-hint">
                   該当するユーザーが見つかりません
-                </p>
+                </Typography>
               ) : null}
             </div>
           </div>

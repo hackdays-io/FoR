@@ -8,6 +8,7 @@ import {
 } from "~/components/ui/app-bar";
 import { Button } from "~/components/ui/button";
 import { formatAmount } from "~/lib/format";
+import { Typography } from "~/components/ui/typography";
 import type { Route } from "./+types/osusowake.$id";
 
 export function meta(_args: Route.MetaArgs) {
@@ -84,30 +85,30 @@ export default function OsusowakeDetail({ params }: Route.ComponentProps) {
 
       {/* Content */}
       <div className="flex flex-1 flex-col gap-16 px-20 pt-20 pb-20">
-        <h1 className="text-content-headline-l font-bold text-foreground">
+        <Typography variant="headline-l" as="h1">
           {dummyItem.title}
-        </h1>
+        </Typography>
 
         <div className="flex items-baseline justify-end gap-4">
-          <span className="font-latin text-content-number-m font-bold text-foreground">
+          <Typography variant="number-m">
             {formatAmount(dummyItem.amount)}
-          </span>
-          <span className="font-latin text-ui-20 font-bold text-foreground">
+          </Typography>
+          <Typography variant="ui-20" weight="bold">
             FoR
-          </span>
+          </Typography>
         </div>
 
         <Markdown
           components={{
             h2: ({ children }) => (
-              <h2 className="mt-24 mb-8 text-content-headline-m font-bold text-foreground">
+              <Typography variant="headline-m" as="h2" className="mt-24 mb-8">
                 {children}
-              </h2>
+              </Typography>
             ),
             p: ({ children }) => (
-              <p className="mb-8 text-content-body-m leading-relaxed text-foreground">
+              <Typography variant="body-m" as="p" className="mb-8 leading-relaxed">
                 {children}
-              </p>
+              </Typography>
             ),
             ul: ({ children }) => (
               <ul className="mb-8 list-disc pl-20 text-content-body-m leading-relaxed text-foreground">
