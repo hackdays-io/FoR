@@ -60,6 +60,7 @@ FoR/
 - **Tailwind CSS v4**: スタイリング
 - **Vite**: ビルドツール
 - **TypeScript**: 型安全な開発
+- **UIコンポーネント**: `packages/frontend/app/components/ui/` にプリミティブコンポーネントを集約し、これらを組み合わせてページを構築する
 
 ### インデクサー
 

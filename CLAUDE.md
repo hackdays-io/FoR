@@ -26,6 +26,12 @@ FoR/
 - **Vite**: ビルドツール
 - **TypeScript**: 型安全な開発
 
+## フロントエンド開発方針
+
+- `packages/frontend/app/components/ui/` にプリミティブUIコンポーネント（Button, Card, Tabs など）が格納されている
+- ページやフィーチャーの実装では、これらのプリミティブコンポーネントを組み合わせて構築する
+- 各コンポーネントのStorybookストーリーは同じ `ui/` ディレクトリ内に配置する（例: `button.tsx` と `buttons.stories.tsx`）
+
 ## コア機能
 
 ### 1. FORトークン
