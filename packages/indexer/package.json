@@ -7,7 +7,7 @@
     "generate:sepolia": "mustache ./config/sepolia.json subgraph.template.yaml > subgraph.sepolia.yaml",
     "codegen:sepolia": "pnpm run generate:sepolia && graph codegen subgraph.sepolia.yaml",
     "build:sepolia": "pnpm run codegen:sepolia && graph build subgraph.sepolia.yaml",
-    "deploy:sepolia": "pnpm run build:sepolia && goldsky subgraph deploy for-sepolia/0.0.1 --path ./build",
+    "deploy:sepolia": "pnpm run build:sepolia && goldsky subgraph deploy for-sepolia/0.0.0 --path ./build",
     "generate:base": "mustache ./config/base.json subgraph.template.yaml > subgraph.base.yaml",
     "codegen:base": "pnpm run generate:base && graph codegen subgraph.base.yaml",
     "build:base": "pnpm run codegen:base && graph build subgraph.base.yaml",
