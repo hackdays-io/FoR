@@ -68,29 +68,87 @@ FoR/
 - **Graph Protocol (AssemblyScript)**: イベントマッピング
 - **GraphQL**: インデックス済みデータ取得
 
-## 🚀 セットアップ
+## 🚀 ローカルセットアップ
 
-### 環境要件
+### 必要な環境
 
-- Node.js >= 18.18.0
-- pnpm 9.12.0
+- Node.js `>= 18.18.0`
+- pnpm `9.12.0`
+- Docker Desktop
+- `VITE_PRIVY_APP_ID`（運営から共有される値）
 
-### インストール
+### 1. リポジトリクローン & 依存関係インストール
 
 ```bash
-# 依存関係のインストール
+git clone https://github.com/hackdays-io/FoR.git
+cd FoR
 pnpm install
-
-# コントラクトのビルド
-pnpm --filter contract build
-
-# フロントエンドの開発サーバー起動
-pnpm --filter frontend dev
 ```
+
+### 2. Hardhat ローカルノード起動
+
+別ターミナルで起動し、そのまま維持してください。
+
+```bash
+pnpm dev:node
+```
+
+### 3. コントラクトデプロイ & セットアップ
+
+別ターミナルで実行します。`setup:local` の出力に表示される Router address を確認してください。
+
+```bash
+cd packages/contract
+pnpm deploy:local
+pnpm setup:local
+```
+
+### 4. Graph Node 起動
+
+Docker Desktop が起動していることを確認してから実行します。
+
+```bash
+pnpm dev:graph
+```
+
+### 5. Indexer デプロイ
+
+`graph-node` が起動してから、別ターミナルで実行します。
+
+```bash
+cd packages/indexer
+pnpm create:localhost
+pnpm deploy:localhost
+```
+
+### 6. フロントエンド起動
+
+```bash
+cp packages/frontend/.env.example packages/frontend/.env
+```
+
+`.env` を開いて以下を設定してください。
+
+- `VITE_CHAIN_ID=31337`
+- `VITE_PRIVY_APP_ID=<運営から共有された値>`
+
+その後、別ターミナルでフロントエンドを起動します。
+
+```bash
+cd packages/frontend
+pnpm dev
+```
+
+### 7. 動作確認
+
+- `http://localhost:5173` にアクセスし、Privy ログインが表示されること
+- `http://localhost:8000/subgraphs/name/for/localhost` にアクセスし、GraphQL Playground が表示されること
+
+リセット手順や補足を含む詳細ガイドは [`CONTRIBUTING.md`](./CONTRIBUTING.md) を参照してください。
 
 ### パッケージ別コマンド
 
-#### コントラクト (packages/contract/)
+#### コントラクト (`packages/contract/`)
 
 ```bash
 cd packages/contract
@@ -101,11 +159,12 @@ pnpm build
 # テスト
 pnpm test
 
-# デプロイ
-pnpm deploy
+# ローカルデプロイ
+pnpm deploy:local
+pnpm setup:local
 ```
 
-#### フロントエンド (packages/frontend/)
+#### フロントエンド (`packages/frontend/`)
 
 ```bash
 cd packages/frontend
@@ -116,28 +175,24 @@ pnpm dev
 # プロダクションビルド
 pnpm build
 
-# 型チェック
-pnpm typecheck
+# React Router の型生成
+pnpm typegen
 ```
 
-#### インデクサー (packages/indexer/)
+#### インデクサー (`packages/indexer/`)
 
 ```bash
 cd packages/indexer
 
-# codegen
-pnpm codegen
+# localhost 向けサブグラフ作成
+pnpm create:localhost
 
-# サブグラフのビルド
-pnpm build
+# localhost 向けサブグラフデプロイ
+pnpm deploy:localhost
 
-# Sepoliaへのデプロイ
+# Sepolia へのデプロイ
 pnpm deploy:sepolia
 ```
-
-### Indexer Endpoint
-
-- Sepolia GraphQL endpoint: `<set-after-deploy>`
 
 ## 📚 ドキュメント
 

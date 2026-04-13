@@ -166,8 +166,11 @@ console.log(`  Router address: ${routerAddress}`);
 console.log("\n=== Setup Complete ===");
 console.log(`
 Next steps:
-  1. Start Graph Node:  pnpm dev:graph
-  2. Create subgraph:   cd packages/indexer && pnpm create:localhost
-  3. Deploy subgraph:   cd packages/indexer && pnpm deploy:localhost
-  4. Start frontend:    cd packages/frontend && pnpm dev
+  1. Confirm Router address above for local setup and indexer config.
+  2. Start Graph Node:   pnpm dev:graph
+  3. Create subgraph:    cd packages/indexer && pnpm create:localhost
+  4. Deploy subgraph:    cd packages/indexer && pnpm deploy:localhost
+  5. Create frontend env: cp packages/frontend/.env.example packages/frontend/.env
+  6. Update frontend env: set VITE_CHAIN_ID=31337 and VITE_PRIVY_APP_ID=<shared value>
+  7. Start frontend:     cd packages/frontend && pnpm dev
 `);
