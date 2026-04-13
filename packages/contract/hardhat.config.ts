@@ -42,4 +42,9 @@ export default defineConfig({
       },
     },
   },
+  verify: {
+    etherscan: {
+      apiKey: configVariable("ETHERSCAN_API_KEY"),
+    },
+  },
 });

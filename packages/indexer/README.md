@@ -55,10 +55,10 @@ pnpm --filter @for/indexer deploy:base
 
 補足:
 - `deploy:*` は内部で `build:*` を実行します。
-- `for-<chain>/0.0.0` が既に存在すると `already exists` エラーになります。
-- その場合はデプロイ名/バージョンを変更するか、既存運用ルールに従って更新してください。
+- `for-<chain>/<version>` が既に存在すると `already exists` エラーになります。
+- 再デプロイする場合は `package.json` のデプロイスクリプトと、参照側（`packages/frontend/app/lib/subgraph.ts` や `.env.example`、本README の公開エンドポイント）のバージョンを揃えて上げてください。
 
 ## 公開エンドポイント
 
-- Sepolia: `https://api.goldsky.com/api/public/project_cm5nv64onnxxz01wf8smdgk1e/subgraphs/for-sepolia/0.0.0/gn`
+- Sepolia: `https://api.goldsky.com/api/public/project_cm5nv64onnxxz01wf8smdgk1e/subgraphs/for-sepolia/0.0.1/gn`
 - Base: `<set-after-deploy>`
