@@ -2,6 +2,7 @@ import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { Gift, QrCode, Scan, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useFetcher } from "react-router";
+import { formatUnits } from "viem";
 import { AppBar, AppBarItem, AppBarTitle } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
 import {
@@ -14,6 +15,8 @@ import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
+import { useForTokenBalance } from "~/hooks/useForToken";
+import { useTransfers } from "~/hooks/useTransfers";
 import type { NameStoneProfile } from "~/lib/namestone.server";
 import type { Route } from "./+types/home";
 
@@ -75,12 +78,19 @@ function LoginScreen() {
 
 const ICON_SIZE = 20;
 
-// Dummy data for transactions
-const dummyTransactions = [
-  { name: "りょうま", message: "草刈りありがとう！", date: "10/29 (水)", amount: 50, address: "0x1234567890abcdef1234567890abcdef12345678" },
-  { name: "りょうま", message: "草刈りありがとう！", date: "10/29 (水)", amount: 50, address: "0x1234567890abcdef1234567890abcdef12345678" },
-  { name: "りょうま", message: "草刈りありがとう！", date: "10/29 (水)", amount: 50, address: "0x1234567890abcdef1234567890abcdef12345678" },
-];
+const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
+
+function formatTimestamp(timestamp: string): string {
+  const date = new Date(Number(timestamp) * 1000);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const dayName = DAY_NAMES[date.getDay()];
+  return `${month}/${String(day).padStart(2, "0")} (${dayName})`;
+}
+
+function shortenAddress(address: string): string {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
 
 // Dummy data for osusowake
 const dummyOsusowake = [
@@ -92,6 +102,8 @@ const dummyOsusowake = [
 function AuthenticatedHome() {
   const navigate = useNavigate();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
+  const { data: balance, isLoading: isBalanceLoading } = useForTokenBalance(address);
+  const { data: transfers, isLoading: isTransfersLoading } = useTransfers(3);
   const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
   const [checked, setChecked] = useState(false);
 
@@ -152,7 +164,7 @@ function AuthenticatedHome() {
         {/* Wallet Card */}
         <Card
           variant="wallet"
-          amount={34393}
+          amount={isBalanceLoading ? "--" : balance ? Number(balance.formatted) : 0}
           topProps={{
             badgeImage: "",
           }}
@@ -167,18 +179,23 @@ function AuthenticatedHome() {
             履歴
           </SectionTitle>
           <div className="mt-8">
-            {dummyTransactions.map((tx, i) => (
-              <ListRow
-                key={i}
-                name={tx.name}
-                message={tx.message}
-                date={tx.date}
-                amount={tx.amount}
-                divider={i < dummyTransactions.length - 1}
-                onClick={() => navigate(`/transactions/${tx.address}`)}
-                className="cursor-pointer"
-              />
-            ))}
+            {isTransfersLoading ? (
+              <p className="py-12 text-center text-ui-13 text-text-hint">読み込み中...</p>
+            ) : !transfers || transfers.length === 0 ? (
+              <p className="py-12 text-center text-ui-13 text-text-hint">取引履歴がありません</p>
+            ) : (
+              transfers.map((tx, i) => (
+                <ListRow
+                  key={tx.id}
+                  name={shortenAddress(tx.from.id)}
+                  date={formatTimestamp(tx.timestamp)}
+                  amount={Number(formatUnits(BigInt(tx.totalAmount), 18))}
+                  divider={i < transfers.length - 1}
+                  onClick={() => navigate(`/transactions/${tx.transactionHash}`)}
+                  className="cursor-pointer"
+                />
+              ))
+            )}
           </div>
         </div>
 
