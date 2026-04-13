@@ -1,9 +1,21 @@
 // biome-ignore lint/style/useImportType: graph-ts mappings are compiled by AssemblyScript and require this import form.
+import { ethereum } from "@graphprotocol/graph-ts";
+// biome-ignore lint/style/useImportType: graph-ts mappings are compiled by AssemblyScript and require this import form.
+import {
+  AllowListAdded as AllowListAddedEvent,
+  AllowListRemoved as AllowListRemovedEvent,
+} from "../generated/FoRToken/FoRToken";
+// biome-ignore lint/style/useImportType: graph-ts mappings are compiled by AssemblyScript and require this import form.
 import {
   DistributionRatioUpdated as DistributionRatioUpdatedEvent,
   TransferWithDistribution as TransferWithDistributionEvent,
 } from "../generated/Router/Router";
-import { DistributionRatio, Transfer, User } from "../generated/schema";
+import {
+  AllowedUser,
+  DistributionRatio,
+  Transfer,
+  User,
+} from "../generated/schema";
 
 function upsertUser(address: string): void {
   let user = User.load(address);
@@ -11,6 +23,24 @@ function upsertUser(address: string): void {
     user = new User(address);
     user.save();
   }
+}
+
+function upsertAllowedUser(
+  account: string,
+  isAllowed: boolean,
+  event: ethereum.Event,
+): void {
+  let allowed = AllowedUser.load(account);
+  if (allowed == null) {
+    allowed = new AllowedUser(account);
+    allowed.addedAtBlock = event.block.number;
+    allowed.addedAtTimestamp = event.block.timestamp;
+  }
+  allowed.isAllowed = isAllowed;
+  allowed.updatedAtBlock = event.block.number;
+  allowed.updatedAtTimestamp = event.block.timestamp;
+  allowed.updatedAtTransactionHash = event.transaction.hash;
+  allowed.save();
 }
 
 export function handleTransferWithDistribution(
@@ -61,4 +91,16 @@ export function handleDistributionRatioUpdated(
   ratio.logIndex = event.logIndex;
 
   ratio.save();
+}
+
+export function handleAllowListAdded(event: AllowListAddedEvent): void {
+  const account = event.params.account.toHexString();
+  upsertUser(account);
+  upsertAllowedUser(account, true, event);
+}
+
+export function handleAllowListRemoved(event: AllowListRemovedEvent): void {
+  const account = event.params.account.toHexString();
+  upsertUser(account);
+  upsertAllowedUser(account, false, event);
 }

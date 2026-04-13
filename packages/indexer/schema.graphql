@@ -32,3 +32,13 @@ type User @entity(immutable: false) {
   executedTransfers: [Transfer!]! @derivedFrom(field: "sender")
   ratioChanges: [DistributionRatio!]! @derivedFrom(field: "changedBy")
 }
+
+type AllowedUser @entity(immutable: false) {
+  id: ID!
+  isAllowed: Boolean!
+  addedAtBlock: BigInt!
+  addedAtTimestamp: BigInt!
+  updatedAtBlock: BigInt!
+  updatedAtTimestamp: BigInt!
+  updatedAtTransactionHash: Bytes!
+}

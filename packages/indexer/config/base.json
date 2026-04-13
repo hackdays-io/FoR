@@ -1,5 +1,7 @@
 {
   "network": "base",
-  "address": "0x0000000000000000000000000000000000000000",
-  "startBlock": 0
+  "routerAddress": "0x0000000000000000000000000000000000000000",
+  "routerStartBlock": 0,
+  "forTokenAddress": "0x0000000000000000000000000000000000000000",
+  "forTokenStartBlock": 0
 }

@@ -7,9 +7,9 @@ dataSources:
     name: Router
     network: {{network}}
     source:
-      address: "{{address}}"
+      address: "{{routerAddress}}"
       abi: Router
-      startBlock: {{startBlock}}
+      startBlock: {{routerStartBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -26,4 +26,28 @@ dataSources:
           handler: handleTransferWithDistribution
         - event: DistributionRatioUpdated(indexed address,uint256,uint256,uint256)
           handler: handleDistributionRatioUpdated
+      file: ./src/mapping.ts
+
+  - kind: ethereum/contract
+    name: FoRToken
+    network: {{network}}
+    source:
+      address: "{{forTokenAddress}}"
+      abi: FoRToken
+      startBlock: {{forTokenStartBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - AllowedUser
+        - User
+      abis:
+        - name: FoRToken
+          file: ../contract/artifacts/contracts/FoRToken.sol/FoRToken.json
+      eventHandlers:
+        - event: AllowListAdded(indexed address)
+          handler: handleAllowListAdded
+        - event: AllowListRemoved(indexed address)
+          handler: handleAllowListRemoved
       file: ./src/mapping.ts
