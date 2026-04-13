@@ -23,6 +23,17 @@ enum TransferViaRouter_orderBy {
   logIndex
 }
 
+enum Transfer_orderBy {
+  id
+  from
+  to
+  value
+  blockNumber
+  timestamp
+  transactionHash
+  logIndex
+}
+
 enum DistributionRatio_orderBy {
   id
   changedBy
@@ -54,6 +65,17 @@ type TransferViaRouter {
   logIndex: BigInt!
 }
 
+type Transfer {
+  id: ID!
+  from: User!
+  to: User!
+  value: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+  logIndex: BigInt!
+}
+
 type DistributionRatio {
   id: ID!
   changedBy: User!
@@ -71,12 +93,16 @@ type User {
   sentTransfersViaRouter(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection): [TransferViaRouter!]!
   receivedTransfersViaRouter(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection): [TransferViaRouter!]!
   executedTransfersViaRouter(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection): [TransferViaRouter!]!
+  sentTransfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection): [Transfer!]!
+  receivedTransfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection): [Transfer!]!
   ratioChanges(first: Int, skip: Int, orderBy: DistributionRatio_orderBy, orderDirection: OrderDirection): [DistributionRatio!]!
 }
 
 type Query {
   transferViaRouter(id: ID!): TransferViaRouter
   transferViaRouters(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection, where: TransferViaRouter_filter): [TransferViaRouter!]!
+  transfer(id: ID!): Transfer
+  transfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection, where: Transfer_filter): [Transfer!]!
   user(id: ID!): User
   users(first: Int, skip: Int, orderBy: User_orderBy, orderDirection: OrderDirection): [User!]!
   distributionRatio(id: ID!): DistributionRatio
@@ -87,4 +113,9 @@ input TransferViaRouter_filter {
   from: String
   to: String
   sender: String
+}
+
+input Transfer_filter {
+  from: String
+  to: String
 }

@@ -41,6 +41,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - AllowedUser
+        - Transfer
         - User
       abis:
         - name: FoRToken
@@ -50,4 +51,6 @@ dataSources:
           handler: handleAllowListAdded
         - event: AllowListRemoved(indexed address)
           handler: handleAllowListRemoved
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
       file: ./src/mapping.ts

@@ -13,6 +13,17 @@ type TransferViaRouter @entity(immutable: true) {
   logIndex: BigInt!
 }
 
+type Transfer @entity(immutable: true) {
+  id: ID!
+  from: User!
+  to: User!
+  value: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+  logIndex: BigInt!
+}
+
 type DistributionRatio @entity(immutable: true) {
   id: ID!
   changedBy: User!
@@ -30,6 +41,8 @@ type User @entity(immutable: false) {
   sentTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "from")
   receivedTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "to")
   executedTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "sender")
+  sentTransfers: [Transfer!]! @derivedFrom(field: "from")
+  receivedTransfers: [Transfer!]! @derivedFrom(field: "to")
   ratioChanges: [DistributionRatio!]! @derivedFrom(field: "changedBy")
 }
 

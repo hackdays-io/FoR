@@ -4,6 +4,7 @@ import { ethereum } from "@graphprotocol/graph-ts";
 import {
   AllowListAdded as AllowListAddedEvent,
   AllowListRemoved as AllowListRemovedEvent,
+  Transfer as TransferEvent,
 } from "../generated/FoRToken/FoRToken";
 // biome-ignore lint/style/useImportType: graph-ts mappings are compiled by AssemblyScript and require this import form.
 import {
@@ -13,6 +14,7 @@ import {
 import {
   AllowedUser,
   DistributionRatio,
+  Transfer,
   TransferViaRouter,
   User,
 } from "../generated/schema";
@@ -91,6 +93,27 @@ export function handleDistributionRatioUpdated(
   ratio.logIndex = event.logIndex;
 
   ratio.save();
+}
+
+export function handleTransfer(event: TransferEvent): void {
+  const from = event.params.from.toHexString();
+  const to = event.params.to.toHexString();
+
+  upsertUser(from);
+  upsertUser(to);
+
+  const id = `${event.transaction.hash.toHexString()}-${event.logIndex.toString()}`;
+  const transfer = new Transfer(id);
+
+  transfer.from = from;
+  transfer.to = to;
+  transfer.value = event.params.value;
+  transfer.blockNumber = event.block.number;
+  transfer.timestamp = event.block.timestamp;
+  transfer.transactionHash = event.transaction.hash;
+  transfer.logIndex = event.logIndex;
+
+  transfer.save();
 }
 
 export function handleAllowListAdded(event: AllowListAddedEvent): void {
