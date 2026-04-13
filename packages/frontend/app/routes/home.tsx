@@ -14,6 +14,7 @@ import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
+import { useForTokenBalance } from "~/hooks/useForToken";
 import type { NameStoneProfile } from "~/lib/namestone.server";
 import type { Route } from "./+types/home";
 
@@ -92,6 +93,7 @@ const dummyOsusowake = [
 function AuthenticatedHome() {
   const navigate = useNavigate();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
+  const { data: balance, isLoading: isBalanceLoading } = useForTokenBalance(address);
   const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
   const [checked, setChecked] = useState(false);
 
@@ -152,7 +154,7 @@ function AuthenticatedHome() {
         {/* Wallet Card */}
         <Card
           variant="wallet"
-          amount={34393}
+          amount={isBalanceLoading ? "--" : balance ? Number(balance.formatted) : 0}
           topProps={{
             badgeImage: "",
           }}
