@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { Link, useFetcher } from "react-router";
+import { usePrivy } from "@privy-io/react-auth";
+import { Link, useFetcher, useNavigate } from "react-router";
 import {
   AppBar,
   AppBarItem,
@@ -22,7 +23,14 @@ function shortenAddress(address: string): string {
 
 export default function Mypage() {
   const { address, isLoading: isWalletLoading } = useActiveWallet();
+  const { logout } = usePrivy();
+  const navigate = useNavigate();
   const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   useEffect(() => {
     if (address && fetcher.state === "idle" && !fetcher.data) {
@@ -117,6 +125,10 @@ export default function Mypage() {
             <Button className="w-full">プロフィールを作成</Button>
           </Link>
         )}
+
+        <Button variant="secondary" className="w-full" onClick={handleLogout}>
+          ログアウト
+        </Button>
       </div>
     </div>
   );

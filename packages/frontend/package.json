@@ -5,6 +5,7 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
+    "dev:sepolia": "react-router dev --mode sepolia",
     "start": "react-router-serve ./build/server/index.js",
     "typegen": "react-router typegen",
     "check": "biome check",
