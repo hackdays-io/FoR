@@ -90,6 +90,9 @@ type DistributionRatio {
 
 type User {
   id: ID!
+  totalTaxPaid: BigInt!
+  totalFundTaxPaid: BigInt!
+  totalBurnTaxPaid: BigInt!
   sentTransfersViaRouter(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection): [TransferViaRouter!]!
   receivedTransfersViaRouter(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection): [TransferViaRouter!]!
   executedTransfersViaRouter(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection): [TransferViaRouter!]!

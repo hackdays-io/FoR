@@ -1,5 +1,5 @@
 // biome-ignore lint/style/useImportType: graph-ts mappings are compiled by AssemblyScript and require this import form.
-import { ethereum } from "@graphprotocol/graph-ts";
+import { BigInt, ethereum } from "@graphprotocol/graph-ts";
 // biome-ignore lint/style/useImportType: graph-ts mappings are compiled by AssemblyScript and require this import form.
 import {
   AllowListAdded as AllowListAddedEvent,
@@ -19,12 +19,16 @@ import {
   User,
 } from "../generated/schema";
 
-function upsertUser(address: string): void {
+function upsertUser(address: string): User {
   let user = User.load(address);
   if (user == null) {
     user = new User(address);
+    user.totalTaxPaid = BigInt.zero();
+    user.totalFundTaxPaid = BigInt.zero();
+    user.totalBurnTaxPaid = BigInt.zero();
     user.save();
   }
+  return user;
 }
 
 function upsertAllowedUser(
@@ -53,8 +57,19 @@ export function handleTransferWithDistribution(
   const to = event.params.recipient.toHexString();
 
   upsertUser(sender);
-  upsertUser(from);
+  const fromUser = upsertUser(from);
   upsertUser(to);
+
+  fromUser.totalFundTaxPaid = fromUser.totalFundTaxPaid.plus(
+    event.params.fundAmount,
+  );
+  fromUser.totalBurnTaxPaid = fromUser.totalBurnTaxPaid.plus(
+    event.params.burnAmount,
+  );
+  fromUser.totalTaxPaid = fromUser.totalFundTaxPaid.plus(
+    fromUser.totalBurnTaxPaid,
+  );
+  fromUser.save();
 
   const id = `${event.transaction.hash.toHexString()}-${event.logIndex.toString()}`;
   const transfer = new TransferViaRouter(id);

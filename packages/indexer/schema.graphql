@@ -38,6 +38,9 @@ type DistributionRatio @entity(immutable: true) {
 
 type User @entity(immutable: false) {
   id: ID!
+  totalTaxPaid: BigInt!
+  totalFundTaxPaid: BigInt!
+  totalBurnTaxPaid: BigInt!
   sentTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "from")
   receivedTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "to")
   executedTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "sender")
