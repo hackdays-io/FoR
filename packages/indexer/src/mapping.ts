@@ -13,7 +13,7 @@ import {
 import {
   AllowedUser,
   DistributionRatio,
-  Transfer,
+  TransferViaRouter,
   User,
 } from "../generated/schema";
 
@@ -55,7 +55,7 @@ export function handleTransferWithDistribution(
   upsertUser(to);
 
   const id = `${event.transaction.hash.toHexString()}-${event.logIndex.toString()}`;
-  const transfer = new Transfer(id);
+  const transfer = new TransferViaRouter(id);
 
   transfer.sender = sender;
   transfer.from = from;

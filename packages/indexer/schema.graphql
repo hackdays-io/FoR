@@ -1,4 +1,4 @@
-type Transfer @entity(immutable: true) {
+type TransferViaRouter @entity(immutable: true) {
   id: ID!
   sender: User!
   from: User!
@@ -27,9 +27,9 @@ type DistributionRatio @entity(immutable: true) {
 
 type User @entity(immutable: false) {
   id: ID!
-  sentTransfers: [Transfer!]! @derivedFrom(field: "from")
-  receivedTransfers: [Transfer!]! @derivedFrom(field: "to")
-  executedTransfers: [Transfer!]! @derivedFrom(field: "sender")
+  sentTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "from")
+  receivedTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "to")
+  executedTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "sender")
   ratioChanges: [DistributionRatio!]! @derivedFrom(field: "changedBy")
 }
 

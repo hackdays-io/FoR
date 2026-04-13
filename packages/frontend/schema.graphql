@@ -8,7 +8,7 @@ enum OrderDirection {
   desc
 }
 
-enum Transfer_orderBy {
+enum TransferViaRouter_orderBy {
   id
   sender
   from
@@ -39,7 +39,7 @@ enum User_orderBy {
   id
 }
 
-type Transfer {
+type TransferViaRouter {
   id: ID!
   sender: User!
   from: User!
@@ -68,22 +68,22 @@ type DistributionRatio {
 
 type User {
   id: ID!
-  sentTransfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection): [Transfer!]!
-  receivedTransfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection): [Transfer!]!
-  executedTransfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection): [Transfer!]!
+  sentTransfersViaRouter(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection): [TransferViaRouter!]!
+  receivedTransfersViaRouter(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection): [TransferViaRouter!]!
+  executedTransfersViaRouter(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection): [TransferViaRouter!]!
   ratioChanges(first: Int, skip: Int, orderBy: DistributionRatio_orderBy, orderDirection: OrderDirection): [DistributionRatio!]!
 }
 
 type Query {
-  transfer(id: ID!): Transfer
-  transfers(first: Int, skip: Int, orderBy: Transfer_orderBy, orderDirection: OrderDirection, where: Transfer_filter): [Transfer!]!
+  transferViaRouter(id: ID!): TransferViaRouter
+  transferViaRouters(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection, where: TransferViaRouter_filter): [TransferViaRouter!]!
   user(id: ID!): User
   users(first: Int, skip: Int, orderBy: User_orderBy, orderDirection: OrderDirection): [User!]!
   distributionRatio(id: ID!): DistributionRatio
   distributionRatios(first: Int, skip: Int, orderBy: DistributionRatio_orderBy, orderDirection: OrderDirection): [DistributionRatio!]!
 }
 
-input Transfer_filter {
+input TransferViaRouter_filter {
   from: String
   to: String
   sender: String

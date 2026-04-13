@@ -1,8 +1,8 @@
 import { graphql } from "~/gql";
 
-export const GET_TRANSFERS = graphql(`
-  query GetTransfers($first: Int!, $skip: Int!, $orderDirection: OrderDirection!) {
-    transfers(
+export const GET_TRANSFERS_VIA_ROUTER = graphql(`
+  query GetTransfersViaRouter($first: Int!, $skip: Int!, $orderDirection: OrderDirection!) {
+    transferViaRouters(
       first: $first
       skip: $skip
       orderBy: timestamp
@@ -33,7 +33,7 @@ export const GET_USER = graphql(`
   query GetUser($id: ID!, $first: Int!) {
     user(id: $id) {
       id
-      sentTransfers(first: $first, orderBy: timestamp, orderDirection: desc) {
+      sentTransfersViaRouter(first: $first, orderBy: timestamp, orderDirection: desc) {
         id
         sender { id }
         from { id }
@@ -46,7 +46,7 @@ export const GET_USER = graphql(`
         transactionHash
         blockNumber
       }
-      receivedTransfers(first: $first, orderBy: timestamp, orderDirection: desc) {
+      receivedTransfersViaRouter(first: $first, orderBy: timestamp, orderDirection: desc) {
         id
         sender { id }
         from { id }
