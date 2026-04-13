@@ -34,7 +34,12 @@ export function useTransferWithDistribution() {
   const { wallet } = useActiveWallet();
 
   const transfer = useCallback(
-    async (from: Address, recipient: Address, amount: bigint) => {
+    async (
+      from: Address,
+      recipient: Address,
+      amount: bigint,
+      message = "",
+    ) => {
       if (!wallet) throw new Error("Wallet not connected");
       if (!addresses) throw new Error("Contract addresses not configured");
 
@@ -42,7 +47,7 @@ export function useTransferWithDistribution() {
         address: addresses.router,
         abi: routerAbi,
         functionName: "transferWithDistribution",
-        args: [from, recipient, amount],
+        args: [from, recipient, amount, message],
         chain: publicClient.chain,
         account: wallet.account!,
       });
@@ -66,6 +71,7 @@ export function useTransferWithPermit() {
       v: number,
       r: `0x${string}`,
       s: `0x${string}`,
+      message = "",
     ) => {
       if (!wallet) throw new Error("Wallet not connected");
       if (!addresses) throw new Error("Contract addresses not configured");
@@ -74,7 +80,7 @@ export function useTransferWithPermit() {
         address: addresses.router,
         abi: routerAbi,
         functionName: "transferWithPermit",
-        args: [from, recipient, amount, deadline, v, r, s],
+        args: [from, recipient, amount, deadline, v, r, s, message],
         chain: publicClient.chain,
         account: wallet.account!,
       });

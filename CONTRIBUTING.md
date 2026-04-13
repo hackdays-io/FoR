@@ -42,6 +42,8 @@ FoRは [Comoris DAO](https://comoris.co/) と[Hackdays project](https://hackdays
 
 - Node.js >= 18.18.0
 - pnpm 9.12.0
+- Docker Desktop
+- VITE_PRIVY_APP_ID（運営から共有される値）
 
 ### セットアップ手順
 
@@ -52,12 +54,6 @@ cd FoR
 
 # 依存関係のインストール
 pnpm install
-
-# 全パッケージのビルド
-pnpm build
-
-# 開発サーバーの起動
-pnpm dev
 ```
 
 詳細な開発手順は [CLAUDE.md](./CLAUDE.md) をご確認ください。
@@ -66,9 +62,11 @@ pnpm dev
 
 コントラクト → Graph Node → インデクサー → フロントエンドを一気通貫で動かす手順です。
 
-**���提**: Docker が起動していること
+**前提**: Docker Desktop が起動していること
 
 #### 1. Hardhat ローカルノード起動
+
+ターミナル 1 で起動し、そのまま維持してください。
 
 ```bash
 pnpm dev:node
@@ -76,32 +74,67 @@ pnpm dev:node
 
 #### 2. コントラクトデプロイ & セットアップ
 
+ターミナル 2 で実行します。`setup:local` 実行後に表示される Router address を確認してください。
+
 ```bash
 cd packages/contract
-pnpm deploy:local        # FoRToken, RouterFactory, Router を順にデプロイ
-pnpm setup:local         # AllowList 設定 & Indexer の config 更新
+pnpm deploy:local
+pnpm setup:local
 ```
 
 #### 3. Graph Node 起動 & サブグラフデプロイ
 
-```bash
-pnpm dev:graph           # graph-node + PostgreSQL + IPFS をバックグラウンド起動
+ターミナル 3 で Graph Node を起動し、起動後にターミナル 4 で Indexer をデプロイします。
 
-cd packages/indexer
-pnpm create:localhost    # サブグラフ作成
-pnpm deploy:localhost    # サブグラフデプロイ
+```bash
+pnpm dev:graph
 ```
 
-GraphQL Playground: http://localhost:8000/subgraphs/name/for/localhost
+```bash
+# graph-node が起動してから実行
+cd packages/indexer
+pnpm create:localhost
+pnpm deploy:localhost
+```
+
+GraphQL Playground:
+
+- http://localhost:8000/subgraphs/name/for/localhost
 
 #### 4. フロントエンド起動
 
+まず `.env.example` をコピーして `.env` を作成し、ローカル向けの値を設定します。
+
 ```bash
-# packages/frontend/.env に VITE_CHAIN_ID=31337 を設定
-pnpm dev:frontend
+cp packages/frontend/.env.example packages/frontend/.env
 ```
 
-#### MetaMask にローカルネットワークを追加
+`.env` の設定内容:
+
+- `VITE_CHAIN_ID=31337`
+- `VITE_PRIVY_APP_ID=<運営から共有された値>`
+
+設定後、`packages/frontend` で起動します。
+
+```bash
+cd packages/frontend
+pnpm dev
+```
+
+#### 5. 動作確認
+
+- [ ] Hardhat ノードが起動している
+- [ ] コントラクトがデプロイ済み
+- [ ] Docker で `graph-node` / `IPFS` / `PostgreSQL` が起動している
+- [ ] Indexer がデプロイ済み
+- [ ] フロントエンドが起動し、Privy ログイン画面が表示される
+
+確認 URL:
+
+- http://localhost:5173
+- http://localhost:8000/subgraphs/name/for/localhost
+
+#### 6. MetaMask にローカルネットワークを追加
 
 | 項目 | 値 |
 |---|---|
@@ -120,13 +153,11 @@ pnpm dev:frontend
 
 #### リセット
 
-Hardhat ノードを再起動した場合は、Graph Node のデータもクリーンアップが必要です。
+Hardhat ノードを再起動した場合は、Graph Node のデータもクリーンアップが必要です。再起動後は `pnpm dev:graph:clean` を実行してから、手順 1 からやり直してください。
 
 ```bash
-pnpm dev:graph:clean     # docker compose down -v & データ削除
+pnpm dev:graph:clean
 ```
-
-その後、手順 1 からやり直してください。
 
 ## Issue と Pull Request について
 

@@ -1,6 +1,7 @@
 .DS_Store
 .env
 .env*.local
+.env.sepolia
 /node_modules/
 
 # GraphQL Codegen

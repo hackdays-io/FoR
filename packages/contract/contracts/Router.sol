@@ -49,6 +49,7 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
      * @param fundAmount 基金ウォレットへ送金された額
      * @param burnAmount Burnアドレスへ送金された額
      * @param recipientAmount 受取人が受け取った額
+     * @param message 送金時に添付されたメッセージ
      */
     event TransferWithDistribution(
         address indexed sender,
@@ -57,7 +58,8 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
         uint256 totalAmount,
         uint256 fundAmount,
         uint256 burnAmount,
-        uint256 recipientAmount
+        uint256 recipientAmount,
+        string message
     );
 
     /**
@@ -227,6 +229,7 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
      * @param v 署名コンポーネント v
      * @param r 署名コンポーネント r
      * @param s 署名コンポーネント s
+     * @param message 送金時に添付するメッセージ
      */
     function transferWithPermit(
         address from,
@@ -235,7 +238,8 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
         uint256 deadline,
         uint8 v,
         bytes32 r,
-        bytes32 s
+        bytes32 s,
+        string calldata message
     ) external whenNotPaused nonReentrant {
         // 入力値の検証
         if (amount == 0) revert InvalidAmount();
@@ -267,7 +271,8 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
             amount,
             fundAmount,
             burnAmount,
-            recipientAmount
+            recipientAmount,
+            message
         );
     }
 
@@ -277,11 +282,13 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
      * @param from トークン所有者アドレス（approve済みであること）
      * @param recipient 分配後の残りトークンを受け取るアドレス
      * @param amount 送金総額（分配前）
+     * @param message 送金時に添付するメッセージ
      */
     function transferWithDistribution(
         address from,
         address recipient,
-        uint256 amount
+        uint256 amount,
+        string calldata message
     ) external whenNotPaused nonReentrant {
         // 入力値の検証
         if (amount == 0) revert InvalidAmount();
@@ -302,7 +309,8 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
             amount,
             fundAmount,
             burnAmount,
-            recipientAmount
+            recipientAmount,
+            message
         );
     }
 }

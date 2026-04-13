@@ -18,6 +18,7 @@ describe("Router.transferWithPermit", async () => {
   const fundRatio = 2000n; // 20%
   const burnRatio = 1000n; // 10%
   const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD" as Address;
+  const DEFAULT_MESSAGE = "thanks";
 
   // Helper function to create permit signature
   async function createPermitSignature(
@@ -141,6 +142,7 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       await publicClient.waitForTransactionReceipt({ hash });
@@ -208,6 +210,7 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       // All should go to recipient
@@ -257,6 +260,7 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       // Verify distribution
@@ -315,6 +319,7 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       // Verify sum equals total
@@ -369,6 +374,7 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       // Verify no over-distribution due to rounding
@@ -430,6 +436,7 @@ describe("Router.transferWithPermit", async () => {
             v,
             r,
             s,
+            DEFAULT_MESSAGE,
           ]);
         },
         (error: Error) => {
@@ -480,6 +487,7 @@ describe("Router.transferWithPermit", async () => {
             invalidV,
             invalidR,
             invalidS,
+            DEFAULT_MESSAGE,
           ]);
         },
         (error: Error) => {
@@ -529,6 +537,7 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       // Second transfer with same signature should fail
@@ -542,6 +551,7 @@ describe("Router.transferWithPermit", async () => {
             v,
             r,
             s,
+            DEFAULT_MESSAGE,
           ]);
         },
         (error: Error) => {
@@ -590,6 +600,7 @@ describe("Router.transferWithPermit", async () => {
             v,
             r,
             s,
+            DEFAULT_MESSAGE,
           ]);
         },
         (error: Error) => {
@@ -640,6 +651,7 @@ describe("Router.transferWithPermit", async () => {
             v,
             r,
             s,
+            DEFAULT_MESSAGE,
           ]);
         },
         (error: Error) => {
@@ -686,6 +698,7 @@ describe("Router.transferWithPermit", async () => {
             v,
             r,
             s,
+            DEFAULT_MESSAGE,
           ]);
         },
         (error: Error) => {
@@ -742,6 +755,7 @@ describe("Router.transferWithPermit", async () => {
             v,
             r,
             s,
+            DEFAULT_MESSAGE,
           ]);
         },
         (error: Error) => {
@@ -754,6 +768,69 @@ describe("Router.transferWithPermit", async () => {
 
   // E. Event Emission Tests
   describe("Event Emission", () => {
+    it("Should transfer with empty message", async () => {
+      const forToken = await viem.deployContract("FoRToken", [
+        INITIAL_SUPPLY,
+        NAME,
+        SYMBOL,
+      ]);
+      const router = await viem.deployContract("Router", [
+        deployer.account.address,
+        forToken.address,
+        fundWallet.account.address,
+        fundRatio,
+        burnRatio,
+      ]);
+
+      await allowListBase(forToken, [account2.account.address]);
+
+      await forToken.write.transfer([
+        account1.account.address,
+        parseEther("1000"),
+      ]);
+
+      const amount = parseEther("100");
+      const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+      const { v, r, s } = await createPermitSignature(
+        account1,
+        forToken,
+        router.address,
+        amount,
+        deadline,
+      );
+
+      const hash = await router.write.transferWithPermit([
+        account1.account.address,
+        account2.account.address,
+        amount,
+        deadline,
+        v,
+        r,
+        s,
+        "",
+      ]);
+
+      await publicClient.waitForTransactionReceipt({ hash });
+
+      const expectedFundAmount = (amount * fundRatio) / 10000n;
+      const expectedBurnAmount = (amount * burnRatio) / 10000n;
+      const expectedRecipientAmount =
+        amount - expectedFundAmount - expectedBurnAmount;
+
+      assert.equal(
+        await forToken.read.balanceOf([fundWallet.account.address]),
+        expectedFundAmount,
+      );
+      assert.equal(
+        await forToken.read.balanceOf([BURN_ADDRESS]),
+        expectedBurnAmount,
+      );
+      assert.equal(
+        await forToken.read.balanceOf([account2.account.address]),
+        expectedRecipientAmount,
+      );
+    });
+
     it("Should emit TransferWithDistribution event with correct parameters", async () => {
       const forToken = await viem.deployContract("FoRToken", [
         INITIAL_SUPPLY,
@@ -793,11 +870,11 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-      // Find the TransferWithDistribution event
       const transferEvent = receipt.logs.find(
         (log) => log.address.toLowerCase() === router.address.toLowerCase(),
       );
@@ -806,6 +883,39 @@ describe("Router.transferWithPermit", async () => {
         transferEvent,
         "TransferWithDistribution event should be emitted",
       );
+
+      const decoded = decodeEventLog({
+        abi: router.abi,
+        data: transferEvent.data,
+        topics: transferEvent.topics,
+        eventName: "TransferWithDistribution",
+      });
+
+      const expectedFundAmount = (amount * fundRatio) / 10000n;
+      const expectedBurnAmount = (amount * burnRatio) / 10000n;
+      const expectedRecipientAmount =
+        amount - expectedFundAmount - expectedBurnAmount;
+
+      assert.equal(
+        getAddress(decoded.args.sender),
+        getAddress(deployer.account.address),
+        "sender should match msg.sender",
+      );
+      assert.equal(
+        getAddress(decoded.args.from),
+        getAddress(account1.account.address),
+        "from should match permit owner",
+      );
+      assert.equal(
+        getAddress(decoded.args.recipient),
+        getAddress(account2.account.address),
+        "recipient should match target address",
+      );
+      assert.equal(decoded.args.totalAmount, amount);
+      assert.equal(decoded.args.fundAmount, expectedFundAmount);
+      assert.equal(decoded.args.burnAmount, expectedBurnAmount);
+      assert.equal(decoded.args.recipientAmount, expectedRecipientAmount);
+      assert.equal(decoded.args.message, DEFAULT_MESSAGE);
     });
 
     it("Should emit DistributionRatioUpdated on setFundRatio with correct values", async () => {
@@ -957,6 +1067,7 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       // account1 should have initial - fundAmount - burnAmount
@@ -1009,6 +1120,7 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       // Verify distribution
@@ -1075,6 +1187,7 @@ describe("Router.transferWithPermit", async () => {
         v,
         r,
         s,
+        DEFAULT_MESSAGE,
       ]);
 
       // Verify transfer succeeded
