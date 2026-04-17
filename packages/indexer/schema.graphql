@@ -1,4 +1,4 @@
-type Transfer @entity(immutable: true) {
+type TransferViaRouter @entity(immutable: true) {
   id: ID!
   sender: User!
   from: User!
@@ -7,6 +7,17 @@ type Transfer @entity(immutable: true) {
   fundAmount: BigInt!
   burnAmount: BigInt!
   recipientAmount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+  logIndex: BigInt!
+}
+
+type Transfer @entity(immutable: true) {
+  id: ID!
+  from: User!
+  to: User!
+  value: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: Bytes!
@@ -27,8 +38,23 @@ type DistributionRatio @entity(immutable: true) {
 
 type User @entity(immutable: false) {
   id: ID!
+  totalTaxPaid: BigInt!
+  totalFundTaxPaid: BigInt!
+  totalBurnTaxPaid: BigInt!
+  sentTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "from")
+  receivedTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "to")
+  executedTransfersViaRouter: [TransferViaRouter!]! @derivedFrom(field: "sender")
   sentTransfers: [Transfer!]! @derivedFrom(field: "from")
   receivedTransfers: [Transfer!]! @derivedFrom(field: "to")
-  executedTransfers: [Transfer!]! @derivedFrom(field: "sender")
   ratioChanges: [DistributionRatio!]! @derivedFrom(field: "changedBy")
+}
+
+type AllowedUser @entity(immutable: false) {
+  id: ID!
+  isAllowed: Boolean!
+  addedAtBlock: BigInt!
+  addedAtTimestamp: BigInt!
+  updatedAtBlock: BigInt!
+  updatedAtTimestamp: BigInt!
+  updatedAtTransactionHash: Bytes!
 }

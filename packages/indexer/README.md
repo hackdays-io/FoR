@@ -60,5 +60,5 @@ pnpm --filter @for/indexer deploy:base
 
 ## 公開エンドポイント
 
-- Sepolia: `https://api.goldsky.com/api/public/project_cm5nv64onnxxz01wf8smdgk1e/subgraphs/for-sepolia/0.0.1/gn`
+- Sepolia: `https://api.goldsky.com/api/public/project_cm5nv64onnxxz01wf8smdgk1e/subgraphs/for-sepolia/0.0.0/gn`
 - Base: `<set-after-deploy>`
