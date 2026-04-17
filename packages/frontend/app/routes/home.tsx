@@ -18,6 +18,7 @@ import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useForTokenBalance } from "~/hooks/useForToken";
 import { useTransfers } from "~/hooks/useTransfers";
 import type { NameStoneProfile } from "~/lib/namestone.server";
+import { formatTimestamp, shortenAddress } from "~/lib/utils";
 import type { Route } from "./+types/home";
 
 export function meta(_args: Route.MetaArgs) {
@@ -77,20 +78,6 @@ function LoginScreen() {
 }
 
 const ICON_SIZE = 20;
-
-const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
-
-function formatTimestamp(timestamp: string): string {
-  const date = new Date(Number(timestamp) * 1000);
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const dayName = DAY_NAMES[date.getDay()];
-  return `${month}/${String(day).padStart(2, "0")} (${dayName})`;
-}
-
-function shortenAddress(address: string): string {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
 
 // Dummy data for osusowake
 const dummyOsusowake = [

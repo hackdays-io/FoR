@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useFetcher } from "react-router";
+import { formatUnits } from "viem";
 import {
   AppBar,
   AppBarBackButton,
@@ -11,7 +12,9 @@ import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
+import { useTransfers } from "~/hooks/useTransfers";
 import { searchNames, type NameStoneProfile } from "~/lib/namestone.server";
+import { formatTimestamp, shortenAddress } from "~/lib/utils";
 import type { Route } from "./+types/transactions";
 
 export function meta(_args: Route.MetaArgs) {
@@ -34,20 +37,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 }
 
-// Dummy transaction data
-const dummyTransactions = [
-  { name: "りょうま", message: "草刈りありがとう！", date: "10/29 (水)", amount: 50, address: "0x1234567890abcdef1234567890abcdef12345678" },
-  { name: "南部", message: "鹿肉をもらいました。", date: "10/29 (水)", amount: -50, address: "0x2234567890abcdef1234567890abcdef12345678" },
-  { name: "たかこ", message: "草刈りありがとう！", date: "10/29 (水)", amount: -50, address: "0x3234567890abcdef1234567890abcdef12345678" },
-  { name: "あさこ", message: "草刈りありがとう！", date: "10/29 (水)", amount: -50, address: "0x4234567890abcdef1234567890abcdef12345678" },
-  { name: "西原", message: "草刈りありがとう！", date: "10/29 (水)", amount: 50, address: "0x5234567890abcdef1234567890abcdef12345678" },
-  { name: "高橋", message: "草刈りありがとう！", date: "10/29 (水)", amount: 50, address: "0x6234567890abcdef1234567890abcdef12345678" },
-];
-
 export default function Transactions() {
   const navigate = useNavigate();
   const fetcher = useFetcher<typeof loader>();
   const [query, setQuery] = useState("");
+  const { data: transfers, isLoading: isTransfersLoading } = useTransfers(20);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const isSearching = query.length > 0;
@@ -126,18 +120,23 @@ export default function Transactions() {
           <div>
             <SectionTitle>履歴</SectionTitle>
             <div className="mt-8">
-              {dummyTransactions.map((tx, i) => (
-                <ListRow
-                  key={i}
-                  name={tx.name}
-                  message={tx.message}
-                  date={tx.date}
-                  amount={tx.amount}
-                  divider={i < dummyTransactions.length - 1}
-                  onClick={() => navigate(`/transactions/${tx.address}`)}
-                  className="cursor-pointer"
-                />
-              ))}
+              {isTransfersLoading ? (
+                <Typography variant="ui-13" className="py-12 text-text-hint">読み込み中...</Typography>
+              ) : !transfers || transfers.length === 0 ? (
+                <Typography variant="ui-13" className="py-12 text-text-hint">取引履歴がありません</Typography>
+              ) : (
+                transfers.map((tx, i) => (
+                  <ListRow
+                    key={tx.id}
+                    name={shortenAddress(tx.from.id)}
+                    date={formatTimestamp(tx.timestamp)}
+                    amount={Number(formatUnits(BigInt(tx.totalAmount), 18))}
+                    divider={i < transfers.length - 1}
+                    onClick={() => navigate(`/transactions/${tx.transactionHash}`)}
+                    className="cursor-pointer"
+                  />
+                ))
+              )}
             </div>
           </div>
         )}
