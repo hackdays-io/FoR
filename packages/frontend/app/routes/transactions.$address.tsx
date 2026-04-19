@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router";
+import { formatUnits } from "viem";
 import {
   AppBar,
   AppBarBackButton,
@@ -7,9 +9,15 @@ import {
 } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import { formatAmount } from "~/lib/format";
 import { Typography } from "~/components/ui/typography";
+import { useActiveWallet } from "~/hooks/useActiveWallet";
+import {
+  type TransferBetween,
+  useTransfersBetween,
+} from "~/hooks/useTransfersBetween";
+import { formatAmount } from "~/lib/format";
 import { getNamesByAddress } from "~/lib/namestone.server";
+import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/transactions.$address";
 
 export function meta(_args: Route.MetaArgs) {
@@ -30,37 +38,22 @@ export async function loader({ params }: Route.LoaderArgs) {
   return { address, profile };
 }
 
-// Dummy message data
-const dummyMessages = [
-  {
-    type: "sent" as const,
-    title: "FoRを送りました",
-    message: "鹿肉",
-    amount: 112500,
-    time: "12:20",
-    date: "10/29 (水)",
-  },
-  {
-    type: "received" as const,
-    title: "FoRを受け取りました",
-    message: "草刈りありがとう！",
-    amount: 112500,
-    time: "12:20",
-    date: "10/29 (水)",
-  },
-];
+function formatTime(timestamp: string): string {
+  const date = new Date(Number(timestamp) * 1000);
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
 
 function MessageBubble({
   type,
   title,
-  message,
   amount,
   time,
   avatarSrc,
 }: {
   type: "sent" | "received";
   title: string;
-  message: string;
   amount: number;
   time: string;
   avatarSrc?: string;
@@ -69,26 +62,25 @@ function MessageBubble({
 
   return (
     <div className={`flex items-end gap-8 ${isSent ? "flex-row-reverse" : ""}`}>
-      {!isSent && (
-        <Avatar src={avatarSrc} size="sm" alt="" />
-      )}
-      <div
-        className={`flex max-w-[75%] flex-col gap-4 rounded-lg p-12 ${
-          isSent ? "bg-background" : "bg-background"
-        }`}
-      >
-        <Typography variant="ui-13" weight="bold">{title}</Typography>
-        <Typography variant="ui-13" className="text-muted-foreground">{message}</Typography>
+      {!isSent && <Avatar src={avatarSrc} size="sm" alt="" />}
+      <div className="flex max-w-[75%] flex-col gap-4 rounded-lg bg-background p-12">
+        <Typography variant="ui-13" weight="bold">
+          {title}
+        </Typography>
         <div className="flex items-end justify-end gap-4">
-          <Typography variant="number-m">
-            {formatAmount(amount)}
-          </Typography>
+          <Typography variant="number-m">{formatAmount(amount)}</Typography>
           <Typography variant="ui-16" weight="bold">
             FoR
           </Typography>
         </div>
       </div>
-      <Typography variant="ui-10" as="span" className="shrink-0 text-muted-foreground">{time}</Typography>
+      <Typography
+        variant="ui-10"
+        as="span"
+        className="shrink-0 text-muted-foreground"
+      >
+        {time}
+      </Typography>
     </div>
   );
 }
@@ -96,24 +88,66 @@ function MessageBubble({
 function DateSeparator({ date }: { date: string }) {
   return (
     <div className="flex justify-center py-8">
-      <Typography variant="ui-12" as="span" className="rounded-full bg-primary px-16 py-4 text-primary-foreground">
+      <Typography
+        variant="ui-12"
+        as="span"
+        className="rounded-full bg-primary px-16 py-4 text-primary-foreground"
+      >
         {date}
       </Typography>
     </div>
   );
 }
 
+interface ChatMessage {
+  id: string;
+  type: "sent" | "received";
+  title: string;
+  amount: number;
+  time: string;
+  date: string;
+}
+
+function buildMessages(
+  transfers: TransferBetween[],
+  meLower: string,
+): ChatMessage[] {
+  return transfers.map((tx) => {
+    const isSent = tx.from.id.toLowerCase() === meLower;
+    const rawAmount = isSent ? tx.totalAmount : tx.recipientAmount;
+    return {
+      id: tx.id,
+      type: isSent ? "sent" : "received",
+      title: isSent ? "FoRを送りました" : "FoRを受け取りました",
+      amount: Number(formatUnits(BigInt(rawAmount), 18)),
+      time: formatTime(tx.timestamp),
+      date: formatTimestamp(tx.timestamp),
+    };
+  });
+}
+
 export default function TransactionDetail({
   loaderData,
 }: Route.ComponentProps) {
-  const { profile } = loaderData;
+  const { address: peer, profile } = loaderData;
   const navigate = useNavigate();
+  const { address: me } = useActiveWallet();
+
+  const { data: transfers, isLoading } = useTransfersBetween(me, peer);
+
+  const messages = useMemo(() => {
+    if (!transfers || !me) return [];
+    return buildMessages(transfers, me.toLowerCase());
+  }, [transfers, me]);
+
+  const dates = useMemo(
+    () => Array.from(new Set(messages.map((m) => m.date))),
+    [messages],
+  );
 
   const displayName =
     profile?.text_records?.display || profile?.name || "ユーザー";
-
-  // Group messages by date
-  const dates = [...new Set(dummyMessages.map((m) => m.date))];
+  const avatarSrc = profile?.text_records?.avatar;
 
   return (
     <div className="flex min-h-screen flex-col bg-bg-default">
@@ -126,33 +160,46 @@ export default function TransactionDetail({
         </AppBarItem>
       </AppBar>
 
-      {/* Messages */}
       <div className="flex flex-1 flex-col gap-16 px-20 py-16">
-        {dates.map((date) => (
-          <div key={date} className="flex flex-col gap-16">
-            <DateSeparator date={date} />
-            {dummyMessages
-              .filter((m) => m.date === date)
-              .map((msg, i) => (
-                <MessageBubble
-                  key={i}
-                  type={msg.type}
-                  title={msg.title}
-                  message={msg.message}
-                  amount={msg.amount}
-                  time={msg.time}
-                  avatarSrc={profile?.text_records?.avatar}
-                />
-              ))}
-          </div>
-        ))}
+        {isLoading ? (
+          <Typography
+            variant="ui-13"
+            className="py-24 text-center text-text-hint"
+          >
+            読み込み中...
+          </Typography>
+        ) : messages.length === 0 ? (
+          <Typography
+            variant="ui-13"
+            className="py-24 text-center text-text-hint"
+          >
+            やりとりがありません
+          </Typography>
+        ) : (
+          dates.map((date) => (
+            <div key={date} className="flex flex-col gap-16">
+              <DateSeparator date={date} />
+              {messages
+                .filter((m) => m.date === date)
+                .map((msg) => (
+                  <MessageBubble
+                    key={msg.id}
+                    type={msg.type}
+                    title={msg.title}
+                    amount={msg.amount}
+                    time={msg.time}
+                    avatarSrc={avatarSrc}
+                  />
+                ))}
+            </div>
+          ))
+        )}
       </div>
 
-      {/* Sticky Send Button */}
       <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
         <Button
           className="w-full"
-          onClick={() => navigate(`/send?to=${loaderData.address}`)}
+          onClick={() => navigate(`/send?to=${peer}`)}
         >
           送る
         </Button>

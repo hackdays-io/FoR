@@ -1,7 +1,7 @@
 {
   "network": "localhost",
-  "routerAddress": "0x00107E2ff2a6F2658D338F5A9dE05A86791f0268",
+  "routerAddress": "0x320fCda3FE9a5d6010e35242B550f8ef8b0748D2",
   "routerStartBlock": 0,
-  "forTokenAddress": "0x0000000000000000000000000000000000000000",
+  "forTokenAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   "forTokenStartBlock": 0
 }

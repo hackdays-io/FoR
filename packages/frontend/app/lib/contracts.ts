@@ -10,7 +10,7 @@ const ADDRESSES: Record<number, ContractAddresses> = {
   // Hardhat local (chain 31337)
   31337: {
     forToken: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-    router: "0x3855b44011B599c506B464a7d91629A11AB930aA",
+    router: "0x320fCda3FE9a5d6010e35242B550f8ef8b0748D2",
   },
   // Sepolia
   11155111: {

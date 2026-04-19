@@ -112,6 +112,17 @@ export const forTokenAbi = [
     type: "function",
   },
   {
+    inputs: [
+      { name: "account", type: "address" },
+      { name: "deadline", type: "uint256" },
+      { name: "signature", type: "bytes" },
+    ],
+    name: "addToAllowListWithSignature",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     anonymous: false,
     inputs: [
       { indexed: true, name: "owner", type: "address" },

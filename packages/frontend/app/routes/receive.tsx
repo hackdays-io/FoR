@@ -1,6 +1,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useFetcher } from "react-router";
+import { formatUnits, parseUnits } from "viem";
 import {
   AppBar,
   AppBarBackButton,
@@ -8,9 +9,11 @@ import {
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Button } from "~/components/ui/button";
-import { formatAmount } from "~/lib/format";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
+import { calculateDistribution } from "~/hooks/useDistributionTransfer";
+import { useDistributionRatios } from "~/hooks/useRouter";
+import { formatAmount } from "~/lib/format";
 import type { NameStoneProfile } from "~/lib/namestone.server";
 import type { Route } from "./+types/receive";
 
@@ -18,12 +21,20 @@ export function meta(_args: Route.MetaArgs) {
   return [{ title: "FoRを受け取る | FoR" }];
 }
 
-const FUND_RATE = 0.05;
+function toBigIntAmount(value: string): bigint {
+  if (!value) return 0n;
+  try {
+    return parseUnits(value, 18);
+  } catch {
+    return 0n;
+  }
+}
 
 export default function Receive() {
   const navigate = useNavigate();
   const { address } = useActiveWallet();
   const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
+  const { data: ratios, isLoading: isRatiosLoading } = useDistributionRatios();
 
   const [amount, setAmount] = useState("");
   const [copied, setCopied] = useState(false);
@@ -39,8 +50,25 @@ export default function Receive() {
     profile?.text_records?.display || profile?.name || "";
 
   const numAmount = Number(amount) || 0;
-  const fundAmount = Math.ceil(numAmount * FUND_RATE);
-  const totalAmount = numAmount + fundAmount;
+  const amountBigInt = useMemo(() => toBigIntAmount(amount), [amount]);
+  const breakdown = useMemo(
+    () =>
+      ratios
+        ? calculateDistribution(amountBigInt, ratios.fundRatio, ratios.burnRatio)
+        : null,
+    [amountBigInt, ratios],
+  );
+  const fundAmount = breakdown
+    ? Number(formatUnits(breakdown.fundAmount, 18))
+    : 0;
+  const totalAmount = breakdown
+    ? Number(
+        formatUnits(
+          breakdown.recipientAmount + breakdown.fundAmount + breakdown.burnAmount,
+          18,
+        ),
+      )
+    : numAmount;
 
   const receiveUrl = useMemo(() => {
     if (!address) return "";
@@ -118,7 +146,7 @@ export default function Receive() {
             </Typography>
             <div className="flex items-baseline gap-4">
               <Typography variant="number-m">
-                {formatAmount(fundAmount)}
+                {isRatiosLoading ? "--" : formatAmount(fundAmount)}
               </Typography>
               <Typography variant="ui-20" weight="bold">
                 FoR
@@ -131,7 +159,7 @@ export default function Receive() {
             <Typography variant="ui-13" weight="bold" as="span">合計</Typography>
             <div className="flex items-baseline gap-4">
               <Typography variant="number-l">
-                {formatAmount(totalAmount)}
+                {isRatiosLoading ? "--" : formatAmount(totalAmount)}
               </Typography>
               <Typography variant="ui-20" weight="bold">
                 FoR

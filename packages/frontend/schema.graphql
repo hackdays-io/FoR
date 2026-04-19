@@ -116,9 +116,13 @@ input TransferViaRouter_filter {
   from: String
   to: String
   sender: String
+  and: [TransferViaRouter_filter!]
+  or: [TransferViaRouter_filter!]
 }
 
 input Transfer_filter {
   from: String
   to: String
+  and: [Transfer_filter!]
+  or: [Transfer_filter!]
 }

@@ -63,6 +63,33 @@ export const GET_USER = graphql(`
   }
 `);
 
+export const GET_TRANSFERS_BETWEEN = graphql(`
+  query GetTransfersBetween($me: String!, $peer: String!, $first: Int!) {
+    transferViaRouters(
+      first: $first
+      orderBy: timestamp
+      orderDirection: asc
+      where: {
+        or: [
+          { from: $me, to: $peer }
+          { from: $peer, to: $me }
+        ]
+      }
+    ) {
+      id
+      from { id }
+      to { id }
+      totalAmount
+      fundAmount
+      burnAmount
+      recipientAmount
+      timestamp
+      transactionHash
+      blockNumber
+    }
+  }
+`);
+
 export const GET_CURRENT_DISTRIBUTION_RATIO = graphql(`
   query GetCurrentDistributionRatio {
     distributionRatios(first: 1, orderBy: timestamp, orderDirection: desc) {

@@ -8,6 +8,9 @@ export default [
   route("terms", "routes/terms.tsx"),
   route("privacy", "routes/privacy.tsx"),
 
+  // オンボーディング（AllowList登録）
+  route("welcome", "routes/welcome.tsx"),
+
   // プロフィール
   route("profile/create", "routes/profile.create.tsx"),
   route("profile/edit", "routes/profile.edit.tsx"),
@@ -36,6 +39,7 @@ export default [
 
   // API
   route("api/profile/:address", "routes/api.profile.$address.tsx"),
+  route("api/allowlist/sign", "routes/api.allowlist.sign.ts"),
 
   // トークン送信・受取・スキャン
   route("send", "routes/send.tsx"),

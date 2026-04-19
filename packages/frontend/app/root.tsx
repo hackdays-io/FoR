@@ -2,13 +2,13 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
-  Outlet,
   Scripts,
   ScrollRestoration,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { AuthGate } from "./components/auth-gate";
 import { AppPrivyProvider } from "./providers/AppPrivyProvider";
 import { QueryProvider } from "./providers/QueryProvider";
 
@@ -48,7 +48,7 @@ export default function App() {
     <QueryProvider>
       <AppPrivyProvider>
         <div className="mx-auto w-full max-w-md min-h-screen">
-          <Outlet />
+          <AuthGate />
         </div>
       </AppPrivyProvider>
     </QueryProvider>

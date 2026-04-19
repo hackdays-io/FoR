@@ -1,8 +1,9 @@
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { Gift, QrCode, Scan, Send } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useFetcher } from "react-router";
+import { Link, useFetcher, useNavigate } from "react-router";
 import { formatUnits } from "viem";
+import { LoadingScreen } from "~/components/loading-screen";
 import { AppBar, AppBarItem, AppBarTitle } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
 import {
@@ -14,12 +15,30 @@ import { Card } from "~/components/ui/card";
 import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useForTokenBalance } from "~/hooks/useForToken";
-import { useTransfers } from "~/hooks/useTransfers";
+import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import type { NameStoneProfile } from "~/lib/namestone.server";
 import { formatTimestamp, shortenAddress } from "~/lib/utils";
 import type { Route } from "./+types/home";
+
+const WALLET_INIT_TIMEOUT_MS = 5000;
+
+function WalletErrorScreen({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-16 bg-bg-default px-20">
+      <Typography variant="ui-13" className="text-center text-text-default">
+        ウォレットの準備に時間がかかっています。
+        <br />
+        再度ログインしてお試しください。
+      </Typography>
+      <Button onClick={onRetry} className="w-full">
+        再ログイン
+      </Button>
+    </div>
+  );
+}
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -88,27 +107,40 @@ const dummyOsusowake = [
 
 function AuthenticatedHome() {
   const navigate = useNavigate();
+  const { logout } = usePrivy();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
   const { data: balance, isLoading: isBalanceLoading } = useForTokenBalance(address);
-  const { data: transfers, isLoading: isTransfersLoading } = useTransfers(3);
+  const { data: transfers, isLoading: isTransfersLoading } = useTransfersViaRouter(3);
   const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
-  const [checked, setChecked] = useState(false);
+  const [walletTimedOut, setWalletTimedOut] = useState(false);
 
+  // プロフィール表示用（AuthGateで存在は保証済み、ここでは表示のためだけに取得）
   useEffect(() => {
-    if (address && !checked && fetcher.state === "idle") {
-      setChecked(true);
+    if (address && fetcher.state === "idle" && !fetcher.data) {
       fetcher.load(`/api/profile/${address}`);
     }
-  }, [address, checked, fetcher.state]);
+  }, [address, fetcher]);
 
   useEffect(() => {
-    if (fetcher.data && !fetcher.data.profile) {
-      navigate("/profile/create");
+    if (address) {
+      setWalletTimedOut(false);
+      return;
     }
-  }, [fetcher.data, navigate]);
+    const timer = setTimeout(() => setWalletTimedOut(true), WALLET_INIT_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [address]);
 
-  if (isWalletLoading || !address || !checked || fetcher.state === "loading" || !fetcher.data) {
-    return null;
+  const handleRelogin = async () => {
+    await logout();
+    setWalletTimedOut(false);
+  };
+
+  if (!address && walletTimedOut) {
+    return <WalletErrorScreen onRetry={handleRelogin} />;
+  }
+
+  if (isWalletLoading || !address || !fetcher.data) {
+    return <LoadingScreen />;
   }
 
   const profile = fetcher.data.profile;
@@ -178,7 +210,7 @@ function AuthenticatedHome() {
                   date={formatTimestamp(tx.timestamp)}
                   amount={Number(formatUnits(BigInt(tx.totalAmount), 18))}
                   divider={i < transfers.length - 1}
-                  onClick={() => navigate(`/transactions/${tx.transactionHash}`)}
+                  onClick={() => navigate(`/transactions/${tx.to.id}`)}
                   className="cursor-pointer"
                 />
               ))
@@ -240,7 +272,7 @@ function AuthenticatedHome() {
 export default function Home() {
   const { ready, authenticated } = usePrivy();
 
-  if (!ready) return null;
+  if (!ready) return <LoadingScreen />;
 
   return authenticated ? <AuthenticatedHome /> : <LoginScreen />;
 }

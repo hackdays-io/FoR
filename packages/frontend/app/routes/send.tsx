@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { type Address, formatUnits, parseUnits } from "viem";
 import {
   AppBar,
   AppBarBackButton,
@@ -11,8 +12,15 @@ import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { TextField } from "~/components/ui/text-field";
-import { formatAmount } from "~/lib/format";
 import { Typography } from "~/components/ui/typography";
+import { useActiveWallet } from "~/hooks/useActiveWallet";
+import {
+  calculateDistribution,
+  useDistributionTransfer,
+} from "~/hooks/useDistributionTransfer";
+import { useForTokenBalance } from "~/hooks/useForToken";
+import { useDistributionRatios } from "~/hooks/useRouter";
+import { formatAmount } from "~/lib/format";
 import { getNamesByAddress } from "~/lib/namestone.server";
 import type { Route } from "./+types/send";
 
@@ -40,9 +48,16 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 }
 
-const FUND_RATE = 0.05; // 5%
 const PURPOSE_OPTIONS = ["森", "川", "コミュニティ"];
-const DUMMY_BALANCE = 45900;
+
+function toBigIntAmount(value: string): bigint {
+  if (!value) return 0n;
+  try {
+    return parseUnits(value, 18);
+  } catch {
+    return 0n;
+  }
+}
 
 type Step = "input" | "confirm" | "complete";
 
@@ -85,10 +100,70 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   const [selectedPurpose, setSelectedPurpose] = useState<string | null>(null);
   const [story, setStory] = useState(loaderData.initialStory);
 
+  const { address } = useActiveWallet();
+  const { data: balance, isLoading: isBalanceLoading } =
+    useForTokenBalance(address);
+  const { data: ratios, isLoading: isRatiosLoading } = useDistributionRatios();
+  const { executeTransfer, status, txHash, error } = useDistributionTransfer();
+
+  const amountBigInt = useMemo(() => toBigIntAmount(amount), [amount]);
+
+  const breakdown = useMemo(
+    () =>
+      ratios
+        ? calculateDistribution(amountBigInt, ratios.fundRatio, ratios.burnRatio)
+        : null,
+    [amountBigInt, ratios],
+  );
+
   const numAmount = Number(amount) || 0;
-  const fundAmount = Math.ceil(numAmount * FUND_RATE);
-  const totalAmount = numAmount + fundAmount;
-  const remainingBalance = DUMMY_BALANCE - totalAmount;
+  const fundAmount = breakdown
+    ? Number(formatUnits(breakdown.fundAmount, 18))
+    : 0;
+  // 合計は送金額 + fund + burn（= 入力額 = 実際に差し引かれる額）
+  const totalAmount = breakdown
+    ? Number(
+        formatUnits(
+          breakdown.recipientAmount + breakdown.fundAmount + breakdown.burnAmount,
+          18,
+        ),
+      )
+    : numAmount;
+
+  const balanceRaw = balance?.raw ?? 0n;
+  const balanceNum = balance ? Number(balance.formatted) : 0;
+  const insufficientBalance =
+    !!balance && amountBigInt > 0n && balanceRaw < amountBigInt;
+  const remainingBalance = balance
+    ? Number(
+        formatUnits(
+          balanceRaw > amountBigInt ? balanceRaw - amountBigInt : 0n,
+          18,
+        ),
+      )
+    : 0;
+
+  const isSubmitting = status === "signing" || status === "pending";
+  const confirmLabel =
+    status === "signing"
+      ? "署名中..."
+      : status === "pending"
+        ? "送信中..."
+        : "送る";
+
+  const handleConfirmSend = async () => {
+    if (!recipient?.address || amountBigInt === 0n || isSubmitting) return;
+    try {
+      await executeTransfer(
+        recipient.address as Address,
+        amountBigInt,
+        story,
+      );
+      setStep("complete");
+    } catch {
+      // エラーは hook の error に反映
+    }
+  };
 
   const displayName =
     recipient?.profile?.text_records?.display ||
@@ -156,7 +231,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               </Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-m">
-                  {formatAmount(fundAmount)}
+                  {isRatiosLoading ? "--" : formatAmount(fundAmount)}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
                   FoR
@@ -168,12 +243,27 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               <Typography variant="ui-13" weight="bold" as="span">合計</Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-l">
-                  {formatAmount(totalAmount)}
+                  {isRatiosLoading ? "--" : formatAmount(totalAmount)}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
                   FoR
                 </Typography>
               </div>
+            </div>
+          </div>
+
+          {/* Current Balance */}
+          <div className="flex items-center justify-between px-4">
+            <Typography variant="ui-13" as="span" className="text-text-hint">
+              残高
+            </Typography>
+            <div className="flex items-baseline gap-4">
+              <Typography variant="number-m">
+                {isBalanceLoading ? "--" : formatAmount(balanceNum)}
+              </Typography>
+              <Typography variant="ui-13" weight="bold">
+                FoR
+              </Typography>
             </div>
           </div>
 
@@ -234,9 +324,23 @@ export default function Send({ loaderData }: Route.ComponentProps) {
         </div>
 
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
+          {insufficientBalance && (
+            <Typography
+              variant="ui-13"
+              className="mb-8 text-center text-destructive"
+            >
+              残高が不足しています
+            </Typography>
+          )}
           <Button
             className="w-full"
-            disabled={numAmount <= 0}
+            disabled={
+              numAmount <= 0 ||
+              insufficientBalance ||
+              isBalanceLoading ||
+              isRatiosLoading ||
+              !address
+            }
             onClick={() => setStep("confirm")}
           >
             送る
@@ -319,11 +423,21 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           <Typography variant="ui-13" className="text-muted-foreground">
             ※ この取引は、キャンセルできません。
           </Typography>
+
+          {error && (
+            <Typography variant="ui-13" className="text-destructive">
+              送金に失敗しました: {error.message}
+            </Typography>
+          )}
         </div>
 
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
-          <Button className="w-full" onClick={() => setStep("complete")}>
-            送る
+          <Button
+            className="w-full"
+            disabled={isSubmitting || !recipient?.address}
+            onClick={handleConfirmSend}
+          >
+            {confirmLabel}
           </Button>
         </div>
       </div>

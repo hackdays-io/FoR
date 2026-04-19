@@ -22,7 +22,7 @@ dataSources:
         - name: Router
           file: ../contract/artifacts/contracts/Router.sol/Router.json
       eventHandlers:
-        - event: TransferWithDistribution(indexed address,indexed address,indexed address,uint256,uint256,uint256,uint256)
+        - event: TransferWithDistribution(indexed address,indexed address,indexed address,uint256,uint256,uint256,uint256,string)
           handler: handleTransferWithDistribution
         - event: DistributionRatioUpdated(indexed address,uint256,uint256,uint256)
           handler: handleDistributionRatioUpdated

@@ -12,7 +12,7 @@ import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
-import { useTransfers } from "~/hooks/useTransfers";
+import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import { searchNames, type NameStoneProfile } from "~/lib/namestone.server";
 import { formatTimestamp, shortenAddress } from "~/lib/utils";
 import type { Route } from "./+types/transactions";
@@ -41,7 +41,7 @@ export default function Transactions() {
   const navigate = useNavigate();
   const fetcher = useFetcher<typeof loader>();
   const [query, setQuery] = useState("");
-  const { data: transfers, isLoading: isTransfersLoading } = useTransfers(20);
+  const { data: transfers, isLoading: isTransfersLoading } = useTransfersViaRouter(20);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const isSearching = query.length > 0;
@@ -132,7 +132,7 @@ export default function Transactions() {
                     date={formatTimestamp(tx.timestamp)}
                     amount={Number(formatUnits(BigInt(tx.totalAmount), 18))}
                     divider={i < transfers.length - 1}
-                    onClick={() => navigate(`/transactions/${tx.transactionHash}`)}
+                    onClick={() => navigate(`/transactions/${tx.to.id}`)}
                     className="cursor-pointer"
                   />
                 ))

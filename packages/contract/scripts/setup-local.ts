@@ -155,13 +155,16 @@ const indexerConfigPath = resolve(
 );
 const indexerConfig = {
   network: "localhost",
-  address: routerAddress,
-  startBlock: 0,
+  routerAddress,
+  routerStartBlock: 0,
+  forTokenAddress,
+  forTokenStartBlock: 0,
 };
 writeFileSync(indexerConfigPath, `${JSON.stringify(indexerConfig, null, 2)}\n`);
 console.log(`\n=== Indexer Config Updated ===`);
 console.log(`  ${indexerConfigPath}`);
-console.log(`  Router address: ${routerAddress}`);
+console.log(`  Router address:   ${routerAddress}`);
+console.log(`  FoRToken address: ${forTokenAddress}`);
 
 console.log("\n=== Setup Complete ===");
 console.log(`

@@ -5,7 +5,7 @@ import { addresses } from "~/lib/contracts";
 import { publicClient, currentChain } from "~/lib/viem";
 import { useActiveWallet } from "./useActiveWallet";
 
-const TOKEN_NAME = "FoR";
+const TOKEN_NAME = "FoR Token";
 const TOKEN_VERSION = "1";
 
 const PERMIT_TYPES = {

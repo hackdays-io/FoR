@@ -55,7 +55,6 @@ export function useDistributionTransfer() {
 					// AA wallet flow: approve → transferWithDistribution
 					setStatus("signing");
 
-					// Check current allowance
 					const currentAllowance = await publicClient.readContract({
 						address: addresses.forToken,
 						abi: forTokenAbi,
@@ -63,7 +62,6 @@ export function useDistributionTransfer() {
 						args: [address, addresses.router],
 					});
 
-					// Approve if needed
 					if (currentAllowance < amount) {
 						const approveHash = await wallet.writeContract({
 							address: addresses.forToken,
@@ -73,9 +71,13 @@ export function useDistributionTransfer() {
 							chain: publicClient.chain,
 							account: wallet.account!,
 						});
-						await publicClient.waitForTransactionReceipt({
-							hash: approveHash,
-						});
+						const approveReceipt =
+							await publicClient.waitForTransactionReceipt({
+								hash: approveHash,
+							});
+						if (approveReceipt.status !== "success") {
+							throw new Error("Approve transaction reverted");
+						}
 					}
 
 					setStatus("pending");
@@ -108,7 +110,12 @@ export function useDistributionTransfer() {
 					});
 				}
 
-				await publicClient.waitForTransactionReceipt({ hash });
+				const receipt = await publicClient.waitForTransactionReceipt({
+					hash,
+				});
+				if (receipt.status !== "success") {
+					throw new Error("Transfer transaction reverted");
+				}
 				setTxHash(hash);
 				setStatus("success");
 				return hash;
