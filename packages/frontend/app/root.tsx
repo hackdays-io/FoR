@@ -9,6 +9,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { AuthGate } from "./components/auth-gate";
+import { ActiveWalletProvider } from "./providers/ActiveWalletProvider";
 import { AppPrivyProvider } from "./providers/AppPrivyProvider";
 import { QueryProvider } from "./providers/QueryProvider";
 
@@ -47,9 +48,11 @@ export default function App() {
   return (
     <QueryProvider>
       <AppPrivyProvider>
-        <div className="mx-auto w-full max-w-md min-h-screen">
-          <AuthGate />
-        </div>
+        <ActiveWalletProvider>
+          <div className="mx-auto w-full max-w-md min-h-screen">
+            <AuthGate />
+          </div>
+        </ActiveWalletProvider>
       </AppPrivyProvider>
     </QueryProvider>
   );
