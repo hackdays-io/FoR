@@ -123,3 +123,21 @@ export const List = () => {
 };
 
 List.storyName = "List View";
+
+export const WithExternalLink = () => {
+  return (
+    <StoryFrame>
+      <ListRow
+        avatarSrc={SAMPLE_AVATAR}
+        name="りょうま"
+        message="草刈りありがとう！"
+        date="10/29 (水)"
+        amount={50}
+        externalUrl="https://etherscan.io/tx/0x0000000000000000000000000000000000000000000000000000000000000000"
+        externalUrlLabel="Etherscanで取引を開く"
+      />
+    </StoryFrame>
+  );
+};
+
+WithExternalLink.storyName = "With External Link";
