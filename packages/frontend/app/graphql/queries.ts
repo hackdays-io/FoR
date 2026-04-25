@@ -115,6 +115,31 @@ export const GET_CURRENT_DISTRIBUTION_RATIO = graphql(`
   }
 `);
 
+export const GET_RECENT_FUND_CONTRIBUTIONS = graphql(`
+  query GetRecentFundContributions($first: Int!, $skip: Int!) {
+    transferViaRouters(
+      first: $first
+      skip: $skip
+      orderBy: timestamp
+      orderDirection: desc
+    ) {
+      id
+      from {
+        id
+      }
+      to {
+        id
+      }
+      fundAmount
+      burnAmount
+      totalAmount
+      message
+      timestamp
+      transactionHash
+    }
+  }
+`);
+
 export const GET_DISTRIBUTION_RATIO_HISTORY = graphql(`
   query GetDistributionRatioHistory($first: Int!, $skip: Int!) {
     distributionRatios(
