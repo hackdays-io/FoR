@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useFetcher } from "react-router";
+import { useFetcher, useNavigate } from "react-router";
 import { formatUnits } from "viem";
 import {
   AppBar,
@@ -14,7 +14,8 @@ import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
-import { searchNames, type NameStoneProfile } from "~/lib/namestone.server";
+import { getExplorerName, getExplorerTxUrl } from "~/lib/explorer";
+import { type NameStoneProfile, searchNames } from "~/lib/namestone.server";
 import { formatTimestamp, shortenAddress } from "~/lib/utils";
 import type { Route } from "./+types/transactions";
 
@@ -43,7 +44,8 @@ export default function Transactions() {
   const fetcher = useFetcher<typeof loader>();
   const [query, setQuery] = useState("");
   const { address } = useActiveWallet();
-  const { data: transfers, isLoading: isTransfersLoading } = useTransfersViaRouter(address, 20);
+  const { data: transfers, isLoading: isTransfersLoading } =
+    useTransfersViaRouter(address, 20);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const isSearching = query.length > 0;
@@ -98,7 +100,9 @@ export default function Transactions() {
             <SectionTitle>検索結果</SectionTitle>
             <div className="mt-8">
               {fetcher.state === "loading" ? (
-                <Typography variant="ui-13" className="py-12 text-text-hint">検索中...</Typography>
+                <Typography variant="ui-13" className="py-12 text-text-hint">
+                  検索中...
+                </Typography>
               ) : searchResults && searchResults.length > 0 ? (
                 searchResults.map((profile: NameStoneProfile, i: number) => (
                   <ListRow
@@ -123,9 +127,13 @@ export default function Transactions() {
             <SectionTitle>履歴</SectionTitle>
             <div className="mt-8">
               {isTransfersLoading ? (
-                <Typography variant="ui-13" className="py-12 text-text-hint">読み込み中...</Typography>
+                <Typography variant="ui-13" className="py-12 text-text-hint">
+                  読み込み中...
+                </Typography>
               ) : !transfers || transfers.length === 0 ? (
-                <Typography variant="ui-13" className="py-12 text-text-hint">取引履歴がありません</Typography>
+                <Typography variant="ui-13" className="py-12 text-text-hint">
+                  取引履歴がありません
+                </Typography>
               ) : (
                 transfers.map((tx, i) => {
                   const meLower = address?.toLowerCase() ?? "";
@@ -137,6 +145,7 @@ export default function Transactions() {
                   const signedAmount =
                     (isSent ? -1 : 1) *
                     Number(formatUnits(BigInt(shownAmount), 18));
+                  const explorerUrl = getExplorerTxUrl(tx.transactionHash);
                   return (
                     <ListRow
                       key={tx.id}
@@ -146,6 +155,8 @@ export default function Transactions() {
                       divider={i < transfers.length - 1}
                       onClick={() => navigate(`/transactions/${counterparty}`)}
                       className="cursor-pointer"
+                      externalUrl={explorerUrl ?? undefined}
+                      externalUrlLabel={`${getExplorerName()}で取引を開く`}
                     />
                   );
                 })

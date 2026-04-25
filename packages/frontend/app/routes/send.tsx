@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { type Address, formatUnits, parseUnits } from "viem";
@@ -21,6 +21,7 @@ import {
 } from "~/hooks/useDistributionTransfer";
 import { useForTokenBalance } from "~/hooks/useForToken";
 import { useDistributionRatios } from "~/hooks/useRouter";
+import { getExplorerName, getExplorerTxUrl } from "~/lib/explorer";
 import { formatAmount } from "~/lib/format";
 import { getNamesByAddress } from "~/lib/namestone.server";
 import { buildMessagePayload } from "~/lib/transfer-message";
@@ -46,7 +47,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     const profile = profiles.length > 0 ? profiles[0] : null;
     return { recipient: { address: to, profile }, initialAmount, initialStory };
   } catch {
-    return { recipient: { address: to, profile: null }, initialAmount, initialStory };
+    return {
+      recipient: { address: to, profile: null },
+      initialAmount,
+      initialStory,
+    };
   }
 }
 
@@ -74,17 +79,11 @@ function AmountRow({
 }) {
   return (
     <div className="flex items-center justify-between rounded-lg bg-background px-16 py-12">
-      <Typography
-        variant="ui-13"
-        weight={bold ? "bold" : "normal"}
-        as="span"
-      >
+      <Typography variant="ui-13" weight={bold ? "bold" : "normal"} as="span">
         {label}
       </Typography>
       <div className="flex items-baseline gap-4">
-        <Typography variant="number-m">
-          {formatAmount(amount)}
-        </Typography>
+        <Typography variant="number-m">{formatAmount(amount)}</Typography>
         <Typography variant="ui-20" weight="bold">
           FoR
         </Typography>
@@ -235,7 +234,12 @@ export default function Send({ loaderData }: Route.ComponentProps) {
                 placeholder="0"
                 className="min-w-0 flex-1 rounded-md border border-border bg-card px-8 py-6 text-right font-latin text-content-number-m font-bold text-foreground outline-none"
               />
-              <Typography variant="ui-20" weight="bold" as="span" className="shrink-0">
+              <Typography
+                variant="ui-20"
+                weight="bold"
+                as="span"
+                className="shrink-0"
+              >
                 FoR
               </Typography>
             </div>
@@ -255,7 +259,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             </div>
 
             <div className="mt-12 flex items-center justify-between">
-              <Typography variant="ui-13" weight="bold" as="span">合計</Typography>
+              <Typography variant="ui-13" weight="bold" as="span">
+                合計
+              </Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-l">
                   {isRatiosLoading ? "--" : formatAmount(totalAmount)}
@@ -318,7 +324,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
 
           {/* Story */}
           <div>
-            <Typography variant="ui-16" weight="bold">ストーリー</Typography>
+            <Typography variant="ui-16" weight="bold">
+              ストーリー
+            </Typography>
             <div className="mt-8">
               <TextField
                 placeholder="ストーリーをシェア"
@@ -420,7 +428,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             </div>
 
             <div className="flex items-center justify-between pt-4">
-              <Typography variant="ui-13" weight="bold" as="span">合計</Typography>
+              <Typography variant="ui-13" weight="bold" as="span">
+                合計
+              </Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-l">
                   {formatAmount(totalAmount)}
@@ -491,13 +501,32 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           <AmountRow label="合計" amount={totalAmount} bold />
         </div>
 
+        {/* Explorer link */}
+        {(() => {
+          const explorerUrl = getExplorerTxUrl(txHash);
+          if (!explorerUrl) return null;
+          return (
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-4 self-start text-ui-13 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            >
+              {getExplorerName()}で取引を見る
+              <ExternalLink size={14} aria-hidden="true" />
+            </a>
+          );
+        })()}
+
         {/* Rank */}
         <div className="flex flex-col items-center gap-8 pt-8">
           <Typography variant="ui-16" weight="bold" className="w-full">
             あなたのランク
           </Typography>
           <div className="h-[100px] w-[100px] rounded-lg bg-background" />
-          <Typography variant="ui-16" weight="bold">ランク2</Typography>
+          <Typography variant="ui-16" weight="bold">
+            ランク2
+          </Typography>
           <Typography variant="ui-13" className="text-visual-green-4">
             あと○回交換すると、ランク3にアップ！
           </Typography>
