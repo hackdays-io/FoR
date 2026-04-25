@@ -77,6 +77,9 @@ importers:
       permissionless:
         specifier: ^0.2.57
         version: 0.2.57(viem@2.43.5(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))
+      pinata:
+        specifier: ^2.5.5
+        version: 2.5.5(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       qrcode.react:
         specifier: ^4.2.0
         version: 4.2.0(react@19.2.0)
@@ -4432,7 +4435,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+    deprecated: Glob versions prior to v9 are no longer supported
 
   globby@11.1.0:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
@@ -5974,6 +5977,18 @@ packages:
   pify@5.0.0:
     resolution: {integrity: sha512-eW/gHNMlxdSP6dmG6uJip6FXN0EQBwm2clYYd8Wul42Cwu/DK8HEftzsapcNdYe2MfLiIwZqsDk2RDEsTE79hA==}
     engines: {node: '>=10'}
+
+  pinata@2.5.5:
+    resolution: {integrity: sha512-GmHGL8bSpiwQlbrXrT73DJ1ZrYi+MD3lY7scY10D2PnH0kggDCUP04Gb96thbRenhvqVYjPRYYFt7gW9yjejYw==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   pinkie-promise@2.0.1:
     resolution: {integrity: sha512-0Gni6D4UcLTbv9c57DfxDGdr41XfgUjqWZu492f0cIGr16zDU06BWP/RAEvOuo7CQ0CNjHaLlM59YJJFm3NWlw==}
@@ -16212,6 +16227,11 @@ snapshots:
   pify@3.0.0: {}
 
   pify@5.0.0: {}
+
+  pinata@2.5.5(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    optionalDependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
 
   pinkie-promise@2.0.1:
     dependencies:

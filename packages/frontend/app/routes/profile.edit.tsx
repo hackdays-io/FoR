@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  Form,
   redirect,
   useActionData,
   useLoaderData,
   useNavigate,
   useNavigation,
+  useSubmit,
 } from "react-router";
 import {
   AppBar,
@@ -16,8 +16,9 @@ import {
 import { AvatarUpload } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { TextField } from "~/components/ui/text-field";
-import { getNamesByAddress, setName } from "~/lib/namestone.server";
 import { Typography } from "~/components/ui/typography";
+import { useUploadImageFileToIpfs } from "~/hooks/useUploadImageFileToIpfs";
+import { getNamesByAddress, setName } from "~/lib/namestone.server";
 import type { Route } from "./+types/profile.edit";
 
 export function meta(_args: Route.MetaArgs) {
@@ -48,7 +49,6 @@ export async function action({ request }: Route.ActionArgs) {
   const name = formData.get("name") as string;
   const address = formData.get("address") as string;
   const avatar = (formData.get("avatar") as string)?.trim();
-  const display = (formData.get("display") as string)?.trim();
   const description = (formData.get("description") as string)?.trim();
 
   const errors: Record<string, string> = {};
@@ -57,12 +57,12 @@ export async function action({ request }: Route.ActionArgs) {
     errors.address = "ウォレットが接続されていません";
   }
 
-  if (avatar && !avatar.startsWith("https://")) {
-    errors.avatar = "URLはhttps://で始めてください";
-  }
-
-  if (display && display.length > 50) {
-    errors.display = "ニックネームは50文字以内にしてください";
+  if (
+    avatar &&
+    !avatar.startsWith("ipfs://") &&
+    !avatar.startsWith("https://")
+  ) {
+    errors.avatar = "プロフィール画像のURLが不正です";
   }
 
   if (description && description.length > 200) {
@@ -79,7 +79,6 @@ export async function action({ request }: Route.ActionArgs) {
       address,
       textRecords: {
         avatar: avatar || undefined,
-        display: display || undefined,
         description: description || undefined,
       },
     });
@@ -95,13 +94,60 @@ export default function ProfileEdit() {
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const navigate = useNavigate();
+  const submit = useSubmit();
 
-  const [avatarUrl, setAvatarUrl] = useState(
-    profile.text_records?.avatar ?? "",
-  );
+  const {
+    uploadImageFileToIpfs,
+    imageFile,
+    setImageFile,
+    isLoading: isUploading,
+    error: uploadError,
+  } = useUploadImageFileToIpfs();
 
-  const isSubmitting = navigation.state === "submitting";
+  const initialAvatar = profile.text_records?.avatar ?? "";
+  const initialDescription = profile.text_records?.description ?? "";
+  const [description, setDescription] = useState(initialDescription);
+
+  const previewUrl = imageFile ? URL.createObjectURL(imageFile) : undefined;
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const displayAvatarSrc = previewUrl ?? initialAvatar ?? undefined;
+  const isSubmitting = navigation.state !== "idle" || isUploading;
   const errors = actionData?.errors;
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      let avatarUri = initialAvatar;
+      if (imageFile) {
+        const res = await uploadImageFileToIpfs();
+        if (!res) return;
+        avatarUri = res.ipfsUri;
+      }
+
+      const formData = new FormData();
+      formData.set("name", profile.name);
+      formData.set("address", profile.address);
+      formData.set("description", description);
+      if (avatarUri) formData.set("avatar", avatarUri);
+
+      submit(formData, { method: "post" });
+    },
+    [
+      profile.name,
+      profile.address,
+      description,
+      imageFile,
+      initialAvatar,
+      uploadImageFileToIpfs,
+      submit,
+    ],
+  );
 
   return (
     <div className="min-h-screen bg-bg-default">
@@ -114,44 +160,31 @@ export default function ProfileEdit() {
         </AppBarItem>
       </AppBar>
 
-      <Form method="post" className="flex flex-col items-center gap-24 px-20 py-24">
-        <input type="hidden" name="name" value={profile.name} />
-        <input type="hidden" name="address" value={profile.address} />
-
-        {/* Avatar */}
-        <AvatarUpload src={avatarUrl || undefined} alt="プロフィール画像" />
-
-        <TextField
-          name="avatar"
-          label="プロフィール画像URL"
-          placeholder="https://..."
-          value={avatarUrl}
-          onChange={(e) => setAvatarUrl(e.target.value)}
-          errorText={errors?.avatar}
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col items-center gap-24 px-20 py-24"
+      >
+        <AvatarUpload
+          src={displayAvatarSrc}
+          alt="プロフィール画像"
+          onFileSelect={setImageFile}
+          disabled={isSubmitting}
         />
 
-        {/* Username (read-only) */}
-        <TextField
-          label="ユーザー名"
-          value={profile.name}
-          readOnly
-        />
+        {uploadError && (
+          <Typography variant="ui-13" className="text-text-danger-default">
+            画像のアップロードに失敗しました
+          </Typography>
+        )}
 
-        {/* Display name */}
-        <TextField
-          name="display"
-          label="ニックネーム"
-          placeholder="表示名"
-          defaultValue={profile.text_records?.display ?? ""}
-          errorText={errors?.display}
-        />
+        <TextField label="ユーザー名" value={profile.name} readOnly />
 
-        {/* Bio */}
         <TextField
           name="description"
           label="自己紹介"
           placeholder="自己紹介を入力"
-          defaultValue={profile.text_records?.description ?? ""}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           errorText={errors?.description}
         />
 
@@ -161,14 +194,20 @@ export default function ProfileEdit() {
           </Typography>
         )}
 
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full"
-        >
-          {isSubmitting ? "保存中..." : "保存"}
+        {errors?.avatar && (
+          <Typography variant="ui-13" className="text-text-danger-default">
+            {errors.avatar}
+          </Typography>
+        )}
+
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isUploading
+            ? "画像アップロード中..."
+            : navigation.state !== "idle"
+              ? "保存中..."
+              : "保存"}
         </Button>
-      </Form>
+      </form>
     </div>
   );
 }

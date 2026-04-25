@@ -1,12 +1,12 @@
 import { ens_normalize } from "@adraffy/ens-normalize";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Form,
   redirect,
   useActionData,
   useFetcher,
   useNavigate,
   useNavigation,
+  useSubmit,
 } from "react-router";
 import {
   AppBar,
@@ -17,9 +17,10 @@ import {
 import { AvatarUpload } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { TextField } from "~/components/ui/text-field";
-import { useActiveWallet } from "~/hooks/useActiveWallet";
-import { searchNames, setName } from "~/lib/namestone.server";
 import { Typography } from "~/components/ui/typography";
+import { useActiveWallet } from "~/hooks/useActiveWallet";
+import { useUploadImageFileToIpfs } from "~/hooks/useUploadImageFileToIpfs";
+import { searchNames, setName } from "~/lib/namestone.server";
 import type { Route } from "./+types/profile.create";
 
 export function meta(_args: Route.MetaArgs) {
@@ -53,12 +54,10 @@ export async function action({ request }: Route.ActionArgs) {
   const name = (formData.get("name") as string)?.trim();
   const address = formData.get("address") as string;
   const avatar = (formData.get("avatar") as string)?.trim();
-  const display = (formData.get("display") as string)?.trim();
   const description = (formData.get("description") as string)?.trim();
 
   const errors: Record<string, string> = {};
 
-  // Validate name
   if (!name) {
     errors.name = "ユーザー名を入力してください";
   } else if (name.length < 3) {
@@ -75,22 +74,18 @@ export async function action({ request }: Route.ActionArgs) {
     }
   }
 
-  // Validate address
   if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
     errors.address = "ウォレットが接続されていません";
   }
 
-  // Validate avatar
-  if (avatar && !avatar.startsWith("https://")) {
-    errors.avatar = "URLはhttps://で始めてください";
+  if (
+    avatar &&
+    !avatar.startsWith("ipfs://") &&
+    !avatar.startsWith("https://")
+  ) {
+    errors.avatar = "プロフィール画像のURLが不正です";
   }
 
-  // Validate display name
-  if (display && display.length > 50) {
-    errors.display = "ニックネームは50文字以内にしてください";
-  }
-
-  // Validate description
   if (description && description.length > 200) {
     errors.description = "自己紹介は200文字以内にしてください";
   }
@@ -99,7 +94,6 @@ export async function action({ request }: Route.ActionArgs) {
     return { errors };
   }
 
-  // Check availability
   try {
     const existing = await searchNames(name, true);
     if (existing.length > 0) {
@@ -109,14 +103,12 @@ export async function action({ request }: Route.ActionArgs) {
     return { errors: { name: "ユーザー名の確認中にエラーが発生しました" } };
   }
 
-  // Create profile
   try {
     await setName({
       name,
       address,
       textRecords: {
         avatar: avatar || undefined,
-        display: display || undefined,
         description: description || undefined,
       },
     });
@@ -132,16 +124,31 @@ export default function ProfileCreate() {
   const navigation = useNavigation();
   const navigate = useNavigate();
   const fetcher = useFetcher<typeof loader>();
+  const submit = useSubmit();
   const { address } = useActiveWallet();
 
+  const {
+    uploadImageFileToIpfs,
+    imageFile,
+    setImageFile,
+    isLoading: isUploading,
+    error: uploadError,
+  } = useUploadImageFileToIpfs();
+
   const [username, setUsername] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+  const [description, setDescription] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const isSubmitting = navigation.state === "submitting";
+  const previewUrl = imageFile ? URL.createObjectURL(imageFile) : undefined;
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const isSubmitting = navigation.state !== "idle" || isUploading;
   const errors = actionData?.errors;
 
-  // Client-side ENS normalize check
   const [clientError, setClientError] = useState<string | null>(null);
 
   const validateAndCheckName = useCallback(
@@ -164,7 +171,6 @@ export default function ProfileCreate() {
         return;
       }
 
-      // Debounced availability check
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         fetcher.load(`/profile/create?check=${encodeURIComponent(value)}`);
@@ -179,7 +185,6 @@ export default function ProfileCreate() {
     };
   }, []);
 
-  // Determine username field status
   const availabilityData = fetcher.data;
   let nameHelperText: string | undefined;
   let nameErrorText = errors?.name ?? clientError ?? undefined;
@@ -196,6 +201,29 @@ export default function ProfileCreate() {
     nameHelperText = "確認中...";
   }
 
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!address || !username) return;
+
+      let avatarUri: string | undefined;
+      if (imageFile) {
+        const res = await uploadImageFileToIpfs();
+        if (!res) return;
+        avatarUri = res.ipfsUri;
+      }
+
+      const formData = new FormData();
+      formData.set("name", username);
+      formData.set("address", address);
+      formData.set("description", description);
+      if (avatarUri) formData.set("avatar", avatarUri);
+
+      submit(formData, { method: "post" });
+    },
+    [address, username, description, imageFile, uploadImageFileToIpfs, submit],
+  );
+
   return (
     <div className="min-h-screen bg-bg-default">
       <AppBar>
@@ -207,22 +235,23 @@ export default function ProfileCreate() {
         </AppBarItem>
       </AppBar>
 
-      <Form method="post" className="flex flex-col items-center gap-24 px-20 py-24">
-        <input type="hidden" name="address" value={address ?? ""} />
-
-        {/* Avatar */}
-        <AvatarUpload src={avatarUrl || undefined} alt="プロフィール画像" />
-
-        <TextField
-          name="avatar"
-          label="プロフィール画像URL"
-          placeholder="https://..."
-          value={avatarUrl}
-          onChange={(e) => setAvatarUrl(e.target.value)}
-          errorText={errors?.avatar}
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col items-center gap-24 px-20 py-24"
+      >
+        <AvatarUpload
+          src={previewUrl}
+          alt="プロフィール画像"
+          onFileSelect={setImageFile}
+          disabled={isSubmitting}
         />
 
-        {/* Username */}
+        {uploadError && (
+          <Typography variant="ui-13" className="text-text-danger-default">
+            画像のアップロードに失敗しました
+          </Typography>
+        )}
+
         <TextField
           name="name"
           label="ユーザー名"
@@ -238,19 +267,12 @@ export default function ProfileCreate() {
           required
         />
 
-        {/* Display name */}
-        <TextField
-          name="display"
-          label="ニックネーム"
-          placeholder="表示名"
-          errorText={errors?.display}
-        />
-
-        {/* Bio */}
         <TextField
           name="description"
           label="自己紹介"
           placeholder="自己紹介を入力"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           errorText={errors?.description}
         />
 
@@ -260,14 +282,24 @@ export default function ProfileCreate() {
           </Typography>
         )}
 
+        {errors?.avatar && (
+          <Typography variant="ui-13" className="text-text-danger-default">
+            {errors.avatar}
+          </Typography>
+        )}
+
         <Button
           type="submit"
           disabled={isSubmitting || !address || !username}
           className="w-full"
         >
-          {isSubmitting ? "作成中..." : "プロフィールを作成"}
+          {isUploading
+            ? "画像アップロード中..."
+            : navigation.state !== "idle"
+              ? "作成中..."
+              : "プロフィールを作成"}
         </Button>
-      </Form>
+      </form>
     </div>
   );
 }
