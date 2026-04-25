@@ -1,3 +1,4 @@
+import { ExternalLink } from "lucide-react";
 import * as React from "react";
 
 import { formatAmount } from "~/lib/format";
@@ -20,6 +21,10 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   unit?: string;
   /** 下部のdividerを表示するか（デフォルト: true） */
   divider?: boolean;
+  /** 行末に外部リンク（例: ブロックエクスプローラ）を表示する */
+  externalUrl?: string;
+  /** 外部リンクの aria-label */
+  externalUrlLabel?: string;
 }
 
 function formatSignedAmount(amount: number): string {
@@ -38,6 +43,8 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
       amount,
       unit = "FoR",
       divider = true,
+      externalUrl,
+      externalUrlLabel = "ブロックエクスプローラで開く",
       className,
       ...props
     },
@@ -97,6 +104,19 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
               </span>
             ) : null}
           </div>
+        ) : null}
+
+        {externalUrl ? (
+          <a
+            href={externalUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label={externalUrlLabel}
+            className="shrink-0 rounded-md p-4 text-muted-foreground hover:text-foreground"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <ExternalLink size={16} aria-hidden="true" />
+          </a>
         ) : null}
       </div>
     );

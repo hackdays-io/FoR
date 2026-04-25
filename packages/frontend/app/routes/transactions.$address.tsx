@@ -1,3 +1,4 @@
+import { ExternalLink } from "lucide-react";
 import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import { formatUnits } from "viem";
@@ -15,6 +16,7 @@ import {
   type TransferBetween,
   useTransfersBetween,
 } from "~/hooks/useTransfersBetween";
+import { getExplorerName, getExplorerTxUrl } from "~/lib/explorer";
 import { formatAmount } from "~/lib/format";
 import { getNamesByAddress } from "~/lib/namestone.server";
 import { parseMessagePayload } from "~/lib/transfer-message";
@@ -54,6 +56,7 @@ function MessageBubble({
   amount,
   time,
   avatarSrc,
+  explorerUrl,
 }: {
   type: "sent" | "received";
   title: string;
@@ -62,6 +65,7 @@ function MessageBubble({
   amount: number;
   time: string;
   avatarSrc?: string;
+  explorerUrl: string | null;
 }) {
   const isSent = type === "sent";
 
@@ -88,6 +92,17 @@ function MessageBubble({
             FoR
           </Typography>
         </div>
+        {explorerUrl ? (
+          <a
+            href={explorerUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label={`${getExplorerName()}で取引を開く`}
+            className="self-end text-muted-foreground hover:text-foreground"
+          >
+            <ExternalLink size={14} aria-hidden="true" />
+          </a>
+        ) : null}
       </div>
       <Typography
         variant="ui-10"
@@ -123,6 +138,7 @@ interface ChatMessage {
   amount: number;
   time: string;
   date: string;
+  explorerUrl: string | null;
 }
 
 function buildMessages(
@@ -142,6 +158,7 @@ function buildMessages(
       amount: Number(formatUnits(BigInt(rawAmount), 18)),
       time: formatTime(tx.timestamp),
       date: formatTimestamp(tx.timestamp),
+      explorerUrl: getExplorerTxUrl(tx.transactionHash),
     };
   });
 }
@@ -211,6 +228,7 @@ export default function TransactionDetail({
                     amount={msg.amount}
                     time={msg.time}
                     avatarSrc={avatarSrc}
+                    explorerUrl={msg.explorerUrl}
                   />
                 ))}
             </div>
@@ -219,10 +237,7 @@ export default function TransactionDetail({
       </div>
 
       <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
-        <Button
-          className="w-full"
-          onClick={() => navigate(`/send?to=${peer}`)}
-        >
+        <Button className="w-full" onClick={() => navigate(`/send?to=${peer}`)}>
           送る
         </Button>
       </div>

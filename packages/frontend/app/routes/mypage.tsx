@@ -1,16 +1,12 @@
-import { useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
+import { useEffect } from "react";
 import { Link, useFetcher, useNavigate } from "react-router";
-import {
-  AppBar,
-  AppBarItem,
-  AppBarTitle,
-} from "~/components/ui/app-bar";
+import { AppBar, AppBarItem, AppBarTitle } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import type { NameStoneProfile } from "~/lib/namestone.server";
-import { Typography } from "~/components/ui/typography";
 import type { Route } from "./+types/mypage";
 
 export function meta(_args: Route.MetaArgs) {
@@ -50,7 +46,9 @@ export default function Mypage() {
           </AppBarItem>
         </AppBar>
         <div className="flex items-center justify-center py-32">
-          <Typography variant="ui-13" className="text-text-hint">読み込み中...</Typography>
+          <Typography variant="ui-13" className="text-text-hint">
+            読み込み中...
+          </Typography>
         </div>
       </div>
     );
@@ -129,6 +127,17 @@ export default function Mypage() {
         <Button variant="secondary" className="w-full" onClick={handleLogout}>
           ログアウト
         </Button>
+
+        {profile ? (
+          <Link
+            to={`/settings/delete-account?address=${address}`}
+            className="w-full"
+          >
+            <Button variant="ghost" className="w-full text-text-danger-default">
+              アカウントを削除
+            </Button>
+          </Link>
+        ) : null}
       </div>
     </div>
   );
