@@ -110,7 +110,7 @@ function AuthenticatedHome() {
   const { logout } = usePrivy();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
   const { data: balance, isLoading: isBalanceLoading } = useForTokenBalance(address);
-  const { data: transfers, isLoading: isTransfersLoading } = useTransfersViaRouter(3);
+  const { data: transfers, isLoading: isTransfersLoading } = useTransfersViaRouter(address, 3);
   const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
   const [walletTimedOut, setWalletTimedOut] = useState(false);
 
@@ -203,17 +203,28 @@ function AuthenticatedHome() {
             ) : !transfers || transfers.length === 0 ? (
               <p className="py-12 text-center text-ui-13 text-text-hint">取引履歴がありません</p>
             ) : (
-              transfers.map((tx, i) => (
-                <ListRow
-                  key={tx.id}
-                  name={shortenAddress(tx.from.id)}
-                  date={formatTimestamp(tx.timestamp)}
-                  amount={Number(formatUnits(BigInt(tx.totalAmount), 18))}
-                  divider={i < transfers.length - 1}
-                  onClick={() => navigate(`/transactions/${tx.to.id}`)}
-                  className="cursor-pointer"
-                />
-              ))
+              transfers.map((tx, i) => {
+                const meLower = address?.toLowerCase() ?? "";
+                const isSent = tx.from.id.toLowerCase() === meLower;
+                const counterparty = isSent ? tx.to.id : tx.from.id;
+                const shownAmount = isSent
+                  ? tx.totalAmount
+                  : tx.recipientAmount;
+                const signedAmount =
+                  (isSent ? -1 : 1) *
+                  Number(formatUnits(BigInt(shownAmount), 18));
+                return (
+                  <ListRow
+                    key={tx.id}
+                    name={shortenAddress(counterparty)}
+                    date={formatTimestamp(tx.timestamp)}
+                    amount={signedAmount}
+                    divider={i < transfers.length - 1}
+                    onClick={() => navigate(`/transactions/${counterparty}`)}
+                    className="cursor-pointer"
+                  />
+                );
+              })
             )}
           </div>
         </div>

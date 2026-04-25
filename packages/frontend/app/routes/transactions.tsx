@@ -12,6 +12,7 @@ import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
+import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import { searchNames, type NameStoneProfile } from "~/lib/namestone.server";
 import { formatTimestamp, shortenAddress } from "~/lib/utils";
@@ -41,7 +42,8 @@ export default function Transactions() {
   const navigate = useNavigate();
   const fetcher = useFetcher<typeof loader>();
   const [query, setQuery] = useState("");
-  const { data: transfers, isLoading: isTransfersLoading } = useTransfersViaRouter(20);
+  const { address } = useActiveWallet();
+  const { data: transfers, isLoading: isTransfersLoading } = useTransfersViaRouter(address, 20);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const isSearching = query.length > 0;
@@ -125,17 +127,28 @@ export default function Transactions() {
               ) : !transfers || transfers.length === 0 ? (
                 <Typography variant="ui-13" className="py-12 text-text-hint">取引履歴がありません</Typography>
               ) : (
-                transfers.map((tx, i) => (
-                  <ListRow
-                    key={tx.id}
-                    name={shortenAddress(tx.from.id)}
-                    date={formatTimestamp(tx.timestamp)}
-                    amount={Number(formatUnits(BigInt(tx.totalAmount), 18))}
-                    divider={i < transfers.length - 1}
-                    onClick={() => navigate(`/transactions/${tx.to.id}`)}
-                    className="cursor-pointer"
-                  />
-                ))
+                transfers.map((tx, i) => {
+                  const meLower = address?.toLowerCase() ?? "";
+                  const isSent = tx.from.id.toLowerCase() === meLower;
+                  const counterparty = isSent ? tx.to.id : tx.from.id;
+                  const shownAmount = isSent
+                    ? tx.totalAmount
+                    : tx.recipientAmount;
+                  const signedAmount =
+                    (isSent ? -1 : 1) *
+                    Number(formatUnits(BigInt(shownAmount), 18));
+                  return (
+                    <ListRow
+                      key={tx.id}
+                      name={shortenAddress(counterparty)}
+                      date={formatTimestamp(tx.timestamp)}
+                      amount={signedAmount}
+                      divider={i < transfers.length - 1}
+                      onClick={() => navigate(`/transactions/${counterparty}`)}
+                      className="cursor-pointer"
+                    />
+                  );
+                })
               )}
             </div>
           </div>

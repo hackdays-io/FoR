@@ -11,7 +11,10 @@ import {
 import { Button } from "~/components/ui/button";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
-import { calculateDistribution } from "~/hooks/useDistributionTransfer";
+import {
+  calculateDistribution,
+  grossUpFromRecipient,
+} from "~/hooks/useDistributionTransfer";
 import { useDistributionRatios } from "~/hooks/useRouter";
 import { formatAmount } from "~/lib/format";
 import type { NameStoneProfile } from "~/lib/namestone.server";
@@ -50,25 +53,36 @@ export default function Receive() {
     profile?.text_records?.display || profile?.name || "";
 
   const numAmount = Number(amount) || 0;
-  const amountBigInt = useMemo(() => toBigIntAmount(amount), [amount]);
+  // 依頼FoR = 受取人が受け取る額。送信側が支払う総額 (合計) は gross up。
+  const recipientAmountBigInt = useMemo(() => toBigIntAmount(amount), [amount]);
+  const totalAmountBigInt = useMemo(
+    () =>
+      ratios
+        ? grossUpFromRecipient(
+            recipientAmountBigInt,
+            ratios.fundRatio,
+            ratios.burnRatio,
+          )
+        : recipientAmountBigInt,
+    [recipientAmountBigInt, ratios],
+  );
   const breakdown = useMemo(
     () =>
       ratios
-        ? calculateDistribution(amountBigInt, ratios.fundRatio, ratios.burnRatio)
+        ? calculateDistribution(
+            totalAmountBigInt,
+            ratios.fundRatio,
+            ratios.burnRatio,
+          )
         : null,
-    [amountBigInt, ratios],
+    [totalAmountBigInt, ratios],
   );
-  const fundAmount = breakdown
-    ? Number(formatUnits(breakdown.fundAmount, 18))
-    : 0;
-  const totalAmount = breakdown
-    ? Number(
-        formatUnits(
-          breakdown.recipientAmount + breakdown.fundAmount + breakdown.burnAmount,
-          18,
-        ),
-      )
-    : numAmount;
+  const fundAndBurn = breakdown
+    ? formatUnits(breakdown.fundAmount + breakdown.burnAmount, 18)
+    : "0";
+  const totalAmount = ratios
+    ? formatUnits(totalAmountBigInt, 18)
+    : String(numAmount);
 
   const receiveUrl = useMemo(() => {
     if (!address) return "";
@@ -139,14 +153,14 @@ export default function Receive() {
             </Typography>
           </div>
 
-          {/* Fund */}
+          {/* Fund + Burn */}
           <div className="mt-12 flex items-baseline justify-between border-b border-border pb-12">
             <Typography variant="ui-13" as="span">
               森の貯金箱
             </Typography>
             <div className="flex items-baseline gap-4">
               <Typography variant="number-m">
-                {isRatiosLoading ? "--" : formatAmount(fundAmount)}
+                {isRatiosLoading ? "--" : formatAmount(fundAndBurn)}
               </Typography>
               <Typography variant="ui-20" weight="bold">
                 FoR

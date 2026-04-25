@@ -16,12 +16,14 @@ import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import {
   calculateDistribution,
+  grossUpFromRecipient,
   useDistributionTransfer,
 } from "~/hooks/useDistributionTransfer";
 import { useForTokenBalance } from "~/hooks/useForToken";
 import { useDistributionRatios } from "~/hooks/useRouter";
 import { formatAmount } from "~/lib/format";
 import { getNamesByAddress } from "~/lib/namestone.server";
+import { buildMessagePayload } from "~/lib/transfer-message";
 import type { Route } from "./+types/send";
 
 export function meta(_args: Route.MetaArgs) {
@@ -67,7 +69,7 @@ function AmountRow({
   bold,
 }: {
   label: string;
-  amount: number;
+  amount: number | string;
   bold?: boolean;
 }) {
   return (
@@ -106,42 +108,51 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   const { data: ratios, isLoading: isRatiosLoading } = useDistributionRatios();
   const { executeTransfer, status, txHash, error } = useDistributionTransfer();
 
-  const amountBigInt = useMemo(() => toBigIntAmount(amount), [amount]);
+  // ユーザー入力 = 受取人が受け取る額（送るFoR）。
+  // Router へは grossUp した total を渡して、分配後に recipient 部分が input に一致するようにする。
+  const recipientAmountBigInt = useMemo(() => toBigIntAmount(amount), [amount]);
+
+  const totalAmountBigInt = useMemo(
+    () =>
+      ratios
+        ? grossUpFromRecipient(
+            recipientAmountBigInt,
+            ratios.fundRatio,
+            ratios.burnRatio,
+          )
+        : recipientAmountBigInt,
+    [recipientAmountBigInt, ratios],
+  );
 
   const breakdown = useMemo(
     () =>
       ratios
-        ? calculateDistribution(amountBigInt, ratios.fundRatio, ratios.burnRatio)
+        ? calculateDistribution(
+            totalAmountBigInt,
+            ratios.fundRatio,
+            ratios.burnRatio,
+          )
         : null,
-    [amountBigInt, ratios],
+    [totalAmountBigInt, ratios],
   );
 
   const numAmount = Number(amount) || 0;
-  const fundAmount = breakdown
-    ? Number(formatUnits(breakdown.fundAmount, 18))
-    : 0;
-  // 合計は送金額 + fund + burn（= 入力額 = 実際に差し引かれる額）
-  const totalAmount = breakdown
-    ? Number(
-        formatUnits(
-          breakdown.recipientAmount + breakdown.fundAmount + breakdown.burnAmount,
-          18,
-        ),
-      )
-    : numAmount;
+  // 森の貯金箱表示は fund + burn を合算して表示する
+  const fundAndBurn = breakdown
+    ? formatUnits(breakdown.fundAmount + breakdown.burnAmount, 18)
+    : "0";
+  const totalAmount = formatUnits(totalAmountBigInt, 18);
 
   const balanceRaw = balance?.raw ?? 0n;
-  const balanceNum = balance ? Number(balance.formatted) : 0;
+  const balanceDisplay = balance ? balance.formatted : "0";
   const insufficientBalance =
-    !!balance && amountBigInt > 0n && balanceRaw < amountBigInt;
+    !!balance && totalAmountBigInt > 0n && balanceRaw < totalAmountBigInt;
   const remainingBalance = balance
-    ? Number(
-        formatUnits(
-          balanceRaw > amountBigInt ? balanceRaw - amountBigInt : 0n,
-          18,
-        ),
+    ? formatUnits(
+        balanceRaw > totalAmountBigInt ? balanceRaw - totalAmountBigInt : 0n,
+        18,
       )
-    : 0;
+    : "0";
 
   const isSubmitting = status === "signing" || status === "pending";
   const confirmLabel =
@@ -152,12 +163,16 @@ export default function Send({ loaderData }: Route.ComponentProps) {
         : "送る";
 
   const handleConfirmSend = async () => {
-    if (!recipient?.address || amountBigInt === 0n || isSubmitting) return;
+    if (!recipient?.address || totalAmountBigInt === 0n || isSubmitting) return;
+    const payload = buildMessagePayload({
+      usecase: selectedPurpose,
+      memo: story,
+    });
     try {
       await executeTransfer(
         recipient.address as Address,
-        amountBigInt,
-        story,
+        totalAmountBigInt,
+        payload,
       );
       setStep("complete");
     } catch {
@@ -231,7 +246,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               </Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-m">
-                  {isRatiosLoading ? "--" : formatAmount(fundAmount)}
+                  {isRatiosLoading ? "--" : formatAmount(fundAndBurn)}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
                   FoR
@@ -259,7 +274,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             </Typography>
             <div className="flex items-baseline gap-4">
               <Typography variant="number-m">
-                {isBalanceLoading ? "--" : formatAmount(balanceNum)}
+                {isBalanceLoading ? "--" : formatAmount(balanceDisplay)}
               </Typography>
               <Typography variant="ui-13" weight="bold">
                 FoR
@@ -382,7 +397,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               </Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-m">
-                  {formatAmount(numAmount)}
+                  {formatAmount(amount || "0")}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
                   FoR
@@ -396,7 +411,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               </Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-m">
-                  {formatAmount(fundAmount)}
+                  {formatAmount(fundAndBurn)}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
                   FoR
@@ -471,8 +486,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
 
         {/* Amount Summary */}
         <div className="flex flex-col gap-8">
-          <AmountRow label="送ったFoR" amount={numAmount} />
-          <AmountRow label="森の貯金箱" amount={fundAmount} />
+          <AmountRow label="送ったFoR" amount={amount || "0"} />
+          <AmountRow label="森の貯金箱" amount={fundAndBurn} />
+          <AmountRow label="合計" amount={totalAmount} bold />
         </div>
 
         {/* Rank */}

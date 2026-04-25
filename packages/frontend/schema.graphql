@@ -59,6 +59,7 @@ type TransferViaRouter {
   fundAmount: BigInt!
   burnAmount: BigInt!
   recipientAmount: BigInt!
+  message: String!
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: Bytes!

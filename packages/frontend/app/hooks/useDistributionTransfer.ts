@@ -26,6 +26,20 @@ export function calculateDistribution(
 	return { fundAmount, burnAmount, recipientAmount };
 }
 
+/**
+ * 受取人が受け取る額から、Router に渡すべき総額を逆算する。
+ * 総額 * (10000 - fund - burn) / 10000 = recipientAmount を満たす total を返す。
+ */
+export function grossUpFromRecipient(
+	recipientAmount: bigint,
+	fundRatio: bigint,
+	burnRatio: bigint,
+): bigint {
+	const recipientRatio = 10000n - fundRatio - burnRatio;
+	if (recipientRatio <= 0n) return recipientAmount;
+	return (recipientAmount * 10000n) / recipientRatio;
+}
+
 export function useDistributionTransfer() {
 	const { wallet, address, isSmartWallet } = useActiveWallet();
 	const { signPermit } = usePermitSignature();

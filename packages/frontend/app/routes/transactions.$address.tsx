@@ -17,6 +17,7 @@ import {
 } from "~/hooks/useTransfersBetween";
 import { formatAmount } from "~/lib/format";
 import { getNamesByAddress } from "~/lib/namestone.server";
+import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/transactions.$address";
 
@@ -48,12 +49,16 @@ function formatTime(timestamp: string): string {
 function MessageBubble({
   type,
   title,
+  usecase,
+  memo,
   amount,
   time,
   avatarSrc,
 }: {
   type: "sent" | "received";
   title: string;
+  usecase: string | null;
+  memo: string;
   amount: number;
   time: string;
   avatarSrc?: string;
@@ -67,6 +72,16 @@ function MessageBubble({
         <Typography variant="ui-13" weight="bold">
           {title}
         </Typography>
+        {usecase && (
+          <span className="self-start rounded-full bg-primary px-12 py-2 text-ui-10 text-primary-foreground">
+            {usecase}
+          </span>
+        )}
+        {memo && (
+          <Typography variant="ui-13" className="text-muted-foreground">
+            {memo}
+          </Typography>
+        )}
         <div className="flex items-end justify-end gap-4">
           <Typography variant="number-m">{formatAmount(amount)}</Typography>
           <Typography variant="ui-16" weight="bold">
@@ -103,6 +118,8 @@ interface ChatMessage {
   id: string;
   type: "sent" | "received";
   title: string;
+  usecase: string | null;
+  memo: string;
   amount: number;
   time: string;
   date: string;
@@ -115,10 +132,13 @@ function buildMessages(
   return transfers.map((tx) => {
     const isSent = tx.from.id.toLowerCase() === meLower;
     const rawAmount = isSent ? tx.totalAmount : tx.recipientAmount;
+    const parsed = parseMessagePayload(tx.message);
     return {
       id: tx.id,
       type: isSent ? "sent" : "received",
       title: isSent ? "FoRを送りました" : "FoRを受け取りました",
+      usecase: parsed?.usecase ?? null,
+      memo: parsed?.memo ?? "",
       amount: Number(formatUnits(BigInt(rawAmount), 18)),
       time: formatTime(tx.timestamp),
       date: formatTimestamp(tx.timestamp),
@@ -186,6 +206,8 @@ export default function TransactionDetail({
                     key={msg.id}
                     type={msg.type}
                     title={msg.title}
+                    usecase={msg.usecase}
+                    memo={msg.memo}
                     amount={msg.amount}
                     time={msg.time}
                     avatarSrc={avatarSrc}

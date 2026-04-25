@@ -81,6 +81,7 @@ export function handleTransferWithDistribution(
   transfer.fundAmount = event.params.fundAmount;
   transfer.burnAmount = event.params.burnAmount;
   transfer.recipientAmount = event.params.recipientAmount;
+  transfer.message = event.params.message;
   transfer.blockNumber = event.block.number;
   transfer.timestamp = event.block.timestamp;
   transfer.transactionHash = event.transaction.hash;
