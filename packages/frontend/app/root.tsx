@@ -9,6 +9,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { AuthGate } from "./components/auth-gate";
+import { ChainMismatchBanner } from "./components/chain-mismatch-banner";
 import { ActiveWalletProvider } from "./providers/ActiveWalletProvider";
 import { AppPrivyProvider } from "./providers/AppPrivyProvider";
 import { QueryProvider } from "./providers/QueryProvider";
@@ -50,6 +51,7 @@ export default function App() {
       <AppPrivyProvider>
         <ActiveWalletProvider>
           <div className="mx-auto w-full max-w-md min-h-screen">
+            <ChainMismatchBanner />
             <AuthGate />
           </div>
         </ActiveWalletProvider>

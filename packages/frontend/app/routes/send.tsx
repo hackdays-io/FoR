@@ -14,6 +14,7 @@ import { Label } from "~/components/ui/label";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
+import { useChainMismatch } from "~/hooks/useChainMismatch";
 import {
   calculateDistribution,
   grossUpFromRecipient,
@@ -106,6 +107,8 @@ export default function Send({ loaderData }: Route.ComponentProps) {
     useForTokenBalance(address);
   const { data: ratios, isLoading: isRatiosLoading } = useDistributionRatios();
   const { executeTransfer, status, txHash, error } = useDistributionTransfer();
+  const { isMismatched: isChainMismatched, expectedChainName } =
+    useChainMismatch();
 
   // ユーザー入力 = 受取人が受け取る額（送るFoR）。
   // Router へは grossUp した total を渡して、分配後に recipient 部分が input に一致するようにする。
@@ -154,15 +157,22 @@ export default function Send({ loaderData }: Route.ComponentProps) {
     : "0";
 
   const isSubmitting = status === "signing" || status === "pending";
-  const confirmLabel =
-    status === "signing"
+  const confirmLabel = isChainMismatched
+    ? `${expectedChainName} に切り替えてください`
+    : status === "signing"
       ? "署名中..."
       : status === "pending"
         ? "送信中..."
         : "送る";
 
   const handleConfirmSend = async () => {
-    if (!recipient?.address || totalAmountBigInt === 0n || isSubmitting) return;
+    if (
+      !recipient?.address ||
+      totalAmountBigInt === 0n ||
+      isSubmitting ||
+      isChainMismatched
+    )
+      return;
     const payload = buildMessagePayload({
       usecase: selectedPurpose,
       memo: story,
@@ -459,7 +469,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
           <Button
             className="w-full"
-            disabled={isSubmitting || !recipient?.address}
+            disabled={isSubmitting || !recipient?.address || isChainMismatched}
             onClick={handleConfirmSend}
           >
             {confirmLabel}
