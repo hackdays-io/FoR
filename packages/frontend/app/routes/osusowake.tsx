@@ -1,5 +1,5 @@
 import { Gift } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import {
   AppBar,
   AppBarBackButton,
@@ -7,21 +7,21 @@ import {
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Card } from "~/components/ui/card";
+import { loadOsusowakeItems } from "~/lib/osusowake.server";
 import type { Route } from "./+types/osusowake";
 
 export function meta(_args: Route.MetaArgs) {
   return [{ title: "おすそわけ | FoR" }];
 }
 
-const dummyItems = Array.from({ length: 8 }, (_, i) => ({
-  id: i + 1,
-  title: "森のお茶会森のお茶会最大何文字...",
-  amount: 500,
-  isNew: i < 2,
-}));
+export async function loader() {
+  const items = await loadOsusowakeItems();
+  return { items };
+}
 
 export default function OsusowakeList() {
   const navigate = useNavigate();
+  const { items } = useLoaderData<typeof loader>();
 
   return (
     <div className="min-h-screen bg-bg-default">
@@ -44,13 +44,14 @@ export default function OsusowakeList() {
       </AppBar>
 
       <div className="grid grid-cols-2 gap-12 px-20 pt-16 pb-20">
-        {dummyItems.map((item) => (
+        {items.map((item) => (
           <Card
             key={item.id}
             variant="promo"
             amount={item.amount}
             topProps={{ title: item.title }}
             isNew={item.isNew}
+            backgroundImage={item.imageUrl}
             to={`/osusowake/${item.id}`}
           />
         ))}

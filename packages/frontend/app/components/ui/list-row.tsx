@@ -2,6 +2,7 @@ import { ExternalLink } from "lucide-react";
 import * as React from "react";
 
 import { formatAmount } from "~/lib/format";
+import { ipfs2https } from "~/lib/ipfs";
 import { cn } from "~/lib/utils";
 
 export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -50,6 +51,9 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
     },
     ref,
   ) => {
+    const resolvedAvatarSrc = avatarSrc?.startsWith("ipfs://")
+      ? ipfs2https(avatarSrc)
+      : avatarSrc;
     return (
       <div
         ref={ref}
@@ -61,18 +65,15 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
         data-slot="list-row"
         {...props}
       >
-        {/* Avatar */}
-        <div className="flex size-40 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
-          {avatarSrc ? (
+        {resolvedAvatarSrc ? (
+          <div className="flex size-40 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
             <img
-              src={avatarSrc}
+              src={resolvedAvatarSrc}
               alt={avatarAlt}
               className="size-40 rounded-full object-cover"
             />
-          ) : (
-            <div className="size-40 rounded-full bg-foreground/10" />
-          )}
-        </div>
+          </div>
+        ) : null}
 
         {/* Left content: name + message */}
         <div className="flex min-w-0 flex-1 flex-col gap-2">

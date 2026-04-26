@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import { type Address, isAddress } from "viem";
 import { chainId } from "./viem";
 
 interface ContractAddresses {
@@ -19,4 +19,29 @@ const ADDRESSES: Record<number, ContractAddresses> = {
   },
 };
 
-export const addresses: ContractAddresses | undefined = ADDRESSES[chainId];
+function pickAddress(
+  envValue: unknown,
+  fallback?: Address,
+): Address | undefined {
+  if (typeof envValue === "string" && isAddress(envValue)) {
+    return envValue as Address;
+  }
+  return fallback;
+}
+
+function resolveAddresses(id: number): ContractAddresses | undefined {
+  const fallback = ADDRESSES[id];
+  const forToken = pickAddress(
+    import.meta.env.VITE_FOR_TOKEN_ADDRESS,
+    fallback?.forToken,
+  );
+  const router = pickAddress(
+    import.meta.env.VITE_ROUTER_ADDRESS,
+    fallback?.router,
+  );
+  if (!forToken || !router) return undefined;
+  return { forToken, router };
+}
+
+export const addresses: ContractAddresses | undefined =
+  resolveAddresses(chainId);

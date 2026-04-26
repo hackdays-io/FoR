@@ -1,7 +1,12 @@
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect } from "react";
 import { Link, useFetcher, useNavigate } from "react-router";
-import { AppBar, AppBarItem, AppBarTitle } from "~/components/ui/app-bar";
+import {
+  AppBar,
+  AppBarBackButton,
+  AppBarItem,
+  AppBarTitle,
+} from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Typography } from "~/components/ui/typography";
@@ -41,6 +46,9 @@ export default function Mypage() {
     return (
       <div className="min-h-screen bg-bg-default">
         <AppBar>
+          <AppBarItem position="left">
+            <AppBarBackButton onClick={() => navigate("/")} />
+          </AppBarItem>
           <AppBarItem position="center">
             <AppBarTitle>マイページ</AppBarTitle>
           </AppBarItem>
@@ -58,6 +66,9 @@ export default function Mypage() {
     return (
       <div className="min-h-screen bg-bg-default">
         <AppBar>
+          <AppBarItem position="left">
+            <AppBarBackButton onClick={() => navigate("/")} />
+          </AppBarItem>
           <AppBarItem position="center">
             <AppBarTitle>マイページ</AppBarTitle>
           </AppBarItem>
@@ -80,6 +91,9 @@ export default function Mypage() {
   return (
     <div className="min-h-screen bg-bg-default">
       <AppBar>
+        <AppBarItem position="left">
+          <AppBarBackButton onClick={() => navigate("/")} />
+        </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>マイページ</AppBarTitle>
         </AppBarItem>
@@ -128,7 +142,7 @@ export default function Mypage() {
           ログアウト
         </Button>
 
-        {profile ? (
+        {/* {profile ? (
           <Link
             to={`/settings/delete-account?address=${address}`}
             className="w-full"
@@ -137,7 +151,7 @@ export default function Mypage() {
               アカウントを削除
             </Button>
           </Link>
-        ) : null}
+        ) : null} */}
       </div>
     </div>
   );

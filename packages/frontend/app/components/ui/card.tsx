@@ -36,7 +36,7 @@ type CardVariant = keyof typeof cardVariantConfig;
 type CardVariantConfig = (typeof cardVariantConfig)[CardVariant];
 
 type WalletCardTopInput = {
-  badgeImage: string;
+  badgeImage?: string;
   qrCodeImage?: string;
 };
 
@@ -110,11 +110,13 @@ function WalletCardTop({
             />
           </div>
         )}
-        <img
-          alt={BADGE_IMAGE_ALT}
-          className="absolute right-0 top-0 h-48 w-48 bg-card object-contain"
-          src={badgeImage}
-        />
+        {badgeImage && (
+          <img
+            alt={BADGE_IMAGE_ALT}
+            className="absolute right-0 top-0 h-48 w-48 bg-card object-contain"
+            src={badgeImage}
+          />
+        )}
       </div>
     </div>
   );

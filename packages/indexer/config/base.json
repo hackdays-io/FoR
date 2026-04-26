@@ -1,7 +1,7 @@
 {
   "network": "base",
-  "routerAddress": "0x0000000000000000000000000000000000000000",
-  "routerStartBlock": 0,
-  "forTokenAddress": "0x0000000000000000000000000000000000000000",
-  "forTokenStartBlock": 0
+  "routerAddress": "0x49b0031680601835d3Dc753463f83DC4133020DF",
+  "routerStartBlock": 45203427,
+  "forTokenAddress": "0x360Af2A7C7A3788F9F113000b64D41a0375c5D82",
+  "forTokenStartBlock": 45203427
 }

@@ -168,12 +168,12 @@ function AuthenticatedHome() {
       {/* Tabs */}
       <Tabs defaultValue="my-wallet" variant="underline">
         <TabsList>
-          <TabsTrigger value="my-wallet">自分のウォレット</TabsTrigger>
+          <TabsTrigger value="my-wallet">あなたのウォレット</TabsTrigger>
           <TabsTrigger
             value="forest-wallet"
             onClick={() => navigate("/forest-bank")}
           >
-            森のウォレット
+            森の共通基金
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -185,7 +185,7 @@ function AuthenticatedHome() {
           variant="wallet"
           amount={isBalanceLoading ? "--" : balance ? Number(balance.formatted) : 0}
           topProps={{
-            badgeImage: "",
+            // badgeImage: "",
           }}
         />
 
@@ -258,7 +258,7 @@ function AuthenticatedHome() {
         <BottomNavigationItem
           icon={<Send size={ICON_SIZE} />}
           label="送る"
-          to="/send"
+          to="/transactions"
         />
         <BottomNavigationItem
           icon={<Scan size={ICON_SIZE} />}

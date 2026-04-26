@@ -98,21 +98,24 @@ export default function Transactions() {
           /* Search Results */
           <div>
             <SectionTitle>検索結果</SectionTitle>
-            <div className="mt-8">
+            <div className="mt-8 flex flex-col gap-12">
               {fetcher.state === "loading" ? (
                 <Typography variant="ui-13" className="py-12 text-text-hint">
                   検索中...
                 </Typography>
               ) : searchResults && searchResults.length > 0 ? (
-                searchResults.map((profile: NameStoneProfile, i: number) => (
-                  <ListRow
-                    key={profile.name}
-                    name={profile.text_records?.display || profile.name}
-                    divider={i < searchResults.length - 1}
-                    avatarSrc={profile.text_records?.avatar}
-                    onClick={() => navigate(`/transactions/${profile.address}`)}
-                    className="cursor-pointer"
-                  />
+                searchResults.map((profile: NameStoneProfile) => (
+                  <div key={profile.name} className="rounded-lg bg-muted px-16">
+                    <ListRow
+                      name={profile.text_records?.display || profile.name}
+                      divider={false}
+                      avatarSrc={profile.text_records?.avatar}
+                      onClick={() =>
+                        navigate(`/transactions/${profile.address}`)
+                      }
+                      className="cursor-pointer"
+                    />
+                  </div>
                 ))
               ) : searchResults ? (
                 <Typography variant="ui-13" className="py-12 text-text-hint">
@@ -125,7 +128,7 @@ export default function Transactions() {
           /* Transaction History */
           <div>
             <SectionTitle>履歴</SectionTitle>
-            <div className="mt-8">
+            <div className="mt-8 flex flex-col gap-12">
               {isTransfersLoading ? (
                 <Typography variant="ui-13" className="py-12 text-text-hint">
                   読み込み中...
@@ -135,7 +138,7 @@ export default function Transactions() {
                   取引履歴がありません
                 </Typography>
               ) : (
-                transfers.map((tx, i) => {
+                transfers.map((tx) => {
                   const meLower = address?.toLowerCase() ?? "";
                   const isSent = tx.from.id.toLowerCase() === meLower;
                   const counterparty = isSent ? tx.to.id : tx.from.id;
@@ -147,17 +150,21 @@ export default function Transactions() {
                     Number(formatUnits(BigInt(shownAmount), 18));
                   const explorerUrl = getExplorerTxUrl(tx.transactionHash);
                   return (
-                    <ListRow
-                      key={tx.id}
-                      name={shortenAddress(counterparty)}
-                      date={formatTimestamp(tx.timestamp)}
-                      amount={signedAmount}
-                      divider={i < transfers.length - 1}
-                      onClick={() => navigate(`/transactions/${counterparty}`)}
-                      className="cursor-pointer"
-                      externalUrl={explorerUrl ?? undefined}
-                      externalUrlLabel={`${getExplorerName()}で取引を開く`}
-                    />
+                    <div key={tx.id} className="rounded-lg bg-muted px-16">
+                      <ListRow
+                        name={shortenAddress(counterparty)}
+                        message={tx.message ?? undefined}
+                        date={formatTimestamp(tx.timestamp)}
+                        amount={signedAmount}
+                        divider={false}
+                        onClick={() =>
+                          navigate(`/transactions/${counterparty}`)
+                        }
+                        className="cursor-pointer"
+                        externalUrl={explorerUrl ?? undefined}
+                        externalUrlLabel={`${getExplorerName()}で取引を開く`}
+                      />
+                    </div>
                   );
                 })
               )}

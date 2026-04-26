@@ -1,0 +1,14 @@
+{
+  "FoRTokenModule": {
+    "initialSupply": "1000000000000000000000000",
+    "name": "kuu coin",
+    "symbol": "KUU"
+  },
+  "RouterModule": {
+    "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "initialAdmin": "0x86036f29855181C4d72a67428f6cdFAdE157381b",
+    "fundWallet": "0x6238A9f703fe659FD4A1b07BFD2724914Ac6cbAa",
+    "fundRatio": 1500,
+    "burnRatio": 500
+  }
+}
