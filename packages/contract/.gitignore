@@ -21,3 +21,8 @@
 
 # Local deployment artifacts (chain-31337 = Hardhat local node)
 /ignition/deployments/chain-31337
+
+# Local env files (secrets)
+/.env
+/.env.*
+!/.env.example
