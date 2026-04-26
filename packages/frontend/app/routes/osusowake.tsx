@@ -33,13 +33,14 @@ export default function OsusowakeList() {
           <AppBarTitle>おすそわけ</AppBarTitle>
         </AppBarItem>
         <AppBarItem position="right">
-          <button
-            type="button"
-            onClick={() => navigate("/osusowake/new")}
+          <a
+            href="https://forms.gle/BWy74cG4KemRi4DZ7"
+            target="_blank"
+            rel="noreferrer noopener"
             className="inline-flex size-32 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted"
           >
             <Gift size={20} />
-          </button>
+          </a>
         </AppBarItem>
       </AppBar>
 
