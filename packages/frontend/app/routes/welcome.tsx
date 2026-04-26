@@ -20,10 +20,20 @@ export function meta(_args: Route.MetaArgs) {
 async function hasProfile(address: Address): Promise<boolean> {
   try {
     const res = await fetch(`/api/profile/${address}`);
+    console.log("[FoR/welcome] hasProfile fetch", {
+      address,
+      ok: res.ok,
+      status: res.status,
+    });
     if (!res.ok) return false;
     const data = (await res.json()) as { profile: unknown | null };
+    console.log("[FoR/welcome] hasProfile data", {
+      address,
+      hasProfile: !!data.profile,
+    });
     return !!data.profile;
-  } catch {
+  } catch (err) {
+    console.error("[FoR/welcome] hasProfile error", err);
     return false;
   }
 }
@@ -31,20 +41,26 @@ async function hasProfile(address: Address): Promise<boolean> {
 export default function Welcome() {
   const navigate = useNavigate();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
-  const { data: isListed, isLoading: isCheckingList, refetch } =
-    useIsAllowListed(address);
+  const {
+    data: isListed,
+    isLoading: isCheckingList,
+    refetch,
+  } = useIsAllowListed(address);
   const { addToAllowList, status, error } = useAddToAllowList();
 
   const goNext = useCallback(
     async (account: Address) => {
       const exists = await hasProfile(account);
-      navigate(exists ? "/" : "/profile/create", { replace: true });
+      const dest = exists ? "/" : "/profile/create";
+      console.log("[FoR/welcome] goNext navigate", { account, dest });
+      navigate(dest, { replace: true });
     },
     [navigate],
   );
 
   // 既に allowlist 済み（別経路で登録済みなど）の場合も profile 有無で遷移先を振り分ける
   useEffect(() => {
+    console.log("[FoR/welcome] isListed effect", { isListed, address });
     if (isListed !== true || !address) return;
     void goNext(address);
   }, [isListed, address, goNext]);
@@ -52,11 +68,16 @@ export default function Welcome() {
   const handleAccept = async () => {
     if (!address) return;
     try {
+      console.log("[FoR/welcome] handleAccept start");
       await addToAllowList();
-      await refetch();
+      console.log("[FoR/welcome] addToAllowList done");
+      const refetchResult = await refetch();
+      console.log("[FoR/welcome] refetch isListed", {
+        data: refetchResult.data,
+      });
       await goNext(address);
-    } catch {
-      // error は hook の error に保持
+    } catch (err) {
+      console.error("[FoR/welcome] handleAccept failed", err);
     }
   };
 

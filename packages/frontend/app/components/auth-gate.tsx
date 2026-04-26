@@ -9,10 +9,7 @@ import { LoadingScreen } from "./loading-screen";
 // 認証無し (Privy)でも閲覧可能な規約系パス
 const FULLY_PUBLIC_PATHS = new Set<string>(["/terms", "/privacy"]);
 // allowlist チェックをスキップするパス（本人が registration 中 or 規約閲覧中）
-const ALLOWLIST_EXEMPT = new Set<string>([
-  ...FULLY_PUBLIC_PATHS,
-  "/welcome",
-]);
+const ALLOWLIST_EXEMPT = new Set<string>([...FULLY_PUBLIC_PATHS, "/welcome"]);
 // profile チェックをスキップするパス（本人が作成中 or allowlist 登録中）
 const PROFILE_EXEMPT = new Set<string>([
   ...ALLOWLIST_EXEMPT,
@@ -55,11 +52,21 @@ export function AuthGate() {
     if (!ready || !authenticated) return;
     if (!bothResolved) return;
 
+    console.log("[FoR/auth-gate] resolved", {
+      pathname,
+      requireAllowlist,
+      requireProfile,
+      isListed,
+      hasProfile: !!profileFetcher.data?.profile,
+    });
+
     if (requireAllowlist && isListed === false) {
+      console.log("[FoR/auth-gate] redirect /welcome (not allowlisted)");
       navigate("/welcome", { replace: true });
       return;
     }
     if (requireProfile && !profileFetcher.data?.profile) {
+      console.log("[FoR/auth-gate] redirect /profile/create (no profile)");
       navigate("/profile/create", { replace: true });
     }
   }, [
@@ -71,6 +78,7 @@ export function AuthGate() {
     isListed,
     profileFetcher.data,
     navigate,
+    pathname,
   ]);
 
   if (!ready) return <LoadingScreen />;
