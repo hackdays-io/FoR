@@ -528,7 +528,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           );
         })()}
 
-        {/* Rank */}
+        {/* Rank
         <div className="flex flex-col items-center gap-8 pt-8">
           <Typography variant="ui-16" weight="bold" className="w-full">
             あなたのランク
@@ -541,6 +541,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             あと○回交換すると、ランク3にアップ！
           </Typography>
         </div>
+        */}
       </div>
 
       <div className="bg-bg-default px-20 pt-12 pb-32">
