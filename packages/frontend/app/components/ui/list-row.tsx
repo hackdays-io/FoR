@@ -18,7 +18,7 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   date?: string;
   /** 金額（2行目右、例: 50 or -50） */
   amount?: number;
-  /** 金額の単位（デフォルト: "FoR"） */
+  /** 金額の単位（デフォルト: "KUU"） */
   unit?: string;
   /** 下部のdividerを表示するか（デフォルト: true） */
   divider?: boolean;
@@ -42,7 +42,7 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
       message,
       date,
       amount,
-      unit = "FoR",
+      unit = "KUU",
       divider = true,
       externalUrl,
       externalUrlLabel = "ブロックエクスプローラで開く",

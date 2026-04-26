@@ -29,7 +29,7 @@ import { buildMessagePayload } from "~/lib/transfer-message";
 import type { Route } from "./+types/send";
 
 export function meta(_args: Route.MetaArgs) {
-  return [{ title: "FoRを送る | FoR" }];
+  return [{ title: "KUUを送る | FoR" }];
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -86,7 +86,7 @@ function AmountRow({
       <div className="flex items-baseline gap-4">
         <Typography variant="number-m">{formatAmount(amount)}</Typography>
         <Typography variant="ui-20" weight="bold">
-          FoR
+          KUU
         </Typography>
       </div>
     </div>
@@ -110,7 +110,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   const { isMismatched: isChainMismatched, expectedChainName } =
     useChainMismatch();
 
-  // ユーザー入力 = 受取人が受け取る額（送るFoR）。
+  // ユーザー入力 = 受取人が受け取る額（送るKUU）。
   // Router へは grossUp した total を渡して、分配後に recipient 部分が input に一致するようにする。
   const recipientAmountBigInt = useMemo(() => toBigIntAmount(amount), [amount]);
 
@@ -215,7 +215,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             <AppBarBackButton onClick={handleBack} />
           </AppBarItem>
           <AppBarItem position="center">
-            <AppBarTitle>FoRを送る</AppBarTitle>
+            <AppBarTitle>KUUを送る</AppBarTitle>
           </AppBarItem>
         </AppBar>
 
@@ -234,7 +234,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           <div className="rounded-lg bg-background p-16">
             <div className="flex items-baseline gap-8">
               <Typography variant="ui-13" as="span" className="shrink-0">
-                送るFoR
+                送るKUU
               </Typography>
               <input
                 type="number"
@@ -250,7 +250,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
                 as="span"
                 className="shrink-0"
               >
-                FoR
+                KUU
               </Typography>
             </div>
 
@@ -263,7 +263,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
                   {isRatiosLoading ? "--" : formatAmount(fundAndBurn)}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
-                  FoR
+                  KUU
                 </Typography>
               </div>
             </div>
@@ -277,7 +277,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
                   {isRatiosLoading ? "--" : formatAmount(totalAmount)}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
-                  FoR
+                  KUU
                 </Typography>
               </div>
             </div>
@@ -293,7 +293,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
                 {isBalanceLoading ? "--" : formatAmount(balanceDisplay)}
               </Typography>
               <Typography variant="ui-13" weight="bold">
-                FoR
+                KUU
               </Typography>
             </div>
           </div>
@@ -312,7 +312,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           {/* Purpose */}
           <div>
             <Typography variant="ui-16" weight="bold">
-              FoRの交換用途
+              KUUの交換用途
             </Typography>
             <div className="mt-8 flex flex-wrap gap-8">
               {PURPOSE_OPTIONS.map((purpose) => (
@@ -392,7 +392,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             <AppBarBackButton onClick={handleBack} />
           </AppBarItem>
           <AppBarItem position="center">
-            <AppBarTitle>FoRを送る</AppBarTitle>
+            <AppBarTitle>KUUを送る</AppBarTitle>
           </AppBarItem>
         </AppBar>
 
@@ -411,14 +411,14 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           <div className="flex flex-col gap-4 rounded-lg bg-background p-16">
             <div className="flex items-center justify-between">
               <Typography variant="ui-13" as="span">
-                送るFoR
+                送るKUU
               </Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-m">
                   {formatAmount(amount || "0")}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
-                  FoR
+                  KUU
                 </Typography>
               </div>
             </div>
@@ -432,7 +432,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
                   {formatAmount(fundAndBurn)}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
-                  FoR
+                  KUU
                 </Typography>
               </div>
             </div>
@@ -446,7 +446,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
                   {formatAmount(totalAmount)}
                 </Typography>
                 <Typography variant="ui-20" weight="bold">
-                  FoR
+                  KUU
                 </Typography>
               </div>
             </div>
@@ -487,7 +487,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           <AppBarBackButton onClick={() => navigate("/")} />
         </AppBarItem>
         <AppBarItem position="center">
-          <AppBarTitle>FoRを送る</AppBarTitle>
+          <AppBarTitle>KUUを送る</AppBarTitle>
         </AppBarItem>
       </AppBar>
 
@@ -502,11 +502,11 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           </div>
         )}
 
-        <Typography variant="ui-16">FoRを送りました。</Typography>
+        <Typography variant="ui-16">KUUを送りました。</Typography>
 
         {/* Amount Summary */}
         <div className="flex flex-col gap-8">
-          <AmountRow label="送ったFoR" amount={amount || "0"} />
+          <AmountRow label="送ったKUU" amount={amount || "0"} />
           <AmountRow label="森の貯金箱" amount={fundAndBurn} />
           <AmountRow label="合計" amount={totalAmount} bold />
         </div>

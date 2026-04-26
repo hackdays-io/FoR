@@ -7,7 +7,7 @@ import { Label } from "~/components/ui/label";
 import { formatAmount } from "~/lib/format";
 import { cn } from "~/lib/utils";
 
-const CURRENCY_LABEL = "FoR";
+const CURRENCY_LABEL = "KUU";
 const QR_CODE_IMAGE_ALT = "QRコード";
 const BADGE_IMAGE_ALT = "バッジ";
 

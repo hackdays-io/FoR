@@ -67,7 +67,7 @@ export default function OsusowakeDetail() {
             {formatAmount(item.amount)}
           </Typography>
           <Typography variant="ui-20" weight="bold">
-            FoR
+            KUU
           </Typography>
         </div>
 
@@ -116,7 +116,7 @@ export default function OsusowakeDetail() {
             )
           }
         >
-          FoRを送る
+          KUUを送る
         </Button>
       </div>
     </div>

@@ -21,7 +21,7 @@ import type { NameStoneProfile } from "~/lib/namestone.server";
 import type { Route } from "./+types/receive";
 
 export function meta(_args: Route.MetaArgs) {
-  return [{ title: "FoRを受け取る | FoR" }];
+  return [{ title: "KUUを受け取る | FoR" }];
 }
 
 function toBigIntAmount(value: string): bigint {
@@ -108,13 +108,13 @@ export default function Receive() {
           <AppBarBackButton onClick={() => navigate(-1)} />
         </AppBarItem>
         <AppBarItem position="center">
-          <AppBarTitle>FoRを受け取る</AppBarTitle>
+          <AppBarTitle>KUUを受け取る</AppBarTitle>
         </AppBarItem>
       </AppBar>
 
       <div className="flex flex-1 flex-col gap-24 px-20 pt-20">
         <Typography variant="body-l">
-          相手にQRコードをスキャンしてもらうと、FoRを受け取ることができます。
+          相手にQRコードをスキャンしてもらうと、KUUを受け取ることができます。
         </Typography>
 
         {/* QR Card */}
@@ -138,7 +138,7 @@ export default function Receive() {
           {/* Amount input */}
           <div className="mt-16 flex items-baseline gap-8">
             <Typography variant="ui-13" as="span" className="shrink-0">
-              依頼FoR
+              依頼KUU
             </Typography>
             <input
               type="number"
@@ -149,7 +149,7 @@ export default function Receive() {
               className="min-w-0 flex-1 rounded-md border border-border bg-card px-8 py-6 text-right font-latin text-content-number-m font-bold text-foreground outline-none"
             />
             <Typography variant="ui-20" weight="bold" as="span" className="shrink-0">
-              FoR
+              KUU
             </Typography>
           </div>
 
@@ -163,7 +163,7 @@ export default function Receive() {
                 {isRatiosLoading ? "--" : formatAmount(fundAndBurn)}
               </Typography>
               <Typography variant="ui-20" weight="bold">
-                FoR
+                KUU
               </Typography>
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function Receive() {
                 {isRatiosLoading ? "--" : formatAmount(totalAmount)}
               </Typography>
               <Typography variant="ui-20" weight="bold">
-                FoR
+                KUU
               </Typography>
             </div>
           </div>

@@ -101,7 +101,7 @@ export default function ForestBank() {
                   {isBalanceLoading ? "—" : balanceDisplay}
                 </Typography>
                 <Typography variant="ui-16" weight="bold">
-                  FoR
+                  KUU
                 </Typography>
               </div>
               <div className="flex justify-end">
