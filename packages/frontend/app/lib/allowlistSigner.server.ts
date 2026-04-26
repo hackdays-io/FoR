@@ -1,11 +1,25 @@
 import type { Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { forTokenAbi } from "./abis/forTokenAbi";
 import { addresses } from "./contracts";
-import { chainId } from "./viem";
+import { chainId, publicClient } from "./viem";
 
-const TOKEN_NAME = "FoR Token";
 const TOKEN_VERSION = "1";
 const DEFAULT_DEADLINE_SECONDS = 15 * 60;
+
+let cachedTokenName: string | undefined;
+
+async function getTokenName(): Promise<string> {
+  if (cachedTokenName) return cachedTokenName;
+  if (!addresses) throw new Error("Contract addresses not configured");
+  const name = await publicClient.readContract({
+    address: addresses.forToken,
+    abi: forTokenAbi,
+    functionName: "name",
+  });
+  cachedTokenName = name;
+  return name;
+}
 
 export interface AllowListSignature {
   deadline: string;
@@ -22,13 +36,15 @@ export async function signAllowListAddition(
   const privateKey = (pk.startsWith("0x") ? pk : `0x${pk}`) as `0x${string}`;
   const signer = privateKeyToAccount(privateKey);
 
+  const tokenName = await getTokenName();
+
   const deadline = BigInt(
     Math.floor(Date.now() / 1000) + DEFAULT_DEADLINE_SECONDS,
   );
 
   const signature = await signer.signTypedData({
     domain: {
-      name: TOKEN_NAME,
+      name: tokenName,
       version: TOKEN_VERSION,
       chainId,
       verifyingContract: addresses.forToken,
