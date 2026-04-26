@@ -13,6 +13,7 @@ import { SectionTitle } from "~/components/ui/section-title";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
+import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import { getExplorerName, getExplorerTxUrl } from "~/lib/explorer";
 import { type NameStoneProfile, searchNames } from "~/lib/namestone.server";
@@ -21,6 +22,47 @@ import type { Route } from "./+types/transactions";
 
 export function meta(_args: Route.MetaArgs) {
   return [{ title: "送る・受け取る | FoR" }];
+}
+
+function TransferHistoryRow({
+  counterparty,
+  message,
+  date,
+  amount,
+  externalUrl,
+  externalUrlLabel,
+  onClick,
+}: {
+  counterparty: string;
+  message?: string;
+  date: string;
+  amount: number;
+  externalUrl?: string;
+  externalUrlLabel?: string;
+  onClick: () => void;
+}) {
+  const { data: profile } = useProfileByAddress(counterparty);
+  const displayName =
+    profile?.text_records?.display ||
+    profile?.name ||
+    shortenAddress(counterparty);
+
+  return (
+    <div className="rounded-lg bg-muted px-16">
+      <ListRow
+        name={displayName}
+        avatarSrc={profile?.text_records?.avatar}
+        message={message}
+        date={date}
+        amount={amount}
+        divider={false}
+        onClick={onClick}
+        className="cursor-pointer"
+        externalUrl={externalUrl}
+        externalUrlLabel={externalUrlLabel}
+      />
+    </div>
+  );
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -150,21 +192,16 @@ export default function Transactions() {
                     Number(formatUnits(BigInt(shownAmount), 18));
                   const explorerUrl = getExplorerTxUrl(tx.transactionHash);
                   return (
-                    <div key={tx.id} className="rounded-lg bg-muted px-16">
-                      <ListRow
-                        name={shortenAddress(counterparty)}
-                        message={tx.message ?? undefined}
-                        date={formatTimestamp(tx.timestamp)}
-                        amount={signedAmount}
-                        divider={false}
-                        onClick={() =>
-                          navigate(`/transactions/${counterparty}`)
-                        }
-                        className="cursor-pointer"
-                        externalUrl={explorerUrl ?? undefined}
-                        externalUrlLabel={`${getExplorerName()}で取引を開く`}
-                      />
-                    </div>
+                    <TransferHistoryRow
+                      key={tx.id}
+                      counterparty={counterparty}
+                      message={tx.message ?? undefined}
+                      date={formatTimestamp(tx.timestamp)}
+                      amount={signedAmount}
+                      externalUrl={explorerUrl ?? undefined}
+                      externalUrlLabel={`${getExplorerName()}で取引を開く`}
+                      onClick={() => navigate(`/transactions/${counterparty}`)}
+                    />
                   );
                 })
               )}
