@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { type Address, formatUnits } from "viem";
+import type { Address } from "viem";
 import { forTokenAbi } from "~/lib/abis/forTokenAbi";
 import { routerAbi } from "~/lib/abis/routerAbi";
 import { addresses } from "~/lib/contracts";
@@ -7,23 +7,28 @@ import { publicClient } from "~/lib/viem";
 import { useActiveWallet } from "./useActiveWallet";
 import { usePermitSignature } from "./usePermitSignature";
 
-export type TransferStatus = "idle" | "signing" | "pending" | "success" | "error";
+export type TransferStatus =
+  | "idle"
+  | "signing"
+  | "pending"
+  | "success"
+  | "error";
 
 export interface DistributionBreakdown {
-	fundAmount: bigint;
-	burnAmount: bigint;
-	recipientAmount: bigint;
+  fundAmount: bigint;
+  burnAmount: bigint;
+  recipientAmount: bigint;
 }
 
 export function calculateDistribution(
-	amount: bigint,
-	fundRatio: bigint,
-	burnRatio: bigint,
+  amount: bigint,
+  fundRatio: bigint,
+  burnRatio: bigint,
 ): DistributionBreakdown {
-	const fundAmount = (amount * fundRatio) / 10000n;
-	const burnAmount = (amount * burnRatio) / 10000n;
-	const recipientAmount = amount - fundAmount - burnAmount;
-	return { fundAmount, burnAmount, recipientAmount };
+  const fundAmount = (amount * fundRatio) / 10000n;
+  const burnAmount = (amount * burnRatio) / 10000n;
+  const recipientAmount = amount - fundAmount - burnAmount;
+  return { fundAmount, burnAmount, recipientAmount };
 }
 
 /**
@@ -31,126 +36,154 @@ export function calculateDistribution(
  * 総額 * (10000 - fund - burn) / 10000 = recipientAmount を満たす total を返す。
  */
 export function grossUpFromRecipient(
-	recipientAmount: bigint,
-	fundRatio: bigint,
-	burnRatio: bigint,
+  recipientAmount: bigint,
+  fundRatio: bigint,
+  burnRatio: bigint,
 ): bigint {
-	const recipientRatio = 10000n - fundRatio - burnRatio;
-	if (recipientRatio <= 0n) return recipientAmount;
-	return (recipientAmount * 10000n) / recipientRatio;
+  const recipientRatio = 10000n - fundRatio - burnRatio;
+  if (recipientRatio <= 0n) return recipientAmount;
+  return (recipientAmount * 10000n) / recipientRatio;
 }
 
 export function useDistributionTransfer() {
-	const { wallet, address, isSmartWallet } = useActiveWallet();
-	const { signPermit } = usePermitSignature();
-	const [status, setStatus] = useState<TransferStatus>("idle");
-	const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
-	const [error, setError] = useState<Error | null>(null);
+  const { wallet, address, isSmartWallet } = useActiveWallet();
+  const { signPermit } = usePermitSignature();
+  const [status, setStatus] = useState<TransferStatus>("idle");
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
-	const reset = useCallback(() => {
-		setStatus("idle");
-		setTxHash(null);
-		setError(null);
-	}, []);
+  const reset = useCallback(() => {
+    setStatus("idle");
+    setTxHash(null);
+    setError(null);
+  }, []);
 
-	const executeTransfer = useCallback(
-		async (recipient: Address, amount: bigint, message = "") => {
-			if (!wallet) throw new Error("Wallet not connected");
-			if (!address) throw new Error("Wallet address not available");
-			if (!addresses) throw new Error("Contract addresses not configured");
+  const executeTransfer = useCallback(
+    async (recipient: Address, amount: bigint, message = "") => {
+      if (!wallet) throw new Error("Wallet not connected");
+      if (!address) throw new Error("Wallet address not available");
+      if (!addresses) throw new Error("Contract addresses not configured");
 
-			setError(null);
-			setTxHash(null);
+      console.log("[FoR/transfer] start", {
+        isSmartWallet,
+        from: address,
+        recipient,
+        amount: amount.toString(),
+        router: addresses.router,
+        forToken: addresses.forToken,
+        walletAccount: wallet.account?.address,
+      });
 
-			try {
-				let hash: `0x${string}`;
+      setError(null);
+      setTxHash(null);
 
-				if (isSmartWallet) {
-					// AA wallet flow: approve → transferWithDistribution
-					setStatus("signing");
+      try {
+        let hash: `0x${string}`;
 
-					const currentAllowance = await publicClient.readContract({
-						address: addresses.forToken,
-						abi: forTokenAbi,
-						functionName: "allowance",
-						args: [address, addresses.router],
-					});
+        if (isSmartWallet) {
+          // AA wallet flow: approve → transferWithDistribution
+          setStatus("signing");
 
-					if (currentAllowance < amount) {
-						const approveHash = await wallet.writeContract({
-							address: addresses.forToken,
-							abi: forTokenAbi,
-							functionName: "approve",
-							args: [addresses.router, amount],
-							chain: publicClient.chain,
-							account: wallet.account!,
-						});
-						const approveReceipt =
-							await publicClient.waitForTransactionReceipt({
-								hash: approveHash,
-							});
-						if (approveReceipt.status !== "success") {
-							throw new Error("Approve transaction reverted");
-						}
-					}
+          const currentAllowance = await publicClient.readContract({
+            address: addresses.forToken,
+            abi: forTokenAbi,
+            functionName: "allowance",
+            args: [address, addresses.router],
+          });
 
-					setStatus("pending");
+          console.log("[FoR/transfer] AA allowance", {
+            current: currentAllowance.toString(),
+            required: amount.toString(),
+          });
 
-					hash = await wallet.writeContract({
-						address: addresses.router,
-						abi: routerAbi,
-						functionName: "transferWithDistribution",
-						args: [address, recipient, amount, message],
-						chain: publicClient.chain,
-						account: wallet.account!,
-					});
-				} else {
-					// EOA wallet flow: permit signature → transferWithPermit
-					setStatus("signing");
-					const { v, r, s, deadline } = await signPermit(
-						addresses.router,
-						amount,
-					);
+          if (currentAllowance < amount) {
+            console.log("[FoR/transfer] AA approve start");
+            const approveHash = await wallet.writeContract({
+              address: addresses.forToken,
+              abi: forTokenAbi,
+              functionName: "approve",
+              args: [addresses.router, amount],
+              chain: publicClient.chain,
+              account: wallet.account!,
+            });
+            console.log("[FoR/transfer] AA approve sent", { approveHash });
+            const approveReceipt = await publicClient.waitForTransactionReceipt(
+              {
+                hash: approveHash,
+              },
+            );
+            if (approveReceipt.status !== "success") {
+              throw new Error("Approve transaction reverted");
+            }
+            console.log("[FoR/transfer] AA approve confirmed");
+          }
 
-					setStatus("pending");
+          setStatus("pending");
 
-					hash = await wallet.writeContract({
-						address: addresses.router,
-						abi: routerAbi,
-						functionName: "transferWithPermit",
-						args: [address, recipient, amount, deadline, v, r, s, message],
-						chain: publicClient.chain,
-						account: wallet.account!,
-					});
-				}
+          console.log("[FoR/transfer] AA transferWithDistribution start");
+          hash = await wallet.writeContract({
+            address: addresses.router,
+            abi: routerAbi,
+            functionName: "transferWithDistribution",
+            args: [address, recipient, amount, message],
+            chain: publicClient.chain,
+            account: wallet.account!,
+          });
+          console.log("[FoR/transfer] AA transferWithDistribution sent", {
+            hash,
+          });
+        } else {
+          // EOA wallet flow: permit signature → transferWithPermit
+          setStatus("signing");
+          console.log("[FoR/transfer] EOA signPermit start");
+          const { v, r, s, deadline } = await signPermit(
+            addresses.router,
+            amount,
+          );
+          console.log("[FoR/transfer] EOA signPermit done", {
+            deadline: deadline.toString(),
+          });
 
-				const receipt = await publicClient.waitForTransactionReceipt({
-					hash,
-				});
-				if (receipt.status !== "success") {
-					throw new Error("Transfer transaction reverted");
-				}
-				setTxHash(hash);
-				setStatus("success");
-				return hash;
-			} catch (err) {
-				const error =
-					err instanceof Error ? err : new Error("Transfer failed");
-				setError(error);
-				setStatus("error");
-				throw error;
-			}
-		},
-		[wallet, address, isSmartWallet, signPermit],
-	);
+          setStatus("pending");
 
-	return {
-		executeTransfer,
-		calculateDistribution,
-		status,
-		txHash,
-		error,
-		reset,
-		isReady: !!wallet && !!address && !!addresses,
-	};
+          hash = await wallet.writeContract({
+            address: addresses.router,
+            abi: routerAbi,
+            functionName: "transferWithPermit",
+            args: [address, recipient, amount, deadline, v, r, s, message],
+            chain: publicClient.chain,
+            account: wallet.account!,
+          });
+          console.log("[FoR/transfer] EOA transferWithPermit sent", { hash });
+        }
+
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash,
+        });
+        if (receipt.status !== "success") {
+          throw new Error("Transfer transaction reverted");
+        }
+        setTxHash(hash);
+        setStatus("success");
+        return hash;
+      } catch (err) {
+        console.error("[FoR/transfer] failed", err);
+        const error = err instanceof Error ? err : new Error("Transfer failed");
+        setError(error);
+        setStatus("error");
+        throw error;
+      }
+    },
+    [wallet, address, isSmartWallet, signPermit],
+  );
+
+  return {
+    executeTransfer,
+    calculateDistribution,
+    status,
+    txHash,
+    error,
+    reset,
+    isReady: !!wallet && !!address && !!addresses,
+  };
 }

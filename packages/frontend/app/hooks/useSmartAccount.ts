@@ -28,8 +28,18 @@ export type SmartAccountClientType = SmartAccountClient<
 async function createSmartAccountClientFromWallet(
   embeddedWallet: ConnectedWallet,
 ): Promise<SmartAccountClientType | undefined> {
+  console.log("[FoR/smart-account] init", {
+    embeddedWalletAddress: embeddedWallet.address,
+    embeddedWalletChainId: embeddedWallet.chainId,
+    walletClientType: embeddedWallet.walletClientType,
+    chain: currentChain.name,
+    chainId: currentChain.id,
+    pimlicoUrl,
+  });
+
   const owner = await embeddedWallet.getEthereumProvider();
   if (!owner) {
+    console.warn("[FoR/smart-account] no provider from embedded wallet");
     return undefined;
   }
 
@@ -48,6 +58,10 @@ async function createSmartAccountClientFromWallet(
       address: entryPoint07Address,
       version: "0.7",
     },
+  });
+
+  console.log("[FoR/smart-account] smartAccount created", {
+    address: smartAccount.address,
   });
 
   return createSmartAccountClient({
@@ -86,8 +100,8 @@ export function useSmartAccountClient(
         const smartAccountClient =
           await createSmartAccountClientFromWallet(embeddedWallet);
         setClient(smartAccountClient);
-      } catch {
-        // Silently fail - error handling at higher level
+      } catch (err) {
+        console.error("[FoR/smart-account] useSmartAccountClient failed", err);
       }
     }
 
@@ -132,11 +146,18 @@ export function useSmartAccount(): SmartAccountResult {
       try {
         const client = await createSmartAccountClientFromWallet(embeddedWallet);
         setSmartAccountClient(client);
+        console.log("[FoR/smart-account] useSmartAccount ready", {
+          address: client?.account?.address,
+        });
       } catch (caughtError) {
         const message =
           caughtError instanceof Error
             ? caughtError.message
             : "Failed to initialize smart account.";
+        console.error(
+          "[FoR/smart-account] useSmartAccount failed",
+          caughtError,
+        );
         setError(message);
       } finally {
         setIsLoading(false);
