@@ -18,6 +18,7 @@ import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useForTokenBalance } from "~/hooks/useForToken";
+import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import type { NameStoneProfile } from "~/lib/namestone.server";
 import { loadOsusowakeItems } from "~/lib/osusowake.server";
@@ -103,6 +104,38 @@ function LoginScreen() {
 }
 
 const ICON_SIZE = 20;
+
+function TransferRow({
+  counterparty,
+  date,
+  amount,
+  divider,
+  onClick,
+}: {
+  counterparty: string;
+  date: string;
+  amount: number;
+  divider: boolean;
+  onClick: () => void;
+}) {
+  const { data: profile } = useProfileByAddress(counterparty);
+  const displayName =
+    profile?.text_records?.display ||
+    profile?.name ||
+    shortenAddress(counterparty);
+
+  return (
+    <ListRow
+      name={displayName}
+      avatarSrc={profile?.text_records?.avatar}
+      date={date}
+      amount={amount}
+      divider={divider}
+      onClick={onClick}
+      className="cursor-pointer"
+    />
+  );
+}
 
 function AuthenticatedHome() {
   const navigate = useNavigate();
@@ -214,14 +247,13 @@ function AuthenticatedHome() {
                   (isSent ? -1 : 1) *
                   Number(formatUnits(BigInt(shownAmount), 18));
                 return (
-                  <ListRow
+                  <TransferRow
                     key={tx.id}
-                    name={shortenAddress(counterparty)}
+                    counterparty={counterparty}
                     date={formatTimestamp(tx.timestamp)}
                     amount={signedAmount}
                     divider={i < transfers.length - 1}
                     onClick={() => navigate(`/transactions/${counterparty}`)}
-                    className="cursor-pointer"
                   />
                 );
               })
