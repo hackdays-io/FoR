@@ -7,8 +7,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [
     nodePolyfills({
-      include: ["buffer", "process"],
-      globals: { Buffer: true, process: true },
+      include: ["buffer"],
+      globals: { Buffer: true },
     }),
     tailwindcss(),
     reactRouter(),
