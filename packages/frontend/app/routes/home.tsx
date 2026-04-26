@@ -1,7 +1,7 @@
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { Gift, QrCode, Scan, Send } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useFetcher, useNavigate } from "react-router";
+import { Link, useFetcher, useLoaderData, useNavigate } from "react-router";
 import { formatUnits } from "viem";
 import { LoadingScreen } from "~/components/loading-screen";
 import { AppBar, AppBarItem, AppBarTitle } from "~/components/ui/app-bar";
@@ -20,8 +20,14 @@ import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useForTokenBalance } from "~/hooks/useForToken";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import type { NameStoneProfile } from "~/lib/namestone.server";
+import { loadOsusowakeItems } from "~/lib/osusowake.server";
 import { formatTimestamp, shortenAddress } from "~/lib/utils";
 import type { Route } from "./+types/home";
+
+export async function loader() {
+  const osusowakeItems = await loadOsusowakeItems();
+  return { osusowakeItems };
+}
 
 const WALLET_INIT_TIMEOUT_MS = 5000;
 
@@ -98,13 +104,6 @@ function LoginScreen() {
 
 const ICON_SIZE = 20;
 
-// Dummy data for osusowake
-const dummyOsusowake = [
-  { title: "森のお茶会森のお茶会最大何文字はいるで...", amount: 500, isNew: true },
-  { title: "森のお茶会森のお茶会最大何文字はいるで...", amount: 500, isNew: true },
-  { title: "森のお茶会森のお茶会最大何文字はいるで...", amount: 500, isNew: true },
-];
-
 function AuthenticatedHome() {
   const navigate = useNavigate();
   const { logout } = usePrivy();
@@ -113,6 +112,7 @@ function AuthenticatedHome() {
   const { data: transfers, isLoading: isTransfersLoading } = useTransfersViaRouter(address, 3);
   const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
   const [walletTimedOut, setWalletTimedOut] = useState(false);
+  const { osusowakeItems } = useLoaderData<typeof loader>();
 
   // プロフィール表示用（AuthGateで存在は保証済み、ここでは表示のためだけに取得）
   useEffect(() => {
@@ -238,14 +238,15 @@ function AuthenticatedHome() {
             おすそ分け
           </SectionTitle>
           <div className="mt-8 flex gap-12 overflow-x-auto pb-8">
-            {dummyOsusowake.map((item, i) => (
-              <div key={i} className="w-[200px] shrink-0">
+            {osusowakeItems.map((item) => (
+              <div key={item.id} className="w-[200px] shrink-0">
                 <Card
                   variant="promo"
                   amount={item.amount}
                   topProps={{ title: item.title }}
                   isNew={item.isNew}
-                  to={`/osusowake/${i + 1}`}
+                  backgroundImage={item.imageUrl}
+                  to={`/osusowake/${item.id}`}
                 />
               </div>
             ))}
