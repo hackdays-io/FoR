@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import type { Address } from "viem";
 import { forTokenAbi } from "~/lib/abis/forTokenAbi";
@@ -31,6 +31,7 @@ export function useIsAllowListed(account: Address | null | undefined) {
 
 export function useAddToAllowList() {
   const { wallet, address } = useActiveWallet();
+  const queryClient = useQueryClient();
   const [status, setStatus] = useState<AllowListStatus>("idle");
   const [error, setError] = useState<Error | null>(null);
   const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
@@ -78,6 +79,9 @@ export function useAddToAllowList() {
       if (receipt.status !== "success") {
         throw new Error("AllowList addition transaction reverted");
       }
+      // tx 成功直後に publicClient で readContract すると RPC ラグで stale な false が返り
+      // AuthGate が /welcome に戻してしまうため、ここで真実 (true) を直接書き込む
+      queryClient.setQueryData(["forToken", "isAllowListed", address], true);
       setTxHash(hash);
       setStatus("success");
       return hash;
@@ -88,7 +92,7 @@ export function useAddToAllowList() {
       setStatus("error");
       throw normalized;
     }
-  }, [wallet, address]);
+  }, [wallet, address, queryClient]);
 
   return {
     addToAllowList,

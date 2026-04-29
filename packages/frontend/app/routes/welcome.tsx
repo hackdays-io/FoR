@@ -41,11 +41,8 @@ async function hasProfile(address: Address): Promise<boolean> {
 export default function Welcome() {
   const navigate = useNavigate();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
-  const {
-    data: isListed,
-    isLoading: isCheckingList,
-    refetch,
-  } = useIsAllowListed(address);
+  const { data: isListed, isLoading: isCheckingList } =
+    useIsAllowListed(address);
   const { addToAllowList, status, error } = useAddToAllowList();
 
   const goNext = useCallback(
@@ -71,10 +68,6 @@ export default function Welcome() {
       console.log("[FoR/welcome] handleAccept start");
       await addToAllowList();
       console.log("[FoR/welcome] addToAllowList done");
-      const refetchResult = await refetch();
-      console.log("[FoR/welcome] refetch isListed", {
-        data: refetchResult.data,
-      });
       await goNext(address);
     } catch (err) {
       console.error("[FoR/welcome] handleAccept failed", err);
