@@ -50,4 +50,7 @@ export default [
   route("osusowake", "routes/osusowake.tsx"),
   route("osusowake/new", "routes/osusowake.new.tsx"),
   route("osusowake/:id", "routes/osusowake.$id.tsx"),
+
+  // 管理画面（ADMIN_ROLE 専用）
+  route("admin/allowlist", "routes/admin.allowlist.tsx"),
 ] satisfies RouteConfig;

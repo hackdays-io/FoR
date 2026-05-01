@@ -123,6 +123,37 @@ export const forTokenAbi = [
     type: "function",
   },
   {
+    inputs: [{ name: "account", type: "address" }],
+    name: "addToAllowList",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ name: "account", type: "address" }],
+    name: "removeFromAllowList",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "ADMIN_ROLE",
+    outputs: [{ type: "bytes32" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      { name: "role", type: "bytes32" },
+      { name: "account", type: "address" },
+    ],
+    name: "hasRole",
+    outputs: [{ type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     anonymous: false,
     inputs: [
       { indexed: true, name: "owner", type: "address" },
@@ -140,6 +171,18 @@ export const forTokenAbi = [
       { indexed: false, name: "value", type: "uint256" },
     ],
     name: "Transfer",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [{ indexed: true, name: "account", type: "address" }],
+    name: "AllowListAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [{ indexed: true, name: "account", type: "address" }],
+    name: "AllowListRemoved",
     type: "event",
   },
 ] as const;
