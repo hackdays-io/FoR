@@ -51,7 +51,7 @@ function OsusowakeCardsView({
           <Card
             variant="promo"
             amount={item.amount}
-            topProps={{ title: item.title }}
+            title={item.title}
             isNew={item.isNew}
             backgroundImage={item.imageUrl}
             to={`/osusowake/${item.id}`}
@@ -62,13 +62,13 @@ function OsusowakeCardsView({
   );
 }
 
-/** items 解決前のプレースホルダー（promo カードと同じ h-[144px]） */
+/** items 解決前のプレースホルダー（promo カードと同じ h-[180px]） */
 function OsusowakeCardsSkeleton({ layout }: { layout: OsusowakeLayout }) {
   return (
     <div className={containerClassName[layout]}>
       {skeletonKeys[layout].map((key) => (
         <CardSlot key={key} layout={layout}>
-          <div className="h-[144px] w-full animate-pulse rounded-lg bg-muted" />
+          <div className="h-[180px] w-full animate-pulse rounded-lg bg-muted" />
         </CardSlot>
       ))}
     </div>

@@ -16,11 +16,11 @@ const labelVariantClasses = {
     root: "h-20 w-73 justify-end rounded-[10px] bg-button-tertiary-frame/90 px-8 py-2",
   },
   tag: {
-    primary: "font-ui text-center text-ui-13 font-normal text-foreground",
+    primary: "font-ui text-center text-ui-13 font-bold text-foreground",
     rootInteractive:
       "cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
-    root: "h-32 min-w-45 items-center justify-center rounded-[8px] border border-alpha-black-25 bg-card px-16 py-6",
-    rootSelected: "border-alpha-black-25 bg-visual-green-1",
+    root: "h-32 min-w-45 items-center justify-center rounded-full bg-background px-16 py-6",
+    rootSelected: "border-alpha-black-25 bg-visual-green-3",
   },
 } as const;
 

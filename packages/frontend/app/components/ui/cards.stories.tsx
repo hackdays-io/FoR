@@ -59,9 +59,7 @@ export const PromoDefault = () => {
     <StoryFrame>
       <Card
         amount={500}
-        topProps={{
-          title: "森のお茶会",
-        }}
+        title="森のお茶会"
         variant="promo"
       />
     </StoryFrame>
@@ -76,10 +74,7 @@ export const PromoNewLongTitle = () => {
       <Card
         amount={500}
         isNew
-        topProps={{
-          title:
-            "風のテラスでひらくコミュニティマーケットと森の手しごと市のお知らせ",
-        }}
+        title="風のテラスでひらくコミュニティマーケットと森の手しごと市のお知らせ"
         variant="promo"
       />
     </StoryFrame>

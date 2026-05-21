@@ -20,8 +20,6 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   amount?: number;
   /** 金額の単位（デフォルト: "KUU"） */
   unit?: string;
-  /** 下部のdividerを表示するか（デフォルト: true） */
-  divider?: boolean;
   /** 行末に外部リンク（例: ブロックエクスプローラ）を表示する */
   externalUrl?: string;
   /** 外部リンクの aria-label */
@@ -43,7 +41,6 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
       date,
       amount,
       unit = "KUU",
-      divider = true,
       externalUrl,
       externalUrlLabel = "ブロックエクスプローラで開く",
       className,
@@ -58,8 +55,7 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
       <div
         ref={ref}
         className={cn(
-          "flex items-center gap-12 py-12",
-          divider && "border-b border-border",
+          "flex items-center gap-12 p-14 bg-background rounded-[10px]",
           className,
         )}
         data-slot="list-row"
@@ -76,12 +72,12 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
         ) : null}
 
         {/* Left content: name + message */}
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <span className="truncate text-ui-16 font-medium text-foreground">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <span className="truncate text-ui-13 font-bold text-foreground">
             {name}
           </span>
           {message ? (
-            <span className="truncate text-ui-13 text-muted-foreground">
+            <span className="truncate text-ui-13 text-foreground">
               {message}
             </span>
           ) : null}
@@ -91,7 +87,7 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
         {date != null || amount != null ? (
           <div className="flex shrink-0 flex-col items-end gap-2">
             {date ? (
-              <span className="text-ui-13 text-muted-foreground">{date}</span>
+              <span className="text-ui-13 text-foreground">{date}</span>
             ) : null}
             {amount != null ? (
               <span

@@ -87,7 +87,7 @@ export const LinkedButton = React.forwardRef<
   return (
     <button
       className={cn(
-        "inline-flex items-center gap-4 text-ui-13 font-medium underline underline-offset-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40",
+        "inline-flex items-center gap-4 text-ui-13 font-bold underline underline-offset-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40",
         linkedButtonVariantClasses[variant],
         className,
       )}

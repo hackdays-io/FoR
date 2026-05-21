@@ -18,17 +18,18 @@ const cardVariantConfig = {
     bottomSurfaceClassName: "bg-alpha-white-60",
     currencyTextClassName: "text-ui-20 text-foreground",
     defaultBackgroundImage: walletCardBackground,
+    gridRowsClassName: "grid-rows-[7fr_3fr]",
     surfaceOverlayColor: undefined,
     surfaceClassName: "h-[214px] shadow-elevation-1",
   },
   promo: {
-    amountTextClassName: "text-content-number-m text-primary-foreground",
     bottomInnerClassName: "px-12",
-    bottomSurfaceClassName: "bg-transparent",
-    currencyTextClassName: "text-ui-16 text-primary-foreground",
+    bottomSurfaceClassName: "bg-card",
     defaultBackgroundImage: promoCardBackground,
+    // 上部 100px（背景画像 + New バッジ）/ 下部 残り 80px（白背景・タイトル + 価格）
+    gridRowsClassName: "grid-rows-[100px_1fr]",
     surfaceOverlayColor: "var(--color-alpha-black-25)",
-    surfaceClassName: "h-[144px]",
+    surfaceClassName: "h-[180px]",
   },
 } as const;
 
@@ -38,10 +39,6 @@ type CardVariantConfig = (typeof cardVariantConfig)[CardVariant];
 type WalletCardTopInput = {
   badgeImage?: string;
   qrCodeImage?: string;
-};
-
-type PromoCardTopInput = {
-  title: string;
 };
 
 type CardBaseProps = {
@@ -55,13 +52,14 @@ type CardBaseProps = {
 
 type WalletCardProps = CardBaseProps & {
   isNew?: never;
+  title?: never;
   topProps: WalletCardTopInput;
   variant: "wallet";
 };
 
 type PromoCardProps = CardBaseProps & {
   isNew?: boolean;
-  topProps: PromoCardTopInput;
+  title: string;
   variant: "promo";
 };
 
@@ -69,7 +67,7 @@ type WalletCardTopProps = WalletCardTopInput & {
   className?: string;
 };
 
-type PromoCardTopProps = PromoCardTopInput & {
+type PromoCardTopProps = {
   className?: string;
   isNew?: boolean;
 };
@@ -77,6 +75,7 @@ type PromoCardTopProps = PromoCardTopInput & {
 type CardBottomProps = {
   amount: number | string;
   className?: string;
+  title?: string;
   variant: CardVariant;
   variantConfig: CardVariantConfig;
 };
@@ -87,6 +86,7 @@ type CardSurfaceProps = {
   bottomClassName?: string;
   className?: string;
   surfaceRef: React.ForwardedRef<HTMLDivElement>;
+  title?: string;
   to?: To;
   topContent: React.ReactNode;
   variant: CardVariant;
@@ -122,15 +122,11 @@ function WalletCardTop({
   );
 }
 
-function PromoCardTop({ className, isNew = false, title }: PromoCardTopProps) {
+// promo カードの上部: 背景画像の上に New バッジのみを表示する
+function PromoCardTop({ className, isNew = false }: PromoCardTopProps) {
   return (
     <div className={cn("min-h-0 px-12 pt-12", className)}>
-      <div className="flex h-full w-full flex-col items-start justify-start gap-8">
-        <p className="line-clamp-2 font-ui text-ui-16 font-bold text-primary-foreground">
-          {title}
-        </p>
-        {isNew && <Label variant="new">New</Label>}
-      </div>
+      {isNew && <Label variant="new">New</Label>}
     </div>
   );
 }
@@ -138,9 +134,44 @@ function PromoCardTop({ className, isNew = false, title }: PromoCardTopProps) {
 function CardBottom({
   amount,
   className,
+  title,
   variant,
   variantConfig,
 }: CardBottomProps) {
+  // promo カードの下部: 白背景にタイトル（2 行 ellipsis）と価格を縦並びで表示
+  if (variant === "promo") {
+    return (
+      <div className={cn(variantConfig.bottomSurfaceClassName, className)}>
+        <div
+          className={cn(
+            "flex h-full flex-col justify-center gap-4",
+            variantConfig.bottomInnerClassName,
+          )}
+        >
+          <p className="line-clamp-2 font-ui text-ui-14 font-bold text-foreground">
+            {title}
+          </p>
+          <div className="flex items-end justify-end gap-4">
+            <span
+              className={cn(
+                "font-latin font-bold text-ui-16"
+              )}
+            >
+              {formatAmount(amount)}
+            </span>
+            <span
+              className={cn(
+                "font-latin font-bold text-ui-13"
+              )}
+            >
+              {CURRENCY_LABEL}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn(variantConfig.bottomSurfaceClassName, className)}>
       <div
@@ -149,25 +180,21 @@ function CardBottom({
           variantConfig.bottomInnerClassName,
         )}
       >
-        {variant === "wallet" && (
-          <span className="font-ui text-ui-16 font-bold text-foreground">
-            残高
-          </span>
-        )}
+        <span className="font-ui text-ui-16 font-bold text-foreground">
+          残高
+        </span>
         <div className="flex h-full min-w-0 flex-1 items-center justify-end">
           <div className="flex h-2/3 w-full items-stretch justify-end gap-4">
             <span
               className={cn(
-                "flex h-full items-center font-latin font-bold",
-                variantConfig.amountTextClassName,
+                "flex h-full items-center font-latin font-bold text-ui-16",
               )}
             >
               {formatAmount(amount)}
             </span>
             <span
               className={cn(
-                "flex h-full items-end font-latin font-bold",
-                variantConfig.currencyTextClassName,
+                "flex h-full items-end font-latin font-bold text-ui-13",
               )}
             >
               {CURRENCY_LABEL}
@@ -186,13 +213,7 @@ function renderCardTop(props: CardProps) {
     return <WalletCardTop className={props.topClassName} {...props.topProps} />;
   }
 
-  return (
-    <PromoCardTop
-      className={props.topClassName}
-      isNew={props.isNew}
-      {...props.topProps}
-    />
-  );
+  return <PromoCardTop className={props.topClassName} isNew={props.isNew} />;
 }
 
 function CardSurface({
@@ -201,6 +222,7 @@ function CardSurface({
   bottomClassName,
   className,
   surfaceRef,
+  title,
   to,
   topContent,
   variant,
@@ -224,11 +246,12 @@ function CardSurface({
         backgroundImage: `url(${resolvedBackgroundImage})`,
       }}
     >
-      <div className="grid h-full grid-rows-[7fr_3fr]">
+      <div className={cn("grid h-full", variantConfig.gridRowsClassName)}>
         {topContent}
         <CardBottom
           amount={amount}
           className={bottomClassName}
+          title={title}
           variant={variant}
           variantConfig={variantConfig}
         />
@@ -247,6 +270,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         bottomClassName={props.bottomClassName}
         className={props.className}
         surfaceRef={ref}
+        title={props.variant === "promo" ? props.title : undefined}
         to={props.to}
         topContent={renderCardTop(props)}
         variant={props.variant}

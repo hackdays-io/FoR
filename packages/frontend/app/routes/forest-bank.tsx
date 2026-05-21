@@ -125,7 +125,6 @@ export default function ForestBank() {
           <ListRow
             name="あなたの貢献量"
             amount={isUserLoading ? undefined : Number(myContributionDisplay)}
-            divider={false}
           />
         </div>
 
@@ -143,7 +142,7 @@ export default function ForestBank() {
                 まだ貢献がありません
               </Typography>
             ) : (
-              contributions.map((t, i) => {
+              contributions.map((t) => {
                 const fundFormatted = Number(
                   formatUnits(BigInt(t.fundAmount), 18),
                 );
@@ -154,7 +153,6 @@ export default function ForestBank() {
                     message={t.message ?? undefined}
                     date={formatTimestamp(t.timestamp)}
                     amount={fundFormatted}
-                    divider={i < contributions.length - 1}
                   />
                 );
               })

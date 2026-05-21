@@ -13,7 +13,7 @@ type StoryFrameProps = {
 
 function StoryFrame({ children }: StoryFrameProps) {
   return (
-    <div className="min-h-screen bg-background p-24">
+    <div className="min-h-screen p-24">
       <div className="mx-auto flex max-w-[480px] flex-col">{children}</div>
     </div>
   );
@@ -63,7 +63,6 @@ export const WithoutDivider = () => {
         message="草刈りありがとう！"
         date="10/29 (水)"
         amount={50}
-        divider={false}
       />
     </StoryFrame>
   );
@@ -116,7 +115,6 @@ export const List = () => {
         message="アバターなし"
         date="10/27 (月)"
         amount={-30}
-        divider={false}
       />
     </StoryFrame>
   );

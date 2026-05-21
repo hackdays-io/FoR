@@ -101,13 +101,11 @@ function TransferRow({
   counterparty,
   date,
   amount,
-  divider,
   onClick,
 }: {
   counterparty: string;
   date: string;
   amount: number;
-  divider: boolean;
   onClick: () => void;
 }) {
   const { data: profile } = useProfileByAddress(counterparty);
@@ -122,7 +120,6 @@ function TransferRow({
       avatarSrc={profile?.text_records?.avatar}
       date={date}
       amount={amount}
-      divider={divider}
       onClick={onClick}
       className="cursor-pointer"
     />
@@ -233,7 +230,7 @@ function AuthenticatedHome() {
                 取引履歴がありません
               </p>
             ) : (
-              transfers.map((tx, i) => {
+              transfers.map((tx) => {
                 const meLower = address?.toLowerCase() ?? "";
                 const isSent = tx.from.id.toLowerCase() === meLower;
                 const counterparty = isSent ? tx.to.id : tx.from.id;
@@ -249,7 +246,6 @@ function AuthenticatedHome() {
                     counterparty={counterparty}
                     date={formatTimestamp(tx.timestamp)}
                     amount={signedAmount}
-                    divider={i < transfers.length - 1}
                     onClick={() => navigate(`/transactions/${counterparty}`)}
                   />
                 );

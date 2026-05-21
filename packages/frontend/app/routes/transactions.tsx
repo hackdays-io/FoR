@@ -55,7 +55,6 @@ function TransferHistoryRow({
         message={message}
         date={date}
         amount={amount}
-        divider={false}
         onClick={onClick}
         className="cursor-pointer"
         externalUrl={externalUrl}
@@ -150,7 +149,6 @@ export default function Transactions() {
                   <div key={profile.name} className="rounded-lg bg-muted px-16">
                     <ListRow
                       name={profile.text_records?.display || profile.name}
-                      divider={false}
                       avatarSrc={profile.text_records?.avatar}
                       onClick={() =>
                         navigate(`/transactions/${profile.address}`)

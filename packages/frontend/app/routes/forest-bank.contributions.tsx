@@ -54,7 +54,6 @@ export default function Contributions() {
                   message={t.message ?? undefined}
                   date={formatTimestamp(t.timestamp)}
                   amount={fundFormatted}
-                  divider={false}
                 />
               </div>
             );

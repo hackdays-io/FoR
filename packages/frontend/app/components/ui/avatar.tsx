@@ -8,9 +8,9 @@ import { cn } from "~/lib/utils";
 const AVATAR_DEFAULT_SRC = avatarDefault;
 
 const avatarSizeClasses = {
-  sm: "size-24",
-  md: "size-40",
-  lg: "size-[80px]",
+  sm: "size-40",
+  md: "size-[60px]",
+  lg: "size-[120px]",
 } as const;
 
 type AvatarSize = keyof typeof avatarSizeClasses;

@@ -47,7 +47,7 @@ function StoryContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-const ICON_SIZE = 20;
+const ICON_SIZE = 24;
 
 type NavItem = {
   icon: React.ReactNode;

@@ -22,7 +22,7 @@ export const BottomNavigation = React.forwardRef<
       )}
       {...props}
     >
-      <div className="mb-12 flex items-center gap-4 rounded-full bg-primary px-8 py-8 shadow-elevation-1">
+      <div className="mb-12 flex items-center gap-4 rounded-[24px] bg-primary shadow-elevation-1">
         {children}
       </div>
     </nav>
@@ -52,7 +52,7 @@ export const BottomNavigationItem = React.forwardRef<
         <span
           aria-disabled="true"
           className={cn(
-            "flex w-[72px] flex-col items-center gap-2 rounded-full px-8 py-6 text-primary-foreground opacity-40",
+            "flex flex-col justify-center items-center gap-10 w-[84px] h-[84px] text-primary-foreground opacity-40",
             className,
           )}
         >
@@ -69,14 +69,13 @@ export const BottomNavigationItem = React.forwardRef<
         aria-label={ariaLabel}
         className={({ isActive }) =>
           cn(
-            "flex w-[72px] flex-col items-center gap-2 rounded-full px-8 py-6 text-primary-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            isActive && "bg-alpha-black-25",
+            "flex flex-col justify-center items-center gap-10 w-[84px] h-[84px] text-primary-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             className,
           )
         }
       >
         {icon}
-        <span className="text-ui-10 font-medium">{label}</span>
+        <span className="text-ui-12 font-bold">{label}</span>
       </NavLink>
     );
   },

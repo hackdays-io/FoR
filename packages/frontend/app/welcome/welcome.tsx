@@ -92,9 +92,7 @@ export function Welcome() {
               backgroundImage={promoCardBackground}
               amount={500}
               to="/promo-demo-1"
-              topProps={{
-                title: "森のお茶会",
-              }}
+              title="森のお茶会"
             ></Card>
             <Card
               isNew
@@ -102,9 +100,7 @@ export function Welcome() {
               backgroundImage={promoCardBackground}
               amount={500}
               to="/promo-demo-2"
-              topProps={{
-                title: "風のテラスでひらくコミュニティマーケット",
-              }}
+              title="風のテラスでひらくコミュニティマーケット"
             ></Card>
           </div>
         </div>

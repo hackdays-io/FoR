@@ -23,14 +23,14 @@ const textFieldSizeClasses = {
     input: "text-ui-13",
     label: "text-ui-13",
     message: "text-ui-10",
-    root: "h-40 px-12 gap-8",
+    root: "h-40 pr-12 pl-8 gap-8",
   },
   md: {
     adornment: "size-20",
     input: "text-ui-16",
     label: "text-ui-16",
     message: "text-ui-12",
-    root: "h-48 px-16 gap-8",
+    root: "h-48 pr-16 pl-10 gap-8",
   },
 } as const;
 
