@@ -30,8 +30,8 @@
   --for-stroke-default: rgb(0 0 0 / 0.05);
 
   /* Semantic Color: Button */
-  --for-button-primary-frame-default: #454545;
-  --for-button-primary-frame-hover: #1a1a1a;
+  --for-button-primary-frame-default: #1e1e1e;
+  --for-button-primary-frame-hover: #6f6f6f;
   --for-button-primary-frame-disabled: #b4b4b4;
   --for-button-primary-text-invert: #ffffff;
   --for-button-primary-text-disabled: #858585;
@@ -39,11 +39,11 @@
   --for-button-secondary-frame-default: #ffffff;
   --for-button-secondary-frame-hover: #e9e9e9;
   --for-button-secondary-frame-disabled: #f0f0f0;
-  --for-button-secondary-stroke-default: #454545;
-  --for-button-secondary-stroke-hover: #1a1a1a;
+  --for-button-secondary-stroke-default: #1e1e1e;
+  --for-button-secondary-stroke-hover: #6f6f6f;
   --for-button-secondary-stroke-disabled: #b4b4b4;
-  --for-button-secondary-text-default: #454545;
-  --for-button-secondary-text-hover: #1a1a1a;
+  --for-button-secondary-text-default: #1e1e1e;
+  --for-button-secondary-text-hover: #6f6f6f;
   --for-button-secondary-text-disabled: #b4b4b4;
 
   /* Tertiary: adjusted for contrast on white background */
@@ -63,6 +63,13 @@
   --for-button-danger-text-pressed: #8b1d1d;
   --for-button-danger-text-disabled: #fbbdbf;
   --for-button-danger-text-invert: #ffffff;
+
+  /* Semantic Color: Checkbox */
+  --for-checkbox-stroke-default: rgb(0 0 0 / 0.6);
+  --for-checkbox-frame-checked: #000000;
+  --for-checkbox-check-invert: #ffffff;
+  --for-checkbox-frame-hover: #e9e9e9;
+  --for-checkbox-disabled: #b4b4b4;
 
   /* Semantic Color: Visual Accent */
   --for-visual-natural-1: #e4edf7;
@@ -243,6 +250,12 @@
   --color-button-danger-text-pressed: var(--for-button-danger-text-pressed);
   --color-button-danger-text-disabled: var(--for-button-danger-text-disabled);
   --color-button-danger-text-invert: var(--for-button-danger-text-invert);
+
+  --color-checkbox-stroke: var(--for-checkbox-stroke-default);
+  --color-checkbox-frame-checked: var(--for-checkbox-frame-checked);
+  --color-checkbox-check-invert: var(--for-checkbox-check-invert);
+  --color-checkbox-frame-hover: var(--for-checkbox-frame-hover);
+  --color-checkbox-disabled: var(--for-checkbox-disabled);
 
   --color-visual-natural-1: var(--for-visual-natural-1);
   --color-visual-natural-2: var(--for-visual-natural-2);

@@ -64,7 +64,7 @@ function StaticBanner({
 export const Default = () => (
   <StaticBanner expectedChainName="Sepolia" walletChainId={1} />
 );
-Default.storyName = "Default (Mainnet → Sepolia)";
+Default.storyName = "Default (Mainnet to Sepolia)";
 
 export const Switching = () => (
   <StaticBanner expectedChainName="Sepolia" walletChainId={1} isSwitching />

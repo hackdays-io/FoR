@@ -9,6 +9,7 @@ import {
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Typography } from "~/components/ui/typography";
 import {
   deleteName,
@@ -154,17 +155,11 @@ export default function SettingsDeleteAccount() {
               </strong>
             </Typography>
 
-            <label className="flex items-start gap-8 text-ui-13 text-text-default">
-              <input
-                type="checkbox"
-                checked={confirmed}
-                onChange={(e) => setConfirmed(e.target.checked)}
-                className="mt-4 size-16"
-              />
-              <span>
-                上記の内容を理解し、アカウントを削除することに同意します。
-              </span>
-            </label>
+            <Checkbox
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+              label="上記の内容を理解し、アカウントを削除することに同意します。"
+            />
 
             {deleteError ? (
               <Typography variant="ui-13" className="text-text-danger-default">
