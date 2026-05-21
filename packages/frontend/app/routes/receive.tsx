@@ -1,6 +1,6 @@
 import { QRCodeSVG } from "qrcode.react";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useFetcher } from "react-router";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import { formatUnits, parseUnits } from "viem";
 import {
   AppBar,
@@ -15,9 +15,9 @@ import {
   calculateDistribution,
   grossUpFromRecipient,
 } from "~/hooks/useDistributionTransfer";
+import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useDistributionRatios } from "~/hooks/useRouter";
 import { formatAmount } from "~/lib/format";
-import type { NameStoneProfile } from "~/lib/namestone.server";
 import type { Route } from "./+types/receive";
 
 export function meta(_args: Route.MetaArgs) {
@@ -36,21 +36,14 @@ function toBigIntAmount(value: string): bigint {
 export default function Receive() {
   const navigate = useNavigate();
   const { address } = useActiveWallet();
-  const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
+  // プロフィールは AuthGate と同じ react-query キャッシュを共有
+  const { data: profile } = useProfileByAddress(address);
   const { data: ratios, isLoading: isRatiosLoading } = useDistributionRatios();
 
   const [amount, setAmount] = useState("");
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (address && fetcher.state === "idle" && !fetcher.data) {
-      fetcher.load(`/api/profile/${address}`);
-    }
-  }, [address, fetcher.state, fetcher.data]);
-
-  const profile = fetcher.data?.profile;
-  const displayName =
-    profile?.text_records?.display || profile?.name || "";
+  const displayName = profile?.text_records?.display || profile?.name || "";
 
   const numAmount = Number(amount) || 0;
   // 依頼FoR = 受取人が受け取る額。送信側が支払う総額 (合計) は gross up。
@@ -131,7 +124,11 @@ export default function Receive() {
           </div>
 
           {/* Name */}
-          <Typography variant="ui-16" weight="bold" className="mt-12 text-center">
+          <Typography
+            variant="ui-16"
+            weight="bold"
+            className="mt-12 text-center"
+          >
             {displayName}
           </Typography>
 
@@ -148,7 +145,12 @@ export default function Receive() {
               placeholder="0"
               className="min-w-0 flex-1 rounded-md border border-border bg-card px-8 py-6 text-right font-latin text-content-number-m font-bold text-foreground outline-none"
             />
-            <Typography variant="ui-20" weight="bold" as="span" className="shrink-0">
+            <Typography
+              variant="ui-20"
+              weight="bold"
+              as="span"
+              className="shrink-0"
+            >
               KUU
             </Typography>
           </div>
@@ -170,7 +172,9 @@ export default function Receive() {
 
           {/* Total */}
           <div className="mt-12 flex items-baseline justify-between">
-            <Typography variant="ui-13" weight="bold" as="span">合計</Typography>
+            <Typography variant="ui-13" weight="bold" as="span">
+              合計
+            </Typography>
             <div className="flex items-baseline gap-4">
               <Typography variant="number-l">
                 {isRatiosLoading ? "--" : formatAmount(totalAmount)}

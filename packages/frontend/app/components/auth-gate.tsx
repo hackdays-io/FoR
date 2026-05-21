@@ -1,9 +1,9 @@
 import { usePrivy } from "@privy-io/react-auth";
-import { useEffect, useRef } from "react";
-import { Outlet, useFetcher, useLocation, useNavigate } from "react-router";
+import { useEffect } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useIsAllowListed } from "~/hooks/useAllowList";
-import type { NameStoneProfile } from "~/lib/namestone.server";
+import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { LoadingScreen } from "./loading-screen";
 
 // 認証無し (Privy)でも閲覧可能な規約系パス
@@ -22,29 +22,20 @@ export function AuthGate() {
   const { ready, authenticated } = usePrivy();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
   const { data: isListed } = useIsAllowListed(address);
-  const profileFetcher = useFetcher<{ profile: NameStoneProfile | null }>();
+  // プロフィールは react-query でキャッシュ管理。allowlist チェックと同じ仕組みで、
+  // ページ遷移ではキャッシュを即返しし、再取得が必要な場合も背景で実行される
+  // （画面をブランクにしない）。作成直後の反映は profile.create 側で
+  // queryClient.invalidateQueries により行う。
+  const { data: profile } = useProfileByAddress(address);
 
   const pathname = location.pathname;
   const isFullyPublic = FULLY_PUBLIC_PATHS.has(pathname);
   const requireAllowlist = !ALLOWLIST_EXEMPT.has(pathname);
   const requireProfile = !PROFILE_EXEMPT.has(pathname);
 
-  // パスかアドレスが変わるたびにプロフィールを再取得（作成後の反映を保証）
-  const lastLoadKey = useRef("");
-  useEffect(() => {
-    if (!address) return;
-    const key = `${address}:${pathname}`;
-    if (lastLoadKey.current === key) return;
-    if (profileFetcher.state !== "idle") return;
-    lastLoadKey.current = key;
-    profileFetcher.load(`/api/profile/${address}`);
-  }, [address, pathname, profileFetcher]);
-
   const allowlistKnown = !!address && typeof isListed === "boolean";
-  const profileKnown =
-    !!address &&
-    profileFetcher.data !== undefined &&
-    profileFetcher.state === "idle";
+  // react-query の data は初回取得が完了するまで undefined
+  const profileKnown = !!address && profile !== undefined;
   const bothResolved = allowlistKnown && profileKnown;
 
   // 両方解決してから allowlist → profile の順に遷移
@@ -52,21 +43,11 @@ export function AuthGate() {
     if (!ready || !authenticated) return;
     if (!bothResolved) return;
 
-    console.log("[FoR/auth-gate] resolved", {
-      pathname,
-      requireAllowlist,
-      requireProfile,
-      isListed,
-      hasProfile: !!profileFetcher.data?.profile,
-    });
-
     if (requireAllowlist && isListed === false) {
-      console.log("[FoR/auth-gate] redirect /welcome (not allowlisted)");
       navigate("/welcome", { replace: true });
       return;
     }
-    if (requireProfile && !profileFetcher.data?.profile) {
-      console.log("[FoR/auth-gate] redirect /profile/create (no profile)");
+    if (requireProfile && !profile) {
       navigate("/profile/create", { replace: true });
     }
   }, [
@@ -76,9 +57,8 @@ export function AuthGate() {
     requireAllowlist,
     requireProfile,
     isListed,
-    profileFetcher.data,
+    profile,
     navigate,
-    pathname,
   ]);
 
   if (!ready) return <LoadingScreen />;
@@ -94,7 +74,7 @@ export function AuthGate() {
 
   // 遷移待ちの間もローディング
   if (requireAllowlist && isListed !== true) return <LoadingScreen />;
-  if (requireProfile && !profileFetcher.data?.profile) return <LoadingScreen />;
+  if (requireProfile && !profile) return <LoadingScreen />;
 
   return <Outlet />;
 }

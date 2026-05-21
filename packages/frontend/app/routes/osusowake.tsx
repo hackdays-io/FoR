@@ -1,12 +1,12 @@
 import { Gift } from "lucide-react";
 import { useLoaderData, useNavigate } from "react-router";
+import { OsusowakeCards } from "~/components/osusowake-cards";
 import {
   AppBar,
   AppBarBackButton,
   AppBarItem,
   AppBarTitle,
 } from "~/components/ui/app-bar";
-import { Card } from "~/components/ui/card";
 import { loadOsusowakeItems } from "~/lib/osusowake.server";
 import type { Route } from "./+types/osusowake";
 
@@ -15,8 +15,8 @@ export function meta(_args: Route.MetaArgs) {
 }
 
 export async function loader() {
-  const items = await loadOsusowakeItems();
-  return { items };
+  // defer: Promise のまま返してストリーミングする
+  return { items: loadOsusowakeItems() };
 }
 
 export default function OsusowakeList() {
@@ -44,18 +44,8 @@ export default function OsusowakeList() {
         </AppBarItem>
       </AppBar>
 
-      <div className="grid grid-cols-2 gap-12 px-20 pt-16 pb-20">
-        {items.map((item) => (
-          <Card
-            key={item.id}
-            variant="promo"
-            amount={item.amount}
-            topProps={{ title: item.title }}
-            isNew={item.isNew}
-            backgroundImage={item.imageUrl}
-            to={`/osusowake/${item.id}`}
-          />
-        ))}
+      <div className="px-20 pt-16 pb-20">
+        <OsusowakeCards items={items} layout="grid" />
       </div>
     </div>
   );

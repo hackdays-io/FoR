@@ -23,6 +23,9 @@ export function AppPrivyProvider({ children }: Props): ReactNode {
           ethereum: {
             createOnLogin: "users-without-wallets",
           },
+          // Privy の署名 / 送金確認モーダル（英語固定・i18n 非対応）を非表示にし、
+          // 確認 UI はアプリ側の日本語画面で担う
+          showWalletUIs: false,
         },
         defaultChain: currentChain,
         supportedChains: [currentChain],

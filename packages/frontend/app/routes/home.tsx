@@ -1,10 +1,18 @@
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { Gift, QrCode, Scan, Send } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useFetcher, useLoaderData, useNavigate } from "react-router";
+import { Link, useLoaderData, useNavigate } from "react-router";
 import { formatUnits } from "viem";
+import logoMain from "~/assets/images/logo/logo-main.png";
+import logoTagline from "~/assets/images/logo/logo-tagline.png";
 import { LoadingScreen } from "~/components/loading-screen";
-import { AppBar, AppBarItem, AppBarTitle } from "~/components/ui/app-bar";
+import { OsusowakeCards } from "~/components/osusowake-cards";
+import {
+  AppBar,
+  AppBarItem,
+  AppBarLogo,
+  AppBarTitle,
+} from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
 import {
   BottomNavigation,
@@ -20,14 +28,14 @@ import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useForTokenBalance } from "~/hooks/useForToken";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
-import type { NameStoneProfile } from "~/lib/namestone.server";
 import { loadOsusowakeItems } from "~/lib/osusowake.server";
 import { formatTimestamp, shortenAddress } from "~/lib/utils";
 import type { Route } from "./+types/home";
 
 export async function loader() {
-  const osusowakeItems = await loadOsusowakeItems();
-  return { osusowakeItems };
+  // defer: Promise のまま返してストリーミングする
+  // （home 本体の描画・遷移を Google Sheets 取得でブロックしない）
+  return { osusowakeItems: loadOsusowakeItems() };
 }
 
 const WALLET_INIT_TIMEOUT_MS = 5000;
@@ -58,44 +66,28 @@ export function meta(_args: Route.MetaArgs) {
 }
 
 function LoginScreen() {
-  const [agreed, setAgreed] = useState(false);
-
   const { login } = useLogin();
 
   return (
     <div className="flex min-h-screen flex-col bg-bg-default px-20">
       {/* Logo */}
-      <div className="flex flex-1 items-center justify-center">
-        {/* Logo placeholder */}
-        <div className="h-[160px] w-[160px]" />
+      <div className="flex flex-1 flex-col items-center justify-center gap-16">
+        <img
+          src={logoMain}
+          alt="FoR"
+          className="h-[160px] w-[160px] object-contain"
+        />
+        <img
+          src={logoTagline}
+          alt="ForForest. ForPlanet. ForUs."
+          className="w-[160px] object-contain"
+        />
       </div>
 
       {/* Footer */}
       <div className="flex flex-col items-center gap-16 pb-40">
-        {/* Links */}
-        <div className="flex items-center gap-12 text-ui-13 text-text-default">
-          <Link to="/terms" className="underline underline-offset-2">
-            利用規約
-          </Link>
-          <span className="text-text-hint">|</span>
-          <Link to="/privacy" className="underline underline-offset-2">
-            プライバシーポリシー
-          </Link>
-        </div>
-
-        {/* Checkbox */}
-        <label className="flex cursor-pointer items-center gap-8 text-ui-13 text-text-default">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="size-20 cursor-pointer rounded accent-button-primary-frame"
-          />
-          上記に同意する
-        </label>
-
         {/* Button */}
-        <Button disabled={!agreed} onClick={() => login()} className="w-full">
+        <Button onClick={() => login()} className="w-full">
           はじめる
         </Button>
       </div>
@@ -141,25 +133,24 @@ function AuthenticatedHome() {
   const navigate = useNavigate();
   const { logout } = usePrivy();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
-  const { data: balance, isLoading: isBalanceLoading } = useForTokenBalance(address);
-  const { data: transfers, isLoading: isTransfersLoading } = useTransfersViaRouter(address, 3);
-  const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
+  const { data: balance, isLoading: isBalanceLoading } =
+    useForTokenBalance(address);
+  const { data: transfers, isLoading: isTransfersLoading } =
+    useTransfersViaRouter(address, 3);
+  // プロフィール表示用（AuthGate と同じ react-query キャッシュを共有）
+  const { data: profile } = useProfileByAddress(address);
   const [walletTimedOut, setWalletTimedOut] = useState(false);
   const { osusowakeItems } = useLoaderData<typeof loader>();
-
-  // プロフィール表示用（AuthGateで存在は保証済み、ここでは表示のためだけに取得）
-  useEffect(() => {
-    if (address && fetcher.state === "idle" && !fetcher.data) {
-      fetcher.load(`/api/profile/${address}`);
-    }
-  }, [address, fetcher]);
 
   useEffect(() => {
     if (address) {
       setWalletTimedOut(false);
       return;
     }
-    const timer = setTimeout(() => setWalletTimedOut(true), WALLET_INIT_TIMEOUT_MS);
+    const timer = setTimeout(
+      () => setWalletTimedOut(true),
+      WALLET_INIT_TIMEOUT_MS,
+    );
     return () => clearTimeout(timer);
   }, [address]);
 
@@ -172,19 +163,23 @@ function AuthenticatedHome() {
     return <WalletErrorScreen onRetry={handleRelogin} />;
   }
 
-  if (isWalletLoading || !address || !fetcher.data) {
+  if (isWalletLoading || !address) {
     return <LoadingScreen />;
   }
 
-  const profile = fetcher.data.profile;
-  const displayName =
-    profile?.text_records?.display || profile?.name || "";
+  const displayName = profile?.text_records?.display || profile?.name || "";
 
   return (
     <div className="min-h-screen bg-bg-default pb-[100px]">
       {/* Header */}
       <AppBar>
         <AppBarItem position="left">
+          <AppBarLogo />
+        </AppBarItem>
+        <AppBarItem position="center">
+          <AppBarTitle>{displayName}</AppBarTitle>
+        </AppBarItem>
+        <AppBarItem position="right">
           <Link to="/mypage">
             <Avatar
               src={profile?.text_records?.avatar}
@@ -192,9 +187,6 @@ function AuthenticatedHome() {
               size="sm"
             />
           </Link>
-        </AppBarItem>
-        <AppBarItem position="center">
-          <AppBarTitle>{displayName}</AppBarTitle>
         </AppBarItem>
       </AppBar>
 
@@ -216,10 +208,14 @@ function AuthenticatedHome() {
         {/* Wallet Card */}
         <Card
           variant="wallet"
-          amount={isBalanceLoading ? "--" : balance ? Number(balance.formatted) : 0}
-          topProps={{
-            // badgeImage: "",
-          }}
+          amount={
+            isBalanceLoading ? "--" : balance ? Number(balance.formatted) : 0
+          }
+          topProps={
+            {
+              // badgeImage: "",
+            }
+          }
         />
 
         {/* Transaction History */}
@@ -231,10 +227,11 @@ function AuthenticatedHome() {
             履歴
           </SectionTitle>
           <div className="mt-8">
-            {isTransfersLoading ? (
-              <p className="py-12 text-center text-ui-13 text-text-hint">読み込み中...</p>
-            ) : !transfers || transfers.length === 0 ? (
-              <p className="py-12 text-center text-ui-13 text-text-hint">取引履歴がありません</p>
+            {isTransfersLoading ? null : !transfers ||
+              transfers.length === 0 ? (
+              <p className="py-12 text-center text-ui-13 text-text-hint">
+                取引履歴がありません
+              </p>
             ) : (
               transfers.map((tx, i) => {
                 const meLower = address?.toLowerCase() ?? "";
@@ -269,19 +266,8 @@ function AuthenticatedHome() {
           >
             おすそ分け
           </SectionTitle>
-          <div className="mt-8 flex gap-12 overflow-x-auto pb-8">
-            {osusowakeItems.map((item) => (
-              <div key={item.id} className="w-[200px] shrink-0">
-                <Card
-                  variant="promo"
-                  amount={item.amount}
-                  topProps={{ title: item.title }}
-                  isNew={item.isNew}
-                  backgroundImage={item.imageUrl}
-                  to={`/osusowake/${item.id}`}
-                />
-              </div>
-            ))}
+          <div className="mt-8">
+            <OsusowakeCards items={osusowakeItems} layout="scroll" />
           </div>
         </div>
       </div>

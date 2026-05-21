@@ -8,6 +8,7 @@ import {
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Button } from "~/components/ui/button";
+import { ErrorMessage } from "~/components/ui/error-message";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
@@ -26,7 +27,7 @@ export function meta(_args: Route.MetaArgs) {
 
 export default function AdminAllowList() {
   const navigate = useNavigate();
-  const { address: caller, isLoading: isWalletLoading } = useActiveWallet();
+  const { address: caller } = useActiveWallet();
   const { data: isAdmin, isLoading: isAdminLoading } = useHasAdminRole(caller);
 
   const [input, setInput] = useState("");
@@ -74,7 +75,7 @@ export default function AdminAllowList() {
     addMutation.status === "success" || removeMutation.status === "success";
   const explorerUrl = getExplorerTxUrl(lastTxHash);
 
-  if (isWalletLoading || (caller && isAdminLoading)) {
+  if (isAdminLoading) {
     return (
       <div className="min-h-screen bg-bg-default">
         <AppBar>
@@ -88,26 +89,6 @@ export default function AdminAllowList() {
         <div className="flex items-center justify-center py-32">
           <Typography variant="ui-13" className="text-text-hint">
             読み込み中...
-          </Typography>
-        </div>
-      </div>
-    );
-  }
-
-  if (!caller) {
-    return (
-      <div className="min-h-screen bg-bg-default">
-        <AppBar>
-          <AppBarItem position="left">
-            <AppBarBackButton onClick={() => navigate(-1)} />
-          </AppBarItem>
-          <AppBarItem position="center">
-            <AppBarTitle>Allow List 管理</AppBarTitle>
-          </AppBarItem>
-        </AppBar>
-        <div className="px-20 py-32">
-          <Typography variant="body-m" className="text-text-default">
-            ウォレットが接続されていません。
           </Typography>
         </div>
       </div>
@@ -186,11 +167,7 @@ export default function AdminAllowList() {
           </Button>
         </div>
 
-        {lastError && (
-          <Typography variant="ui-13" className="text-destructive">
-            {lastError.message}
-          </Typography>
-        )}
+        {lastError && <ErrorMessage error={lastError} />}
 
         {lastSuccess && (
           <Typography variant="ui-13" className="text-text-default">

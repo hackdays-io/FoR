@@ -198,14 +198,7 @@ export default function TransactionDetail({
       </AppBar>
 
       <div className="flex flex-1 flex-col gap-16 px-20 py-16">
-        {isLoading ? (
-          <Typography
-            variant="ui-13"
-            className="py-24 text-center text-text-hint"
-          >
-            読み込み中...
-          </Typography>
-        ) : messages.length === 0 ? (
+        {isLoading ? null : messages.length === 0 ? (
           <Typography
             variant="ui-13"
             className="py-24 text-center text-text-hint"

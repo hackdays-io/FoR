@@ -171,11 +171,8 @@ export default function Transactions() {
           <div>
             <SectionTitle>履歴</SectionTitle>
             <div className="mt-8 flex flex-col gap-12">
-              {isTransfersLoading ? (
-                <Typography variant="ui-13" className="py-12 text-text-hint">
-                  読み込み中...
-                </Typography>
-              ) : !transfers || transfers.length === 0 ? (
+              {isTransfersLoading ? null : !transfers ||
+                transfers.length === 0 ? (
                 <Typography variant="ui-13" className="py-12 text-text-hint">
                   取引履歴がありません
                 </Typography>

@@ -1,6 +1,5 @@
 import { usePrivy } from "@privy-io/react-auth";
-import { useEffect } from "react";
-import { Link, useFetcher, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   AppBar,
   AppBarBackButton,
@@ -11,7 +10,7 @@ import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
-import type { NameStoneProfile } from "~/lib/namestone.server";
+import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import type { Route } from "./+types/mypage";
 
 export function meta(_args: Route.MetaArgs) {
@@ -23,67 +22,19 @@ function shortenAddress(address: string): string {
 }
 
 export default function Mypage() {
-  const { address, isLoading: isWalletLoading } = useActiveWallet();
+  const { address } = useActiveWallet();
   const { logout } = usePrivy();
   const navigate = useNavigate();
-  const fetcher = useFetcher<{ profile: NameStoneProfile | null }>();
+  // プロフィールは AuthGate と同じ react-query キャッシュを共有
+  const { data: profile } = useProfileByAddress(address);
 
   const handleLogout = async () => {
     await logout();
     navigate("/");
   };
 
-  useEffect(() => {
-    if (address && fetcher.state === "idle" && !fetcher.data) {
-      fetcher.load(`/api/profile/${address}`);
-    }
-  }, [address, fetcher]);
-
-  const profile = fetcher.data?.profile;
-  const isLoading = isWalletLoading || fetcher.state === "loading";
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-bg-default">
-        <AppBar>
-          <AppBarItem position="left">
-            <AppBarBackButton onClick={() => navigate("/")} />
-          </AppBarItem>
-          <AppBarItem position="center">
-            <AppBarTitle>マイページ</AppBarTitle>
-          </AppBarItem>
-        </AppBar>
-        <div className="flex items-center justify-center py-32">
-          <Typography variant="ui-13" className="text-text-hint">
-            読み込み中...
-          </Typography>
-        </div>
-      </div>
-    );
-  }
-
-  if (!address) {
-    return (
-      <div className="min-h-screen bg-bg-default">
-        <AppBar>
-          <AppBarItem position="left">
-            <AppBarBackButton onClick={() => navigate("/")} />
-          </AppBarItem>
-          <AppBarItem position="center">
-            <AppBarTitle>マイページ</AppBarTitle>
-          </AppBarItem>
-        </AppBar>
-        <div className="flex flex-col items-center gap-16 px-20 py-32">
-          <Typography variant="ui-13" className="text-text-hint">
-            ウォレットが接続されていません
-          </Typography>
-          <Link to="/">
-            <Button>ログインへ</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // AuthGate がウォレット接続を保証済み。ここは型ガードのための保険
+  if (!address) return null;
 
   const displayName =
     profile?.text_records?.display || profile?.name || shortenAddress(address);

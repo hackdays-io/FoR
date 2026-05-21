@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { ErrorMessage } from "~/components/ui/error-message";
 import { Label } from "~/components/ui/label";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
@@ -459,11 +460,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             ※ この取引は、キャンセルできません。
           </Typography>
 
-          {error && (
-            <Typography variant="ui-13" className="text-destructive">
-              送金に失敗しました: {error.message}
-            </Typography>
-          )}
+          {error && <ErrorMessage error={error} title="送金に失敗しました" />}
         </div>
 
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">

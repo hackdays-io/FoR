@@ -1,7 +1,7 @@
 import { ens_normalize } from "@adraffy/ens-normalize";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  redirect,
   useActionData,
   useFetcher,
   useNavigate,
@@ -19,6 +19,7 @@ import { Button } from "~/components/ui/button";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
+import { profileQueryKey } from "~/hooks/useProfileByAddress";
 import { useUploadImageFileToIpfs } from "~/hooks/useUploadImageFileToIpfs";
 import { searchNames, setName } from "~/lib/namestone.server";
 import type { Route } from "./+types/profile.create";
@@ -116,7 +117,7 @@ export async function action({ request }: Route.ActionArgs) {
     return { errors: { name: "プロフィールの作成に失敗しました" } };
   }
 
-  return redirect("/");
+  return { ok: true as const };
 }
 
 export default function ProfileCreate() {
@@ -126,6 +127,7 @@ export default function ProfileCreate() {
   const fetcher = useFetcher<typeof loader>();
   const submit = useSubmit();
   const { address } = useActiveWallet();
+  const queryClient = useQueryClient();
 
   const {
     uploadImageFileToIpfs,
@@ -147,7 +149,12 @@ export default function ProfileCreate() {
   }, [previewUrl]);
 
   const isSubmitting = navigation.state !== "idle" || isUploading;
-  const errors = actionData?.errors;
+  // action が { ok: true } を返した後、invalidate + ホーム遷移が走るまでの状態
+  const isCreated = actionData != null && "ok" in actionData;
+  const errors =
+    actionData != null && "errors" in actionData
+      ? actionData.errors
+      : undefined;
 
   const [clientError, setClientError] = useState<string | null>(null);
 
@@ -184,6 +191,17 @@ export default function ProfileCreate() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
+
+  // 作成成功後: AuthGate のプロフィールキャッシュを更新してからホームへ遷移
+  useEffect(() => {
+    if (!address || !isCreated) return;
+    void (async () => {
+      await queryClient.invalidateQueries({
+        queryKey: profileQueryKey(address),
+      });
+      navigate("/", { replace: true });
+    })();
+  }, [isCreated, address, queryClient, navigate]);
 
   const availabilityData = fetcher.data;
   let nameHelperText: string | undefined;
@@ -290,12 +308,12 @@ export default function ProfileCreate() {
 
         <Button
           type="submit"
-          disabled={isSubmitting || !address || !username}
+          disabled={isSubmitting || isCreated || !address || !username}
           className="w-full"
         >
           {isUploading
             ? "画像アップロード中..."
-            : navigation.state !== "idle"
+            : navigation.state !== "idle" || isCreated
               ? "作成中..."
               : "プロフィールを作成"}
         </Button>

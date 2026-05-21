@@ -6,6 +6,7 @@ import {
   AppBar,
   AppBarBackButton,
   AppBarItem,
+  AppBarLogo,
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
@@ -42,6 +43,26 @@ export const WithAvatar = () => {
 };
 
 WithAvatar.storyName = "Avatar + Title";
+
+export const WithLogo = () => {
+  return (
+    <StoryFrame>
+      <AppBar>
+        <AppBarItem position="left">
+          <AppBarLogo />
+        </AppBarItem>
+        <AppBarItem position="center">
+          <AppBarTitle>ニックネーム</AppBarTitle>
+        </AppBarItem>
+        <AppBarItem position="right">
+          <Avatar size="sm" alt="ユーザーアバター" />
+        </AppBarItem>
+      </AppBar>
+    </StoryFrame>
+  );
+};
+
+WithLogo.storyName = "Logo + Title + Avatar";
 
 export const WithBackButton = () => {
   return (

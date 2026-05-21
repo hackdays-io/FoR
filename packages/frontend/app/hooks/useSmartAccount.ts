@@ -14,7 +14,7 @@ import {
 
 import { pimlicoClient, pimlicoConfigError, pimlicoUrl } from "../lib/pimlico";
 import { currentChain, publicClient } from "../lib/viem";
-import { getEmbeddedWallet, useEmbeddedWallet } from "./useWallet";
+import { useEmbeddedWallet } from "./useWallet";
 
 export type SmartAccountClientType = SmartAccountClient<
   Transport,
@@ -28,15 +28,6 @@ export type SmartAccountClientType = SmartAccountClient<
 async function createSmartAccountClientFromWallet(
   embeddedWallet: ConnectedWallet,
 ): Promise<SmartAccountClientType | undefined> {
-  console.log("[FoR/smart-account] init", {
-    embeddedWalletAddress: embeddedWallet.address,
-    embeddedWalletChainId: embeddedWallet.chainId,
-    walletClientType: embeddedWallet.walletClientType,
-    chain: currentChain.name,
-    chainId: currentChain.id,
-    pimlicoUrl,
-  });
-
   const owner = await embeddedWallet.getEthereumProvider();
   if (!owner) {
     console.warn("[FoR/smart-account] no provider from embedded wallet");
@@ -60,10 +51,6 @@ async function createSmartAccountClientFromWallet(
     },
   });
 
-  console.log("[FoR/smart-account] smartAccount created", {
-    address: smartAccount.address,
-  });
-
   return createSmartAccountClient({
     account: smartAccount,
     chain: currentChain,
@@ -74,41 +61,6 @@ async function createSmartAccountClientFromWallet(
         (await client.getUserOperationGasPrice()).standard,
     },
   });
-}
-
-/**
- * Low-level hook: Create SmartAccountClient from wallets array
- * Compatible with toban's useSmartAccountClient
- */
-export function useSmartAccountClient(
-  wallets: ConnectedWallet[],
-): SmartAccountClientType | undefined {
-  const [client, setClient] = useState<SmartAccountClientType>();
-
-  const embeddedWallet = getEmbeddedWallet(wallets);
-
-  useEffect(() => {
-    async function initSmartAccount(): Promise<void> {
-      if (!embeddedWallet) {
-        setClient(undefined);
-        return;
-      }
-
-      setClient(undefined);
-
-      try {
-        const smartAccountClient =
-          await createSmartAccountClientFromWallet(embeddedWallet);
-        setClient(smartAccountClient);
-      } catch (err) {
-        console.error("[FoR/smart-account] useSmartAccountClient failed", err);
-      }
-    }
-
-    initSmartAccount();
-  }, [embeddedWallet]);
-
-  return client;
 }
 
 interface SmartAccountResult {
@@ -146,9 +98,6 @@ export function useSmartAccount(): SmartAccountResult {
       try {
         const client = await createSmartAccountClientFromWallet(embeddedWallet);
         setSmartAccountClient(client);
-        console.log("[FoR/smart-account] useSmartAccount ready", {
-          address: client?.account?.address,
-        });
       } catch (caughtError) {
         const message =
           caughtError instanceof Error

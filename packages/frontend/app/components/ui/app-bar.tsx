@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import * as React from "react";
 
+import logoBlack from "~/assets/images/logo/logo-black.png";
 import { cn } from "~/lib/utils";
 
 export interface AppBarProps extends React.HTMLAttributes<HTMLElement> {
@@ -75,6 +76,26 @@ export const AppBarBackButton = React.forwardRef<
   );
 });
 AppBarBackButton.displayName = "AppBarBackButton";
+
+export type AppBarLogoProps = React.ImgHTMLAttributes<HTMLImageElement>;
+
+/**
+ * 戻るボタンを持たないヘッダーの左側に表示するロゴ。
+ */
+export const AppBarLogo = React.forwardRef<HTMLImageElement, AppBarLogoProps>(
+  ({ className, alt = "FoR", ...props }, ref) => {
+    return (
+      <img
+        ref={ref}
+        src={logoBlack}
+        alt={alt}
+        className={cn("h-28 w-auto object-contain", className)}
+        {...props}
+      />
+    );
+  },
+);
+AppBarLogo.displayName = "AppBarLogo";
 
 export interface AppBarTitleProps
   extends React.HTMLAttributes<HTMLHeadingElement> {

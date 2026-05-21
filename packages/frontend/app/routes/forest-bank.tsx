@@ -4,7 +4,12 @@ import { useNavigate } from "react-router";
 import { formatUnits } from "viem";
 
 import forestWalletCardBackground from "~/assets/images/cards/forest-wallet-card-background.png";
-import { AppBar, AppBarItem, AppBarTitle } from "~/components/ui/app-bar";
+import {
+  AppBar,
+  AppBarItem,
+  AppBarLogo,
+  AppBarTitle,
+} from "~/components/ui/app-bar";
 import {
   BottomNavigation,
   BottomNavigationItem,
@@ -69,6 +74,9 @@ export default function ForestBank() {
   return (
     <div className="min-h-screen bg-bg-default pb-[100px]">
       <AppBar>
+        <AppBarItem position="left">
+          <AppBarLogo />
+        </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>森の共通基金</AppBarTitle>
         </AppBarItem>
@@ -129,11 +137,8 @@ export default function ForestBank() {
             みんなの貢献履歴
           </SectionTitle>
           <div className="mt-8">
-            {isContributionsLoading ? (
-              <Typography variant="ui-13" className="py-12 text-text-hint">
-                読み込み中...
-              </Typography>
-            ) : !contributions || contributions.length === 0 ? (
+            {isContributionsLoading ? null : !contributions ||
+              contributions.length === 0 ? (
               <Typography variant="ui-13" className="py-12 text-text-hint">
                 まだ貢献がありません
               </Typography>
