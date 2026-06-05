@@ -97,33 +97,35 @@ contract FoRToken is ERC20, ERC20Permit, AccessControl {
 
     // ============ Transfer Restrictions ============
 
-    /// @notice Override transfer to enforce allow list
+    /// @notice Override transfer to enforce allow list on the sender only
+    /// @dev Only the sender must be allow listed; recipients can receive freely.
     function transfer(
         address to,
         uint256 amount
     ) public virtual override returns (bool) {
-        _requireBothAllowListed(_msgSender(), to);
+        _requireSenderAllowListed(_msgSender());
         return super.transfer(to, amount);
     }
 
-    /// @notice Override transferFrom to enforce allow list
+    /// @notice Override transferFrom to enforce allow list on the sender only
+    /// @dev Only the token owner (`from`) must be allow listed; recipients can receive freely.
     function transferFrom(
         address from,
         address to,
         uint256 amount
     ) public virtual override returns (bool) {
-        _requireBothAllowListed(from, to);
+        _requireSenderAllowListed(from);
         return super.transferFrom(from, to, amount);
     }
 
     // ============ Internal Functions ============
 
-    /// @notice Require both addresses to be on the allow list
+    /// @notice Require the sending address to be on the allow list
+    /// @dev Recipients are intentionally not checked so that any wallet can
+    ///      receive tokens; spending requires allow list membership.
     /// @param from Sender address
-    /// @param to Recipient address
-    function _requireBothAllowListed(address from, address to) internal view {
+    function _requireSenderAllowListed(address from) internal view {
         if (!_allowList[from]) revert NotAllowListed(from);
-        if (!_allowList[to]) revert NotAllowListed(to);
     }
 
     // ============ ERC165 Interface Support ============

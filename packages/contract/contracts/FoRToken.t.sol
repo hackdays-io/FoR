@@ -350,18 +350,24 @@ contract FoRTokenTest is Test {
         token.transfer(user1, 50 ether);
     }
 
-    function test_Transfer_RevertsIfRecipientNotAllowListed() public {
+    function test_Transfer_SucceedsIfRecipientNotAllowListed() public {
         address notAllowListed = address(0x100);
-        
-        vm.expectRevert(abi.encodeWithSelector(FoRToken.NotAllowListed.selector, notAllowListed));
-        token.transfer(notAllowListed, 100 ether);
+        uint256 amount = 100 ether;
+
+        // Recipient is not on the allow list but should still be able to receive.
+        token.transfer(notAllowListed, amount);
+
+        require(
+            token.balanceOf(notAllowListed) == amount,
+            "non-allow-listed recipient should receive tokens"
+        );
     }
 
-    function test_Transfer_SucceedsIfBothAllowListed() public {
+    function test_Transfer_SucceedsIfSenderAllowListed() public {
         uint256 amount = 100 ether;
-        
+
         token.transfer(user1, amount);
-        
+
         require(token.balanceOf(user1) == amount, "transfer should succeed");
     }
 
@@ -381,24 +387,30 @@ contract FoRTokenTest is Test {
         token.transferFrom(notAllowListed, user2, 50 ether);
     }
 
-    function test_TransferFrom_RevertsIfToNotAllowListed() public {
+    function test_TransferFrom_SucceedsIfToNotAllowListed() public {
         address notAllowListed = address(0x100);
-        
+        uint256 amount = 50 ether;
+
         token.approve(user1, 100 ether);
-        
+
+        // Recipient is not on the allow list but should still be able to receive.
         vm.prank(user1);
-        vm.expectRevert(abi.encodeWithSelector(FoRToken.NotAllowListed.selector, notAllowListed));
-        token.transferFrom(deployer, notAllowListed, 50 ether);
+        token.transferFrom(deployer, notAllowListed, amount);
+
+        require(
+            token.balanceOf(notAllowListed) == amount,
+            "non-allow-listed recipient should receive tokens"
+        );
     }
 
-    function test_TransferFrom_SucceedsIfBothAllowListed() public {
+    function test_TransferFrom_SucceedsIfFromAllowListed() public {
         uint256 amount = 100 ether;
-        
+
         token.approve(user1, amount);
-        
+
         vm.prank(user1);
         token.transferFrom(deployer, user2, amount);
-        
+
         require(token.balanceOf(user2) == amount, "transfer should succeed");
     }
 
