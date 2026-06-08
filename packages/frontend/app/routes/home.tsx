@@ -42,7 +42,7 @@ const WALLET_INIT_TIMEOUT_MS = 5000;
 
 function WalletErrorScreen({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-16 bg-bg-default px-20">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-16 bg-bg-default px-20">
       <Typography variant="ui-13" className="text-center text-text-default">
         ウォレットの準備に時間がかかっています。
         <br />
@@ -69,18 +69,18 @@ function LoginScreen() {
   const { login } = useLogin();
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg-default px-20">
+    <div className="flex min-h-dvh flex-col bg-bg-default px-20">
       {/* Logo */}
       <div className="flex flex-1 flex-col items-center justify-center gap-16">
         <img
           src={logoMain}
           alt="FoR"
-          className="h-[160px] w-[160px] object-contain"
+          className="h-[75px] w-[75px] object-contain"
         />
         <img
           src={logoTagline}
           alt="ForForest. ForPlanet. ForUs."
-          className="w-[160px] object-contain"
+          className="w-[120px] object-contain"
         />
       </div>
 
@@ -167,7 +167,7 @@ function AuthenticatedHome() {
   const displayName = profile?.text_records?.display || profile?.name || "";
 
   return (
-    <div className="min-h-screen bg-bg-default pb-[100px]">
+    <div className="min-h-dvh bg-bg-default pb-[100px]">
       {/* Header */}
       <AppBar>
         <AppBarItem position="left">

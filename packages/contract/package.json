@@ -17,6 +17,8 @@
     "deploy:sepolia:RouterFactory": "hardhat ignition deploy ignition/modules/RouterFactory.ts --network sepolia --strategy create2 --parameters ignition/parameters.sepolia.json",
     "deploy:sepolia:FoRToken": "hardhat ignition deploy ignition/modules/FoRToken.ts --network sepolia --parameters ignition/parameters.sepolia.json",
     "deploy:sepolia:Router": "hardhat ignition deploy ignition/modules/Router.ts --network sepolia --parameters ignition/parameters.sepolia.json",
+    "deploy:sepolia": "pnpm deploy:sepolia:FoRToken && pnpm deploy:sepolia:RouterFactory && pnpm deploy:sepolia:Router",
+    "setup:sepolia": "hardhat run scripts/setup-sepolia.ts --network sepolia",
     "deploy:base:RouterFactory": "hardhat ignition deploy ignition/modules/RouterFactory.ts --network base --strategy create2 --parameters ignition/parameters.base.json",
     "deploy:base:FoRToken": "hardhat ignition deploy ignition/modules/FoRToken.ts --network base --parameters ignition/parameters.base.json",
     "deploy:base:Router": "hardhat ignition deploy ignition/modules/Router.ts --network base --parameters ignition/parameters.base.json",
