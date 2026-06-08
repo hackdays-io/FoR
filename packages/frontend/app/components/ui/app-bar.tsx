@@ -14,7 +14,7 @@ export const AppBar = React.forwardRef<HTMLElement, AppBarProps>(
       <header
         ref={ref}
         className={cn(
-          "sticky top-0 z-10 flex h-48 w-full items-center bg-background px-16",
+          "sticky top-0 z-10 flex h-56 w-full items-center bg-bg-default px-16 py-8",
           className,
         )}
         {...props}
