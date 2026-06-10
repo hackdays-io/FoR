@@ -183,7 +183,7 @@ export default function ForestBank() {
         />
         <BottomNavigationItem
           icon={<Gift size={ICON_SIZE} />}
-          label="おすそ分け"
+          label="おすそわけ"
           to="/osusowake"
         />
       </BottomNavigation>

@@ -46,7 +46,7 @@ export default [
   route("receive", "routes/receive.tsx"),
   route("scan", "routes/scan.tsx"),
 
-  // おすそ分け
+  // おすそわけ
   route("osusowake", "routes/osusowake.tsx"),
   route("osusowake/new", "routes/osusowake.new.tsx"),
   route("osusowake/:id", "routes/osusowake.$id.tsx"),

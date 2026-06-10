@@ -1,5 +1,10 @@
 import { useLogin, usePrivy } from "@privy-io/react-auth";
-import { Gift, QrCode, Scan, Send } from "lucide-react";
+import {
+  PresentIcon,
+  QRIcon,
+  ScanIcon,
+  SendIcon,
+} from "~/components/icons";
 import { useEffect, useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router";
 import { formatUnits } from "viem";
@@ -95,7 +100,7 @@ function LoginScreen() {
   );
 }
 
-const ICON_SIZE = 20;
+const ICON_SIZE = 32;
 
 function TransferRow({
   counterparty,
@@ -260,7 +265,7 @@ function AuthenticatedHome() {
             moreLabel="もっとみる"
             onMoreClick={() => navigate("/osusowake")}
           >
-            おすそ分け
+            おすそわけ
           </SectionTitle>
           <div className="mt-8">
             <OsusowakeCards items={osusowakeItems} layout="scroll" />
@@ -271,23 +276,23 @@ function AuthenticatedHome() {
       {/* Bottom Navigation */}
       <BottomNavigation>
         <BottomNavigationItem
-          icon={<Send size={ICON_SIZE} />}
+          icon={<SendIcon width={ICON_SIZE} height={ICON_SIZE} />}
           label="送る"
           to="/transactions"
         />
         <BottomNavigationItem
-          icon={<Scan size={ICON_SIZE} />}
+          icon={<ScanIcon width={ICON_SIZE} height={ICON_SIZE} />}
           label="スキャン"
           to="/scan"
         />
         <BottomNavigationItem
-          icon={<QrCode size={ICON_SIZE} />}
+          icon={<QRIcon width={ICON_SIZE} height={ICON_SIZE} />}
           label="マイコード"
           to="/receive"
         />
         <BottomNavigationItem
-          icon={<Gift size={ICON_SIZE} />}
-          label="おすそ分け"
+          icon={<PresentIcon width={ICON_SIZE} height={ICON_SIZE} />}
+          label="おすそわけ"
           to="/osusowake"
         />
       </BottomNavigation>
