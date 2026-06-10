@@ -3,8 +3,8 @@ import * as React from "react";
 import { cn } from "~/lib/utils";
 
 const titleVariantClasses = {
-  large: "font-ui text-ui-20 font-bold",
-  small: "font-ui text-ui-16 font-bold",
+  large: "font-ui text-ui-20 font-normal",
+  small: "font-ui text-ui-16 font-normal",
 } as const;
 
 export type SectionTitleProps = React.ComponentPropsWithoutRef<"div"> & {
@@ -27,7 +27,10 @@ export const SectionTitle = React.forwardRef<HTMLDivElement, SectionTitleProps>(
   ) => {
     return (
       <div
-        className={cn("flex items-center justify-between gap-8", className)}
+        className={cn(
+          "flex items-center justify-between gap-8 py-8",
+          className,
+        )}
         data-slot="section-title"
         ref={ref}
         {...props}
