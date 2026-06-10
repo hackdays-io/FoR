@@ -15,8 +15,8 @@ import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
-import { getExplorerName, getExplorerTxUrl } from "~/lib/explorer";
 import { type NameStoneProfile, searchNames } from "~/lib/namestone.server";
+import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp, shortenAddress } from "~/lib/utils";
 import type { Route } from "./+types/transactions";
 
@@ -29,16 +29,12 @@ function TransferHistoryRow({
   message,
   date,
   amount,
-  externalUrl,
-  externalUrlLabel,
   onClick,
 }: {
   counterparty: string;
   message?: string;
   date: string;
   amount: number;
-  externalUrl?: string;
-  externalUrlLabel?: string;
   onClick: () => void;
 }) {
   const { data: profile } = useProfileByAddress(counterparty);
@@ -57,8 +53,6 @@ function TransferHistoryRow({
         amount={amount}
         onClick={onClick}
         className="cursor-pointer"
-        externalUrl={externalUrl}
-        externalUrlLabel={externalUrlLabel}
       />
     </div>
   );
@@ -125,7 +119,7 @@ export default function Transactions() {
       </AppBar>
 
       {/* Search */}
-      <div className="px-20 pt-16">
+      <div className="px-20 py-24">
         <TextField
           placeholder="名前・ID・アドレス"
           value={query}
@@ -134,12 +128,12 @@ export default function Transactions() {
         />
       </div>
 
-      <div className="px-20 pt-20">
+      <div className="px-20">
         {isSearching ? (
           /* Search Results */
           <div>
             <SectionTitle>検索結果</SectionTitle>
-            <div className="mt-8 flex flex-col gap-12">
+            <div className="mt-12 flex flex-col gap-12">
               {fetcher.state === "loading" ? (
                 <Typography variant="ui-13" className="py-12 text-text-hint">
                   検索中...
@@ -168,7 +162,7 @@ export default function Transactions() {
           /* Transaction History */
           <div>
             <SectionTitle>履歴</SectionTitle>
-            <div className="mt-8 flex flex-col gap-12">
+            <div className="mt-12 flex flex-col gap-12">
               {isTransfersLoading ? null : !transfers ||
                 transfers.length === 0 ? (
                 <Typography variant="ui-13" className="py-12 text-text-hint">
@@ -185,16 +179,16 @@ export default function Transactions() {
                   const signedAmount =
                     (isSent ? -1 : 1) *
                     Number(formatUnits(BigInt(shownAmount), 18));
-                  const explorerUrl = getExplorerTxUrl(tx.transactionHash);
+                  // リストではコメント（memo）のみ表示し、ユースケースのタグは出さない
+                  const memo =
+                    parseMessagePayload(tx.message)?.memo || undefined;
                   return (
                     <TransferHistoryRow
                       key={tx.id}
                       counterparty={counterparty}
-                      message={tx.message ?? undefined}
+                      message={memo}
                       date={formatTimestamp(tx.timestamp)}
                       amount={signedAmount}
-                      externalUrl={explorerUrl ?? undefined}
-                      externalUrlLabel={`${getExplorerName()}で取引を開く`}
                       onClick={() => navigate(`/transactions/${counterparty}`)}
                     />
                   );
