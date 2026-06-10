@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Link, type To } from "react-router";
 
+import forestWalletCardBackground from "~/assets/images/cards/forest-wallet-card-background.png";
 import promoCardBackground from "~/assets/images/cards/promo-card-background.jpg";
 import walletCardBackground from "~/assets/images/cards/wallet-card-background.png";
 import { Label } from "~/components/ui/label";
@@ -18,6 +19,14 @@ const cardVariantConfig = {
     bottomSurfaceClassName: "bg-alpha-white-60",
     currencyTextClassName: "text-ui-20 text-foreground",
     defaultBackgroundImage: walletCardBackground,
+    gridRowsClassName: "grid-rows-[7fr_3fr]",
+    surfaceOverlayColor: undefined,
+    surfaceClassName: "h-[214px] shadow-elevation-1",
+  },
+  fund: {
+    bottomInnerClassName: "px-16",
+    bottomSurfaceClassName: "bg-alpha-white-60",
+    defaultBackgroundImage: forestWalletCardBackground,
     gridRowsClassName: "grid-rows-[7fr_3fr]",
     surfaceOverlayColor: undefined,
     surfaceClassName: "h-[214px] shadow-elevation-1",
@@ -61,6 +70,13 @@ type PromoCardProps = CardBaseProps & {
   isNew?: boolean;
   title: string;
   variant: "promo";
+};
+
+type FundCardProps = CardBaseProps & {
+  isNew?: never;
+  title?: never;
+  topProps?: never;
+  variant: "fund";
 };
 
 type WalletCardTopProps = WalletCardTopInput & {
@@ -122,6 +138,17 @@ function WalletCardTop({
   );
 }
 
+// fund カードの上部: 背景画像の上に「Collective Fund」見出しを表示する
+function FundCardTop({ className }: { className?: string }) {
+  return (
+    <div className={cn("min-h-0 p-16", className)}>
+      <span className="font-latin text-[24px] font-semibold leading-[1.3] tracking-[1.2px] text-foreground">
+        Collective Fund
+      </span>
+    </div>
+  );
+}
+
 // promo カードの上部: 背景画像の上に New バッジのみを表示する
 function PromoCardTop({ className, isNew = false }: PromoCardTopProps) {
   return (
@@ -164,6 +191,32 @@ function CardBottom({
     );
   }
 
+  // fund カードの下部: 白背景に「Total」ラベル（左）と残高（右）を表示
+  if (variant === "fund") {
+    return (
+      <div className={cn(variantConfig.bottomSurfaceClassName, className)}>
+        <div
+          className={cn(
+            "flex h-full items-center gap-16",
+            variantConfig.bottomInnerClassName,
+          )}
+        >
+          <span className="font-latin text-[16px] font-normal leading-[1.3] text-foreground">
+            Total
+          </span>
+          <div className="flex min-w-0 flex-1 items-end justify-end gap-4">
+            <span className="font-latin text-content-number-l font-semibold tracking-[1.28px] text-foreground">
+              {formatAmount(amount)}
+            </span>
+            <span className="font-latin text-ui-20 font-bold text-foreground">
+              {CURRENCY_LABEL}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn(variantConfig.bottomSurfaceClassName, className)}>
       <div
@@ -188,11 +241,15 @@ function CardBottom({
   );
 }
 
-export type CardProps = WalletCardProps | PromoCardProps;
+export type CardProps = WalletCardProps | PromoCardProps | FundCardProps;
 
 function renderCardTop(props: CardProps) {
   if (props.variant === "wallet") {
     return <WalletCardTop className={props.topClassName} {...props.topProps} />;
+  }
+
+  if (props.variant === "fund") {
+    return <FundCardTop className={props.topClassName} />;
   }
 
   return <PromoCardTop className={props.topClassName} isNew={props.isNew} />;

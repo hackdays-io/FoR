@@ -7,6 +7,7 @@ import logoTagline from "~/assets/images/logo/logo-tagline.png";
 import { PresentIcon, QRIcon, ScanIcon, SendIcon } from "~/components/icons";
 import { LoadingScreen } from "~/components/loading-screen";
 import { OsusowakeCards } from "~/components/osusowake-cards";
+import { ProfileListRow } from "~/components/profile-list-row";
 import {
   AppBar,
   AppBarItem,
@@ -20,7 +21,6 @@ import {
 } from "~/components/ui/bottom-navigation";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Typography } from "~/components/ui/typography";
@@ -29,7 +29,7 @@ import { useForTokenBalance } from "~/hooks/useForToken";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import { loadOsusowakeItems } from "~/lib/osusowake.server";
-import { formatTimestamp, shortenAddress } from "~/lib/utils";
+import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/home";
 
 export async function loader() {
@@ -96,35 +96,6 @@ function LoginScreen() {
 }
 
 const ICON_SIZE = 32;
-
-function TransferRow({
-  counterparty,
-  date,
-  amount,
-  onClick,
-}: {
-  counterparty: string;
-  date: string;
-  amount: number;
-  onClick: () => void;
-}) {
-  const { data: profile } = useProfileByAddress(counterparty);
-  const displayName =
-    profile?.text_records?.display ||
-    profile?.name ||
-    shortenAddress(counterparty);
-
-  return (
-    <ListRow
-      name={displayName}
-      avatarSrc={profile?.text_records?.avatar}
-      date={date}
-      amount={amount}
-      onClick={onClick}
-      className="cursor-pointer"
-    />
-  );
-}
 
 function AuthenticatedHome() {
   const navigate = useNavigate();
@@ -195,7 +166,7 @@ function AuthenticatedHome() {
             value="forest-wallet"
             onClick={() => navigate("/forest-bank")}
           >
-            森の共通基金
+            森の再生基金
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -242,12 +213,13 @@ function AuthenticatedHome() {
                     (isSent ? -1 : 1) *
                     Number(formatUnits(BigInt(shownAmount), 18));
                   return (
-                    <TransferRow
+                    <ProfileListRow
                       key={tx.id}
-                      counterparty={counterparty}
+                      address={counterparty}
                       date={formatTimestamp(tx.timestamp)}
                       amount={signedAmount}
                       onClick={() => navigate(`/transactions/${counterparty}`)}
+                      className="cursor-pointer"
                     />
                   );
                 })}

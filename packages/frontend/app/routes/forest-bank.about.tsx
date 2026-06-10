@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router";
 import Markdown from "react-markdown";
+import { useNavigate } from "react-router";
 
 import {
   AppBar,
@@ -12,7 +12,7 @@ import content from "~/content/forest-fund.md?raw";
 import type { Route } from "./+types/forest-bank.about";
 
 export function meta(_args: Route.MetaArgs) {
-  return [{ title: "森の共通基金とは？ | FoR" }];
+  return [{ title: "森の再生基金とは？ | FoR" }];
 }
 
 export default function ForestBankAbout() {
@@ -25,7 +25,7 @@ export default function ForestBankAbout() {
           <AppBarBackButton onClick={() => navigate(-1)} />
         </AppBarItem>
         <AppBarItem position="center">
-          <AppBarTitle>森の共通基金とは？</AppBarTitle>
+          <AppBarTitle>森の再生基金とは？</AppBarTitle>
         </AppBarItem>
       </AppBar>
 

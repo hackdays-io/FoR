@@ -54,14 +54,20 @@ export const WalletWithoutQr = () => {
 
 WalletWithoutQr.storyName = "Wallet / QR Hidden";
 
+export const FundDefault = () => {
+  return (
+    <StoryFrame>
+      <Card amount={1234567} variant="fund" />
+    </StoryFrame>
+  );
+};
+
+FundDefault.storyName = "Fund / Default";
+
 export const PromoDefault = () => {
   return (
     <StoryFrame>
-      <Card
-        amount={500}
-        title="森のお茶会"
-        variant="promo"
-      />
+      <Card amount={500} title="森のお茶会" variant="promo" />
     </StoryFrame>
   );
 };
