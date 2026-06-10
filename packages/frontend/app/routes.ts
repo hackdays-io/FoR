@@ -28,6 +28,7 @@ export default [
 
   // 森の貯金箱
   route("forest-bank", "routes/forest-bank.tsx"),
+  route("forest-bank/about", "routes/forest-bank.about.tsx"),
   route("forest-bank/contributions", "routes/forest-bank.contributions.tsx"),
 
   // 送受信履歴

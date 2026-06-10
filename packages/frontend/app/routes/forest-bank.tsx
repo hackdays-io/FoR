@@ -23,6 +23,7 @@ import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useRecentFundContributions } from "~/hooks/useFundContributions";
 import { useFundWalletBalance } from "~/hooks/useFundWallet";
 import { useUser } from "~/hooks/useUser";
+import { CURRENCY_LABEL } from "~/lib/currency";
 import { formatTimestamp, shortenAddress } from "~/lib/utils";
 import type { Route } from "./+types/forest-bank";
 
@@ -109,7 +110,7 @@ export default function ForestBank() {
                   {isBalanceLoading ? "—" : balanceDisplay}
                 </Typography>
                 <Typography variant="ui-16" weight="bold">
-                  KUU
+                  {CURRENCY_LABEL}
                 </Typography>
               </div>
               <div className="flex justify-end">
@@ -160,7 +161,11 @@ export default function ForestBank() {
           </div>
         </div>
 
-        <Button variant="secondary" className="w-full" disabled>
+        <Button
+          variant="secondary"
+          className="w-full"
+          onClick={() => navigate("/forest-bank/about")}
+        >
           森の共通基金とは？
         </Button>
       </div>

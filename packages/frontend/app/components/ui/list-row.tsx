@@ -1,6 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import * as React from "react";
 
+import { CURRENCY_LABEL } from "~/lib/currency";
 import { formatAmount } from "~/lib/format";
 import { ipfs2https } from "~/lib/ipfs";
 import { cn } from "~/lib/utils";
@@ -18,7 +19,7 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   date?: string;
   /** 金額（2行目右、例: 50 or -50） */
   amount?: number;
-  /** 金額の単位（デフォルト: "KUU"） */
+  /** 金額の単位（デフォルト: CURRENCY_LABEL） */
   unit?: string;
   /** 行末に外部リンク（例: ブロックエクスプローラ）を表示する */
   externalUrl?: string;
@@ -40,7 +41,7 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
       message,
       date,
       amount,
-      unit = "KUU",
+      unit = CURRENCY_LABEL,
       externalUrl,
       externalUrlLabel = "ブロックエクスプローラで開く",
       className,

@@ -41,7 +41,9 @@ function OsusowakeCardsView({
 }) {
   if (items.length === 0) {
     return (
-      <p className="py-12 text-ui-13 text-text-hint">おすそわけがありません</p>
+      <p className="py-12 text-center text-ui-13 text-text-hint">
+        おすそわけがありません
+      </p>
     );
   }
   return (

@@ -8,6 +8,7 @@ import {
 } from "~/components/ui/app-bar";
 import { Button } from "~/components/ui/button";
 import { Typography } from "~/components/ui/typography";
+import { CURRENCY_LABEL } from "~/lib/currency";
 import { formatAmount } from "~/lib/format";
 import {
   loadOsusowakeItem,
@@ -67,7 +68,7 @@ export default function OsusowakeDetail() {
             {formatAmount(item.amount)}
           </Typography>
           <Typography variant="ui-20" weight="bold">
-            KUU
+            {CURRENCY_LABEL}
           </Typography>
         </div>
 
@@ -116,7 +117,7 @@ export default function OsusowakeDetail() {
             )
           }
         >
-          KUUを送る
+          {CURRENCY_LABEL}を送る
         </Button>
       </div>
     </div>

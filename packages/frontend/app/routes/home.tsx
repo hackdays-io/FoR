@@ -1,15 +1,10 @@
 import { useLogin, usePrivy } from "@privy-io/react-auth";
-import {
-  PresentIcon,
-  QRIcon,
-  ScanIcon,
-  SendIcon,
-} from "~/components/icons";
 import { useEffect, useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router";
 import { formatUnits } from "viem";
 import logoMain from "~/assets/images/logo/logo-main.png";
 import logoTagline from "~/assets/images/logo/logo-tagline.png";
+import { PresentIcon, QRIcon, ScanIcon, SendIcon } from "~/components/icons";
 import { LoadingScreen } from "~/components/loading-screen";
 import { OsusowakeCards } from "~/components/osusowake-cards";
 import {
@@ -235,26 +230,28 @@ function AuthenticatedHome() {
                 取引履歴がありません
               </p>
             ) : (
-              transfers.map((tx) => {
-                const meLower = address?.toLowerCase() ?? "";
-                const isSent = tx.from.id.toLowerCase() === meLower;
-                const counterparty = isSent ? tx.to.id : tx.from.id;
-                const shownAmount = isSent
-                  ? tx.totalAmount
-                  : tx.recipientAmount;
-                const signedAmount =
-                  (isSent ? -1 : 1) *
-                  Number(formatUnits(BigInt(shownAmount), 18));
-                return (
-                  <TransferRow
-                    key={tx.id}
-                    counterparty={counterparty}
-                    date={formatTimestamp(tx.timestamp)}
-                    amount={signedAmount}
-                    onClick={() => navigate(`/transactions/${counterparty}`)}
-                  />
-                );
-              })
+              <div className="flex flex-col gap-12">
+                {transfers.map((tx) => {
+                  const meLower = address?.toLowerCase() ?? "";
+                  const isSent = tx.from.id.toLowerCase() === meLower;
+                  const counterparty = isSent ? tx.to.id : tx.from.id;
+                  const shownAmount = isSent
+                    ? tx.totalAmount
+                    : tx.recipientAmount;
+                  const signedAmount =
+                    (isSent ? -1 : 1) *
+                    Number(formatUnits(BigInt(shownAmount), 18));
+                  return (
+                    <TransferRow
+                      key={tx.id}
+                      counterparty={counterparty}
+                      date={formatTimestamp(tx.timestamp)}
+                      amount={signedAmount}
+                      onClick={() => navigate(`/transactions/${counterparty}`)}
+                    />
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>

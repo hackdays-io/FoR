@@ -4,10 +4,10 @@ import { Link, type To } from "react-router";
 import promoCardBackground from "~/assets/images/cards/promo-card-background.jpg";
 import walletCardBackground from "~/assets/images/cards/wallet-card-background.png";
 import { Label } from "~/components/ui/label";
+import { CURRENCY_LABEL } from "~/lib/currency";
 import { formatAmount } from "~/lib/format";
 import { cn } from "~/lib/utils";
 
-const CURRENCY_LABEL = "KUU";
 const QR_CODE_IMAGE_ALT = "QRコード";
 const BADGE_IMAGE_ALT = "バッジ";
 
@@ -152,18 +152,10 @@ function CardBottom({
             {title}
           </p>
           <div className="flex items-end justify-end gap-4">
-            <span
-              className={cn(
-                "font-latin font-bold text-ui-16"
-              )}
-            >
+            <span className={cn("font-latin font-bold text-ui-16")}>
               {formatAmount(amount)}
             </span>
-            <span
-              className={cn(
-                "font-latin font-bold text-ui-13"
-              )}
-            >
+            <span className={cn("font-latin font-bold text-ui-13")}>
               {CURRENCY_LABEL}
             </span>
           </div>
@@ -180,26 +172,16 @@ function CardBottom({
           variantConfig.bottomInnerClassName,
         )}
       >
-        <span className="font-ui text-ui-16 font-bold text-foreground">
+        <span className="font-ui text-ui-16 font-medium text-foreground">
           残高
         </span>
-        <div className="flex h-full min-w-0 flex-1 items-center justify-end">
-          <div className="flex h-2/3 w-full items-stretch justify-end gap-4">
-            <span
-              className={cn(
-                "flex h-full items-center font-latin font-bold text-ui-16",
-              )}
-            >
-              {formatAmount(amount)}
-            </span>
-            <span
-              className={cn(
-                "flex h-full items-end font-latin font-bold text-ui-13",
-              )}
-            >
-              {CURRENCY_LABEL}
-            </span>
-          </div>
+        <div className="flex min-w-0 flex-1 items-end justify-end gap-4">
+          <span className="font-latin text-content-number-l font-semibold tracking-[1.28px] text-foreground">
+            {formatAmount(amount)}
+          </span>
+          <span className="font-latin text-ui-20 font-bold text-foreground">
+            {CURRENCY_LABEL}
+          </span>
         </div>
       </div>
     </div>
