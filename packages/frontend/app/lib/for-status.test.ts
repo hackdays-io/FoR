@@ -147,6 +147,42 @@ describe("computeForStatus - 進捗（次ランクへの到達度）", () => {
   });
 });
 
+describe("computeForStatus - 昇格案内（upgradeMessage）", () => {
+  it("Tier 1: 累計0回は あと1回でUP", () => {
+    const s = computeForStatus({ paymentTimestampsMs: [], nowMs: NOW });
+    expect(s.tier).toBe(1);
+    expect(s.upgradeMessage).toBe("あと1回の交換でステータスUP！");
+  });
+
+  it("Tier 2: 累計1回は あと2回（累計3で昇格）", () => {
+    const s = computeForStatus({
+      paymentTimestampsMs: [daysAgo(1)],
+      nowMs: NOW,
+    });
+    expect(s.tier).toBe(2);
+    expect(s.upgradeMessage).toBe("あと2回の交換でステータスUP！");
+  });
+
+  it("Tier 3: 月内回数に応じて『今月あとN回』", () => {
+    const s = computeForStatus({
+      paymentTimestampsMs: [daysAgo(2), daysAgo(1), daysAgo(0)],
+      nowMs: NOW,
+    });
+    expect(s.tier).toBe(3);
+    // 直近1ヶ月に3件 → 4-3 = 今月あと1回
+    expect(s.upgradeMessage).toBe("今月あと1回の交換でステータスUP！");
+  });
+
+  it("Tier 6: 最高ランクは upgradeMessage なし", () => {
+    const s = computeForStatus({
+      paymentTimestampsMs: dailyPayments(35),
+      nowMs: NOW,
+    });
+    expect(s.tier).toBe(6);
+    expect(s.upgradeMessage).toBeNull();
+  });
+});
+
 describe("computeForStatus - アラート文言と残日数", () => {
   it("残日数を文言に埋め込む（Tier 2、残り 10 日）", () => {
     const s = computeForStatus({

@@ -77,6 +77,8 @@ export type ForStatus = {
   daysUntilDecay: number | null;
   /** 残日数を埋め込んだ減衰アラート文言。Tier 1 / 決済なしなら null */
   alertMessage: string | null;
+  /** 次ランクへ上がるための案内文。Tier 6（最上位）なら null */
+  upgradeMessage: string | null;
 };
 
 /** (from, to] の半開区間に含まれる決済数。payments は昇順ソート済みであること */
@@ -171,6 +173,44 @@ function toProgressStep(fraction: number): ProgressStep {
 }
 
 /**
+ * 次ランクへ上がるための案内文。各ティアの昇格トリガーに対応した残り回数を示す。
+ * 昇格は決済 1 件ごとに 1 段階のため「残り回数」は常に 1 以上。Tier 6 は最上位で null。
+ */
+function buildUpgradeMessage(
+  payments: readonly number[],
+  t: number,
+  tier: Tier,
+): string | null {
+  switch (tier) {
+    case 1: {
+      // → Tier 2: 初回決済（累計 1 回）
+      const n = Math.max(1, 1 - payments.length);
+      return `あと${n}回の交換でステータスUP！`;
+    }
+    case 2: {
+      // → Tier 3: 累計 3 回
+      const n = Math.max(1, 3 - payments.length);
+      return `あと${n}回の交換でステータスUP！`;
+    }
+    case 3: {
+      // → Tier 4: 直近 1 ヶ月で 4 回
+      const n = Math.max(1, 4 - countInWindow(payments, t - MONTH_MS, t));
+      return `今月あと${n}回の交換でステータスUP！`;
+    }
+    case 4: {
+      // → Tier 5: 直近 7 日で 3 回
+      const n = Math.max(1, 3 - countInWindow(payments, t - WEEK_MS, t));
+      return `今週あと${n}回の交換でステータスUP！`;
+    }
+    case 5:
+      // → Tier 6: 週 3 回以上を 1 ヶ月継続
+      return "週3回の交換を1ヶ月続けてステータスUP！";
+    case 6:
+      return null; // 最高ランク
+  }
+}
+
+/**
  * 時刻 t（その時点までの履歴）で満たしている最上位ティア（昇格トリガー基準）。
  * トリガーは必ずしも単調ではないため、満たす最大ティアを返す。
  */
@@ -256,6 +296,7 @@ export function computeForStatus({
       : null;
 
   const progress = toProgressStep(tierProgressFraction(payments, nowMs, tier));
+  const upgradeMessage = buildUpgradeMessage(payments, nowMs, tier);
 
   const info = TIER_INFO[tier];
   return {
@@ -267,5 +308,6 @@ export function computeForStatus({
     nextDecayAtMs,
     daysUntilDecay,
     alertMessage,
+    upgradeMessage,
   };
 }
