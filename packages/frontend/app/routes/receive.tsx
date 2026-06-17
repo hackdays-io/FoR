@@ -120,7 +120,7 @@ export default function Receive() {
 
           {/* QR Code */}
           <div className="flex justify-center">
-            <div className="bg-card p-12">
+            <div className="bg-card p-36">
               {receiveUrl ? (
                 <QRCodeSVG value={receiveUrl} size={180} />
               ) : (
