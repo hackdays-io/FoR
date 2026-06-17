@@ -66,12 +66,12 @@ export function ErrorMessage({
       )}
       {...props}
     >
-      <div className="flex flex-col items-center gap-2 text-center">
-        <div className="flex items-center justify-center gap-8">
-          <TriangleAlert
-            aria-hidden
-            className="size-16 shrink-0 text-text-danger-default"
-          />
+      <div className="flex items-start gap-8">
+        <TriangleAlert
+          aria-hidden
+          className="mt-2 size-16 shrink-0 text-text-danger-default"
+        />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
           <Typography
             variant="ui-13"
             weight="bold"
@@ -79,54 +79,54 @@ export function ErrorMessage({
           >
             {title}
           </Typography>
-        </div>
-        {description && (
-          <Typography variant="ui-12" className="text-foreground">
-            {description}
-          </Typography>
-        )}
+          {description && (
+            <Typography variant="ui-12" className="text-foreground">
+              {description}
+            </Typography>
+          )}
 
-        {detail && (
-          <div className="mt-6 w-full">
-            <button
-              type="button"
-              aria-expanded={expanded}
-              onClick={() => setExpanded((v) => !v)}
-              className="mx-auto flex items-center gap-2 text-ui-12 text-text-hint"
-            >
-              <ChevronDown
-                aria-hidden
-                className={cn(
-                  "size-14 transition-transform",
-                  expanded && "rotate-180",
-                )}
-              />
-              {expanded ? "詳細を隠す" : "詳細を表示"}
-            </button>
+          {detail && (
+            <div className="mt-6">
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setExpanded((v) => !v)}
+                className="flex items-center gap-2 text-ui-12 text-text-hint"
+              >
+                <ChevronDown
+                  aria-hidden
+                  className={cn(
+                    "size-14 transition-transform",
+                    expanded && "rotate-180",
+                  )}
+                />
+                {expanded ? "詳細を隠す" : "詳細を表示"}
+              </button>
 
-            {expanded && (
-              <div className="mt-6 rounded-md bg-muted p-8 text-left">
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="flex items-center gap-2 text-ui-10 text-text-hint"
-                  >
-                    {copied ? (
-                      <Check aria-hidden className="size-12" />
-                    ) : (
-                      <Copy aria-hidden className="size-12" />
-                    )}
-                    {copied ? "コピーしました" : "コピー"}
-                  </button>
+              {expanded && (
+                <div className="mt-6 rounded-md bg-muted p-8">
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="flex items-center gap-2 text-ui-10 text-text-hint"
+                    >
+                      {copied ? (
+                        <Check aria-hidden className="size-12" />
+                      ) : (
+                        <Copy aria-hidden className="size-12" />
+                      )}
+                      {copied ? "コピーしました" : "コピー"}
+                    </button>
+                  </div>
+                  <pre className="mt-4 max-h-[160px] overflow-auto whitespace-pre-wrap break-words text-ui-10 text-foreground">
+                    {detail}
+                  </pre>
                 </div>
-                <pre className="mt-4 max-h-[160px] overflow-auto whitespace-pre-wrap break-words text-ui-10 text-foreground">
-                  {detail}
-                </pre>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

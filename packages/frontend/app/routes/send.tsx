@@ -458,16 +458,11 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           <Typography variant="ui-13" className="text-muted-foreground">
             ※ この取引は、キャンセルできません。
           </Typography>
+
+          {error && <ErrorMessage error={error} title="送金に失敗しました" />}
         </div>
 
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
-          {error && (
-            <ErrorMessage
-              error={error}
-              title="送金に失敗しました"
-              className="mb-[10px]"
-            />
-          )}
           <Button
             className="w-full"
             disabled={isSubmitting || !recipient?.address || isChainMismatched}
