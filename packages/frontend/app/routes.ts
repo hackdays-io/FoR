@@ -39,6 +39,7 @@ export default [
   route("users/:address", "routes/users.$address.tsx"),
 
   // API
+  route("api/profile/check", "routes/api.profile.check.ts"),
   route("api/profile/:address", "routes/api.profile.$address.tsx"),
   route("api/allowlist/sign", "routes/api.allowlist.sign.ts"),
 

@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import * as React from "react";
 
 import avatarDefault from "~/assets/images/avatar-default.png";
@@ -94,7 +94,7 @@ export const AvatarUpload = React.forwardRef<
     <label
       ref={ref}
       className={cn(
-        "inline-flex size-[120px] shrink-0 flex-col items-center justify-center gap-[10px] overflow-hidden rounded-[64px] bg-button-tertiary-frame/90",
+        "relative inline-block size-[120px] shrink-0",
         interactive && "cursor-pointer",
         className,
       )}
@@ -107,18 +107,28 @@ export const AvatarUpload = React.forwardRef<
         onChange={handleChange}
         disabled={!interactive}
       />
-      {resolvedSrc ? (
-        <img
-          src={resolvedSrc}
-          alt={alt ?? ""}
-          className="size-full rounded-full object-cover"
-        />
-      ) : (
-        <>
-          <Plus className="size-24 text-white" />
-          <span className="text-ui-16 font-bold text-white">画像を選択</span>
-        </>
-      )}
+      <span className="flex size-full flex-col items-center justify-center gap-[10px] overflow-hidden rounded-[64px] bg-button-tertiary-frame/90">
+        {resolvedSrc ? (
+          <img
+            src={resolvedSrc}
+            alt={alt ?? ""}
+            className="size-full rounded-full object-cover"
+          />
+        ) : (
+          <>
+            <Plus className="size-24 text-white" />
+            <span className="text-ui-16 font-bold text-white">画像を選択</span>
+          </>
+        )}
+      </span>
+      {interactive && resolvedSrc ? (
+        <span
+          aria-hidden="true"
+          className="absolute right-0 bottom-0 flex size-32 items-center justify-center rounded-full border-2 border-bg-default bg-button-tertiary-frame text-white"
+        >
+          <Pencil className="size-16" strokeWidth={1.75} />
+        </span>
+      ) : null}
     </label>
   );
 });

@@ -23,31 +23,10 @@ import { profileQueryKey } from "~/hooks/useProfileByAddress";
 import { useUploadImageFileToIpfs } from "~/hooks/useUploadImageFileToIpfs";
 import { searchNames, setName } from "~/lib/namestone.server";
 import type { Route } from "./+types/profile.create";
+import type { loader as checkNameLoader } from "./api.profile.check";
 
 export function meta(_args: Route.MetaArgs) {
   return [{ title: "プロフィール作成 | FoR" }];
-}
-
-export async function loader({ request }: Route.LoaderArgs) {
-  const url = new URL(request.url);
-  const check = url.searchParams.get("check");
-
-  if (!check) {
-    return { available: null };
-  }
-
-  try {
-    ens_normalize(check);
-  } catch {
-    return { available: false };
-  }
-
-  try {
-    const results = await searchNames(check, true);
-    return { available: results.length === 0 };
-  } catch {
-    return { available: null };
-  }
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -124,7 +103,7 @@ export default function ProfileCreate() {
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const navigate = useNavigate();
-  const fetcher = useFetcher<typeof loader>();
+  const fetcher = useFetcher<typeof checkNameLoader>();
   const submit = useSubmit();
   const { address } = useActiveWallet();
   const queryClient = useQueryClient();
@@ -180,7 +159,7 @@ export default function ProfileCreate() {
 
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
-        fetcher.load(`/profile/create?check=${encodeURIComponent(value)}`);
+        fetcher.load(`/api/profile/check?name=${encodeURIComponent(value)}`);
       }, 500);
     },
     [fetcher],
