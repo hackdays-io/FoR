@@ -509,7 +509,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           <AppBarBackButton onClick={() => navigate("/")} />
         </AppBarItem>
         <AppBarItem position="center">
-          <AppBarTitle>{CURRENCY_LABEL}を送る</AppBarTitle>
+          <AppBarTitle>{CURRENCY_LABEL}を送りました</AppBarTitle>
         </AppBarItem>
       </AppBar>
 
@@ -527,10 +527,48 @@ export default function Send({ loaderData }: Route.ComponentProps) {
         <Typography variant="ui-16">{CURRENCY_LABEL}を送りました。</Typography>
 
         {/* Amount Summary */}
-        <div className="flex flex-col gap-8">
-          <AmountRow label={`送った${CURRENCY_LABEL}`} amount={amount || "0"} />
-          <AmountRow label="森の再生基金" amount={fundAndBurn} />
-          <AmountRow label="合計" amount={totalAmount} bold />
+        <div className="rounded-md bg-background p-16">
+          <div className="flex items-center justify-between">
+            <Typography variant="ui-13" weight="bold" as="span">
+              送った{CURRENCY_LABEL}
+            </Typography>
+            <div className="flex items-baseline gap-4">
+              <Typography variant="number-m">
+                {formatAmount(amount || "0")}
+              </Typography>
+              <Typography variant="ui-20" weight="bold">
+                {CURRENCY_LABEL}
+              </Typography>
+            </div>
+          </div>
+
+          <div className="mt-16 flex items-center justify-between border-b border-border pb-16">
+            <Typography variant="ui-13" weight="bold" as="span">
+              森の再生基金
+            </Typography>
+            <div className="flex items-baseline gap-4">
+              <Typography variant="number-m">
+                {formatAmount(fundAndBurn)}
+              </Typography>
+              <Typography variant="ui-20" weight="bold">
+                {CURRENCY_LABEL}
+              </Typography>
+            </div>
+          </div>
+
+          <div className="mt-16 flex items-center justify-between">
+            <Typography variant="ui-13" weight="bold" as="span">
+              合計
+            </Typography>
+            <div className="flex items-baseline gap-4">
+              <Typography variant="number-l">
+                {formatAmount(totalAmount)}
+              </Typography>
+              <Typography variant="ui-20" weight="bold">
+                {CURRENCY_LABEL}
+              </Typography>
+            </div>
+          </div>
         </div>
 
         {/* Explorer link */}
@@ -542,7 +580,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               href={explorerUrl}
               target="_blank"
               rel="noreferrer noopener"
-              className="inline-flex items-center gap-4 self-start text-ui-13 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              className="inline-flex items-center gap-4 self-end text-ui-13 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
             >
               {getExplorerName()}で取引を見る
               <ExternalLink size={14} aria-hidden="true" />
