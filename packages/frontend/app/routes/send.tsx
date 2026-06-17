@@ -1,6 +1,6 @@
 import { ExternalLink, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { type Address, formatUnits, parseUnits } from "viem";
 import {
   AppBar,
@@ -81,7 +81,7 @@ function AmountRow({
   bold?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-lg bg-background px-16 py-12">
+    <div className="flex items-center justify-between rounded-md bg-background px-16 py-12">
       <Typography variant="ui-13" weight={bold ? "bold" : "normal"} as="span">
         {label}
       </Typography>
@@ -141,7 +141,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   );
 
   const numAmount = Number(amount) || 0;
-  // 森の貯金箱表示は fund + burn を合算して表示する
+  // 森の再生基金表示は fund + burn を合算して表示する
   const fundAndBurn = breakdown
     ? formatUnits(breakdown.fundAmount + breakdown.burnAmount, 18)
     : "0";
@@ -233,9 +233,14 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           )}
 
           {/* Amount Card */}
-          <div className="rounded-lg bg-background p-16">
+          <div className="rounded-md bg-background p-16">
             <div className="flex items-baseline gap-8">
-              <Typography variant="ui-13" as="span" className="shrink-0">
+              <Typography
+                variant="ui-13"
+                weight="bold"
+                as="span"
+                className="shrink-0"
+              >
                 送る{CURRENCY_LABEL}
               </Typography>
               <input
@@ -244,7 +249,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
-                className="min-w-0 flex-1 rounded-md border border-border bg-card px-8 py-6 text-right font-latin text-content-number-m font-bold text-foreground outline-none"
+                className="min-w-0 flex-1 rounded-[4px] border border-border bg-card px-8 py-6 text-right font-latin text-content-number-m font-bold text-foreground outline-none"
               />
               <Typography
                 variant="ui-20"
@@ -256,9 +261,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               </Typography>
             </div>
 
-            <div className="mt-12 flex items-center justify-between border-b border-border pb-12">
-              <Typography variant="ui-13" as="span">
-                森の貯金箱
+            <div className="mt-16 flex items-center justify-between border-b border-border pb-16">
+              <Typography variant="ui-13" weight="bold" as="span">
+                森の再生基金
               </Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-m">
@@ -270,7 +275,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               </div>
             </div>
 
-            <div className="mt-12 flex items-center justify-between">
+            <div className="mt-16 flex items-center justify-between">
               <Typography variant="ui-13" weight="bold" as="span">
                 合計
               </Typography>
@@ -286,29 +291,20 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           </div>
 
           {/* Current Balance */}
-          <div className="flex items-center justify-between px-4">
-            <Typography variant="ui-13" as="span" className="text-text-hint">
-              残高
-            </Typography>
-            <div className="flex items-baseline gap-4">
-              <Typography variant="number-m">
-                {isBalanceLoading ? "--" : formatAmount(balanceDisplay)}
-              </Typography>
-              <Typography variant="ui-13" weight="bold">
-                {CURRENCY_LABEL}
-              </Typography>
-            </div>
-          </div>
+          <AmountRow
+            label="残高"
+            amount={isBalanceLoading ? "--" : balanceDisplay}
+            bold
+          />
 
           {/* Forest bank link */}
           <div className="flex justify-end">
-            <button
-              type="button"
+            <Link
+              to="/forest-bank/about"
               className="text-ui-13 font-medium text-foreground underline underline-offset-2"
-              onClick={() => navigate("/forest-bank")}
             >
-              森の貯金箱とは？
-            </button>
+              森の再生基金とは？
+            </Link>
           </div>
 
           {/* Purpose */}
@@ -361,8 +357,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
           {insufficientBalance && (
             <Typography
+              as="p"
               variant="ui-13"
-              className="mb-8 text-center text-destructive"
+              className="mb-[10px] text-center text-destructive"
             >
               残高が不足しています
             </Typography>
@@ -378,7 +375,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             }
             onClick={() => setStep("confirm")}
           >
-            送る
+            内容を確認する
           </Button>
         </div>
       </div>
@@ -394,7 +391,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             <AppBarBackButton onClick={handleBack} />
           </AppBarItem>
           <AppBarItem position="center">
-            <AppBarTitle>{CURRENCY_LABEL}を送る</AppBarTitle>
+            <AppBarTitle>内容を確認</AppBarTitle>
           </AppBarItem>
         </AppBar>
 
@@ -410,9 +407,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           )}
 
           {/* Amount Summary */}
-          <div className="flex flex-col gap-4 rounded-lg bg-background p-16">
+          <div className="rounded-md bg-background p-16">
             <div className="flex items-center justify-between">
-              <Typography variant="ui-13" as="span">
+              <Typography variant="ui-13" weight="bold" as="span">
                 送る{CURRENCY_LABEL}
               </Typography>
               <div className="flex items-baseline gap-4">
@@ -425,9 +422,9 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-b border-border pb-12">
-              <Typography variant="ui-13" as="span">
-                森の貯金箱
+            <div className="mt-16 flex items-center justify-between border-b border-border pb-16">
+              <Typography variant="ui-13" weight="bold" as="span">
+                森の再生基金
               </Typography>
               <div className="flex items-baseline gap-4">
                 <Typography variant="number-m">
@@ -439,7 +436,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4">
+            <div className="mt-16 flex items-center justify-between">
               <Typography variant="ui-13" weight="bold" as="span">
                 合計
               </Typography>
@@ -457,14 +454,41 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           {/* Remaining Balance */}
           <AmountRow label="残高" amount={remainingBalance} bold />
 
-          <Typography variant="ui-13" className="text-muted-foreground">
-            ※ この取引は、キャンセルできません。
-          </Typography>
+          {/* Purpose */}
+          {selectedPurpose && (
+            <div className="mt-16">
+              <Typography variant="ui-16" weight="bold">
+                {CURRENCY_LABEL}の交換用途
+              </Typography>
+              <div className="mt-16 flex flex-wrap gap-8">
+                <Label selected>{selectedPurpose}</Label>
+              </div>
+            </div>
+          )}
+
+          {/* Story */}
+          {story && (
+            <div>
+              <Typography variant="ui-16" weight="bold">
+                ストーリー
+              </Typography>
+              <div className="mt-16">
+                <TextField value={story} readOnly />
+              </div>
+            </div>
+          )}
 
           {error && <ErrorMessage error={error} title="送金に失敗しました" />}
         </div>
 
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
+          <Typography
+            as="p"
+            variant="ui-13"
+            className="mb-[10px] text-center text-muted-foreground"
+          >
+            ※ この取引は、キャンセルできません。
+          </Typography>
           <Button
             className="w-full"
             disabled={isSubmitting || !recipient?.address || isChainMismatched}
@@ -485,28 +509,56 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           <AppBarBackButton onClick={() => navigate("/")} />
         </AppBarItem>
         <AppBarItem position="center">
-          <AppBarTitle>{CURRENCY_LABEL}を送る</AppBarTitle>
+          <AppBarTitle>{CURRENCY_LABEL}を送りました</AppBarTitle>
         </AppBarItem>
       </AppBar>
 
       <div className="flex flex-1 flex-col gap-16 px-20 pt-24">
-        {/* Recipient */}
-        {recipient && (
-          <div className="flex flex-col items-center gap-8">
-            <Avatar src={avatarSrc} alt={displayName} size="md" />
-            <Typography variant="ui-16" weight="bold">
-              {displayName}
-            </Typography>
-          </div>
-        )}
-
         <Typography variant="ui-16">{CURRENCY_LABEL}を送りました。</Typography>
 
         {/* Amount Summary */}
-        <div className="flex flex-col gap-8">
-          <AmountRow label={`送った${CURRENCY_LABEL}`} amount={amount || "0"} />
-          <AmountRow label="森の貯金箱" amount={fundAndBurn} />
-          <AmountRow label="合計" amount={totalAmount} bold />
+        <div className="mt-8 rounded-md bg-background p-16">
+          <div className="flex items-center justify-between">
+            <Typography variant="ui-13" weight="bold" as="span">
+              送った{CURRENCY_LABEL}
+            </Typography>
+            <div className="flex items-baseline gap-4">
+              <Typography variant="number-m">
+                {formatAmount(amount || "0")}
+              </Typography>
+              <Typography variant="ui-20" weight="bold">
+                {CURRENCY_LABEL}
+              </Typography>
+            </div>
+          </div>
+
+          <div className="mt-16 flex items-center justify-between border-b border-border pb-16">
+            <Typography variant="ui-13" weight="bold" as="span">
+              森の再生基金
+            </Typography>
+            <div className="flex items-baseline gap-4">
+              <Typography variant="number-m">
+                {formatAmount(fundAndBurn)}
+              </Typography>
+              <Typography variant="ui-20" weight="bold">
+                {CURRENCY_LABEL}
+              </Typography>
+            </div>
+          </div>
+
+          <div className="mt-16 flex items-center justify-between">
+            <Typography variant="ui-13" weight="bold" as="span">
+              合計
+            </Typography>
+            <div className="flex items-baseline gap-4">
+              <Typography variant="number-l">
+                {formatAmount(totalAmount)}
+              </Typography>
+              <Typography variant="ui-20" weight="bold">
+                {CURRENCY_LABEL}
+              </Typography>
+            </div>
+          </div>
         </div>
 
         {/* Explorer link */}
@@ -518,7 +570,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               href={explorerUrl}
               target="_blank"
               rel="noreferrer noopener"
-              className="inline-flex items-center gap-4 self-start text-ui-13 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              className="inline-flex items-center gap-4 self-end text-ui-13 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
             >
               {getExplorerName()}で取引を見る
               <ExternalLink size={14} aria-hidden="true" />
@@ -545,7 +597,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
       <div className="bg-bg-default px-20 pt-12 pb-32">
         <div className="flex flex-col gap-12">
           <Button className="w-full" onClick={() => navigate("/forest-bank")}>
-            森の貯金箱を見る
+            森の再生基金を見る
           </Button>
           <Button
             variant="secondary"
