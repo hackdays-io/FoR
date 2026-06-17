@@ -137,7 +137,9 @@ function AuthenticatedHome() {
             isBalanceLoading ? "--" : balance ? Number(balance.formatted) : 0
           }
           topProps={{
-            badgeImage: forStatus ? getBadgeImage(forStatus.tier) : undefined,
+            badgeImage: forStatus
+              ? getBadgeImage(forStatus.tier, forStatus.progress)
+              : undefined,
           }}
         />
 

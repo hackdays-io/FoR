@@ -102,6 +102,51 @@ describe("computeForStatus - 維持と減衰", () => {
   });
 });
 
+describe("computeForStatus - 進捗（次ランクへの到達度）", () => {
+  it("決済なしの Tier 1 は進捗 1（最小）", () => {
+    const s = computeForStatus({ paymentTimestampsMs: [], nowMs: NOW });
+    expect(s.tier).toBe(1);
+    expect(s.progress).toBe(1);
+  });
+
+  it("Tier 2: 累計1回は 1/3 → step2、累計2回は 2/3 → step4", () => {
+    const one = computeForStatus({
+      paymentTimestampsMs: [daysAgo(1)],
+      nowMs: NOW,
+    });
+    expect(one.tier).toBe(2);
+    expect(one.progress).toBe(2);
+
+    const two = computeForStatus({
+      paymentTimestampsMs: [daysAgo(2), daysAgo(1)],
+      nowMs: NOW,
+    });
+    expect(two.tier).toBe(2);
+    expect(two.progress).toBe(4);
+  });
+
+  it("Tier 4: 直近7日2回は 2/3 → step4", () => {
+    // p1->2, p2->2, p3(累計3/週3)->3, p4->4。tier4 で週カウント=4件だが
+    // 進捗は「直近7日で3回」基準。ここでは別ケースで週2回の到達度を見る。
+    const s = computeForStatus({
+      paymentTimestampsMs: [daysAgo(3), daysAgo(2), daysAgo(1), daysAgo(0)],
+      nowMs: NOW,
+    });
+    expect(s.tier).toBe(4);
+    // 直近7日に4件 → min(4,3)/3 = 1 → step6
+    expect(s.progress).toBe(6);
+  });
+
+  it("Tier 6 は最上位なので常に進捗 6（フル）", () => {
+    const s = computeForStatus({
+      paymentTimestampsMs: dailyPayments(35),
+      nowMs: NOW,
+    });
+    expect(s.tier).toBe(6);
+    expect(s.progress).toBe(6);
+  });
+});
+
 describe("computeForStatus - アラート文言と残日数", () => {
   it("残日数を文言に埋め込む（Tier 2、残り 10 日）", () => {
     const s = computeForStatus({

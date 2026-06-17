@@ -1,23 +1,28 @@
-// ティア → バッジ画像のマッピング。
-// 画像は後ほど差し替え予定のため、`rankbadge_<tier>.png` 形式のファイル名で配置している。
-// 現状はプレースホルダ画像。同名で差し替えるだけで反映される。
-import rankbadge1 from "~/assets/images/badges/rankbadge_1.png";
-import rankbadge2 from "~/assets/images/badges/rankbadge_2.png";
-import rankbadge3 from "~/assets/images/badges/rankbadge_3.png";
-import rankbadge4 from "~/assets/images/badges/rankbadge_4.png";
-import rankbadge5 from "~/assets/images/badges/rankbadge_5.png";
-import rankbadge6 from "~/assets/images/badges/rankbadge_6.png";
-import type { Tier } from "~/lib/for-status";
+// ティア × 進捗 → プログレスバー付きバッジ画像のマッピング。
+// ファイル名は `<level>-<animal>-<progress>.png`（外周リングが 6 段階で埋まる版）。
+// 静的バッジ `<level>-<animal>.png` や locked `6-wolf-locked-*.png` は対象外。
+import type { ProgressStep, Tier } from "~/lib/for-status";
 
-const BADGE_IMAGE_BY_TIER: Record<Tier, string> = {
-  1: rankbadge1,
-  2: rankbadge2,
-  3: rankbadge3,
-  4: rankbadge4,
-  5: rankbadge5,
-  6: rankbadge6,
-};
+// 全バッジ画像を一括読み込みし、`<level>-<progress>` キーで引けるようにする。
+const badgeModules = import.meta.glob("../assets/images/badges/*.png", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
 
-export function getBadgeImage(tier: Tier): string {
-  return BADGE_IMAGE_BY_TIER[tier];
+// "1-bee-3.png" のような level-animal-progress のみ抽出（locked / 静的は除外）。
+const PROGRESS_BADGE_PATTERN = /\/([1-6])-[a-z]+-([1-6])\.png$/;
+const badgeByTierProgress = new Map<string, string>();
+for (const [path, url] of Object.entries(badgeModules)) {
+  const m = path.match(PROGRESS_BADGE_PATTERN);
+  if (m) badgeByTierProgress.set(`${m[1]}-${m[2]}`, url);
+}
+
+export function getBadgeImage(tier: Tier, progress: ProgressStep): string {
+  const url = badgeByTierProgress.get(`${tier}-${progress}`);
+  if (!url) {
+    throw new Error(
+      `バッジ画像が見つかりません: tier=${tier} progress=${progress}`,
+    );
+  }
+  return url;
 }

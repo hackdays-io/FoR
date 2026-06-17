@@ -14,6 +14,9 @@ export type Tier = 1 | 2 | 3 | 4 | 5 | 6;
 
 export const TIERS: readonly Tier[] = [1, 2, 3, 4, 5, 6];
 
+// バッジ外周リングの進捗段階（1 = 入りたて・最小、6 = 次ランク目前・フル）。
+export type ProgressStep = 1 | 2 | 3 | 4 | 5 | 6;
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * DAY_MS;
 const MONTH_MS = 30 * DAY_MS;
@@ -64,6 +67,8 @@ export type ForStatus = {
   tier: Tier;
   nameJa: string;
   nameEn: string;
+  /** 現在ティア内の進捗（1〜6）。次ランクへの到達度をバッジの 6 段階で表す */
+  progress: ProgressStep;
   /** 最終決済時刻（ms）。決済が一度もなければ null */
   lastActivityMs: number | null;
   /** 次のランクダウン時刻（ms）。Tier 1（減衰なし）または決済なしの場合は null */
@@ -109,6 +114,60 @@ function owlMaintainedForMonth(
     if (countInWindow(payments, c - WEEK_MS, c) < 3) return false;
   }
   return true;
+}
+
+/**
+ * 時刻 t において owl 条件（trailing 7 日で 3 回以上）が
+ * 連続して満たされ続けている長さ（ms）。t で満たしていなければ 0。
+ * Tier 5 → 6 の進捗（1 ヶ月継続で昇格）を測るために使う。
+ * 上限は 1 ヶ月（それ以上は昇格扱いなので測る意味がない）。
+ */
+function owlSustainedMs(payments: readonly number[], t: number): number {
+  if (countInWindow(payments, t - WEEK_MS, t) < 3) return 0;
+  // 条件は決済の流入(p)・流出(p+7d)でのみ変化する。t から最大 1 ヶ月遡り、
+  // 直近で条件を満たさなくなった折れ点を探す。owlMaintainedForMonth と同じ判定式。
+  const start = t - MONTH_MS;
+  const candidates: number[] = [];
+  for (const p of payments) {
+    if (p >= start && p < t) candidates.push(p);
+    const exit = p + WEEK_MS;
+    if (exit >= start && exit < t) candidates.push(exit);
+  }
+  candidates.sort((a, b) => b - a); // 降順（新しい順）
+  for (const c of candidates) {
+    if (countInWindow(payments, c - WEEK_MS, c) < 3) return t - c;
+  }
+  return MONTH_MS; // 1 ヶ月以上ずっと満たしていた
+}
+
+const clamp = (v: number, lo: number, hi: number) =>
+  Math.max(lo, Math.min(hi, v));
+
+/** 現在ティア内の「次ランクへの到達度」[0, 1]。Tier 6 は最上位なので常に 1。 */
+function tierProgressFraction(
+  payments: readonly number[],
+  t: number,
+  tier: Tier,
+): number {
+  switch (tier) {
+    case 1: // → Tier 2: 初回決済（累計 1 回）
+      return payments.length >= 1 ? 1 : 0;
+    case 2: // → Tier 3: 累計 3 回
+      return Math.min(payments.length, 3) / 3;
+    case 3: // → Tier 4: 直近 1 ヶ月で 4 回
+      return Math.min(countInWindow(payments, t - MONTH_MS, t), 4) / 4;
+    case 4: // → Tier 5: 直近 7 日で 3 回
+      return Math.min(countInWindow(payments, t - WEEK_MS, t), 3) / 3;
+    case 5: // → Tier 6: owl 条件を 1 ヶ月継続
+      return owlSustainedMs(payments, t) / MONTH_MS;
+    case 6: // 最上位
+      return 1;
+  }
+}
+
+/** 到達度 [0, 1] をバッジの 6 段階に量子化する（0 でも最小 1 を返す）。 */
+function toProgressStep(fraction: number): ProgressStep {
+  return clamp(Math.round(fraction * 6), 1, 6) as ProgressStep;
 }
 
 /**
@@ -196,11 +255,14 @@ export function computeForStatus({
       ? template.replace("{days}", String(daysUntilDecay))
       : null;
 
+  const progress = toProgressStep(tierProgressFraction(payments, nowMs, tier));
+
   const info = TIER_INFO[tier];
   return {
     tier,
     nameJa: info.nameJa,
     nameEn: info.nameEn,
+    progress,
     lastActivityMs: lastActivity,
     nextDecayAtMs,
     daysUntilDecay,
