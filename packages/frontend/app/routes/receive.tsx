@@ -137,6 +137,7 @@ export default function Receive() {
           <Typography
             variant="ui-16"
             weight="bold"
+            as="p"
             className="my-16 text-center"
           >
             {displayName}
