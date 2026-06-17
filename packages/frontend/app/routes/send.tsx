@@ -460,7 +460,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               <Typography variant="ui-16" weight="bold">
                 {CURRENCY_LABEL}の交換用途
               </Typography>
-              <div className="mt-8 flex flex-wrap gap-8">
+              <div className="mt-16 flex flex-wrap gap-8">
                 <Label selected>{selectedPurpose}</Label>
               </div>
             </div>
@@ -472,7 +472,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
               <Typography variant="ui-16" weight="bold">
                 ストーリー
               </Typography>
-              <div className="mt-8">
+              <div className="mt-16">
                 <TextField value={story} readOnly />
               </div>
             </div>
