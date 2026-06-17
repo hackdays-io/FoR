@@ -1,6 +1,6 @@
 import { ExternalLink, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { type Address, formatUnits, parseUnits } from "viem";
 import {
   AppBar,
@@ -299,13 +299,12 @@ export default function Send({ loaderData }: Route.ComponentProps) {
 
           {/* Forest bank link */}
           <div className="flex justify-end">
-            <button
-              type="button"
+            <Link
+              to="/forest-bank/about"
               className="text-ui-13 font-medium text-foreground underline underline-offset-2"
-              onClick={() => navigate("/forest-bank")}
             >
               森の再生基金とは？
-            </button>
+            </Link>
           </div>
 
           {/* Purpose */}
