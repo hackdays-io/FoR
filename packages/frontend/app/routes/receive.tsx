@@ -2,6 +2,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { formatUnits, parseUnits } from "viem";
+import logoCircle from "~/assets/images/logo/logo-circle.png";
 import {
   AppBar,
   AppBarBackButton,
@@ -113,14 +114,21 @@ export default function Receive() {
         </Typography>
 
         {/* QR Card */}
-        <div className="rounded-lg bg-background p-20">
+        <div className="relative rounded-[10px] bg-background p-20">
+          {/* Logo */}
+          <img
+            src={logoCircle}
+            alt="FoR"
+            className="absolute top-20 left-20 size-32"
+          />
+
           {/* QR Code */}
           <div className="flex justify-center">
             <div className="bg-card p-12">
               {receiveUrl ? (
-                <QRCodeSVG value={receiveUrl} size={200} />
+                <QRCodeSVG value={receiveUrl} size={180} />
               ) : (
-                <div className="size-[200px] bg-muted" />
+                <div className="size-[180px] bg-muted" />
               )}
             </div>
           </div>
@@ -136,7 +144,12 @@ export default function Receive() {
 
           {/* Amount input */}
           <div className="mt-16 flex items-baseline gap-8">
-            <Typography variant="ui-13" as="span" className="shrink-0">
+            <Typography
+              variant="ui-13"
+              weight="bold"
+              as="span"
+              className="shrink-0"
+            >
               依頼{CURRENCY_LABEL}
             </Typography>
             <input
@@ -159,8 +172,8 @@ export default function Receive() {
 
           {/* Fund + Burn */}
           <div className="mt-12 flex items-baseline justify-between border-b border-border pb-12">
-            <Typography variant="ui-13" as="span">
-              森の貯金箱
+            <Typography variant="ui-13" weight="bold" as="span">
+              森の再生基金
             </Typography>
             <div className="flex items-baseline gap-4">
               <Typography variant="number-m">
