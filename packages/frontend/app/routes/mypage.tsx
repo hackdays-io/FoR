@@ -50,7 +50,7 @@ export default function Mypage() {
     profile?.text_records?.display || profile?.name || shortenAddress(address);
 
   return (
-    <div className="min-h-screen bg-bg-default">
+    <div className="min-h-dvh bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate("/")} />

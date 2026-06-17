@@ -259,7 +259,7 @@ export default function ProfileEdit() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg-default">
+    <div className="flex min-h-dvh flex-col bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate(-1)} />

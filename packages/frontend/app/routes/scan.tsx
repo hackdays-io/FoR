@@ -74,7 +74,7 @@ export default function Scan() {
   }, [navigate]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-black">
+    <div className="flex min-h-dvh flex-col bg-black">
       <AppBar className="bg-black/80">
         <AppBarItem position="left">
           <AppBarBackButton

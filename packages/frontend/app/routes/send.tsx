@@ -211,7 +211,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   // ── Input Step ──
   if (step === "input") {
     return (
-      <div className="flex min-h-screen flex-col bg-bg-default">
+      <div className="flex min-h-dvh flex-col bg-bg-default">
         <AppBar>
           <AppBarItem position="left">
             <AppBarBackButton onClick={handleBack} />
@@ -385,7 +385,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   // ── Confirm Step ──
   if (step === "confirm") {
     return (
-      <div className="flex min-h-screen flex-col bg-bg-default">
+      <div className="flex min-h-dvh flex-col bg-bg-default">
         <AppBar>
           <AppBarItem position="left">
             <AppBarBackButton onClick={handleBack} />
@@ -503,7 +503,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
 
   // ── Complete Step ──
   return (
-    <div className="flex min-h-screen flex-col bg-bg-default">
+    <div className="flex min-h-dvh flex-col bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate("/")} />

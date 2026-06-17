@@ -65,7 +65,7 @@ export default function Welcome() {
   const showLoading = isWalletLoading || isCheckingList;
 
   return (
-    <div className="min-h-screen bg-bg-default">
+    <div className="min-h-dvh bg-bg-default">
       <AppBar>
         <AppBarItem position="center">
           <AppBarTitle>利用規約</AppBarTitle>

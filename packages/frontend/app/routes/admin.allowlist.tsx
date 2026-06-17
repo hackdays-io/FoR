@@ -77,7 +77,7 @@ export default function AdminAllowList() {
 
   if (isAdminLoading) {
     return (
-      <div className="min-h-screen bg-bg-default">
+      <div className="min-h-dvh bg-bg-default">
         <AppBar>
           <AppBarItem position="left">
             <AppBarBackButton onClick={() => navigate(-1)} />
@@ -97,7 +97,7 @@ export default function AdminAllowList() {
 
   if (isAdmin === false) {
     return (
-      <div className="min-h-screen bg-bg-default">
+      <div className="min-h-dvh bg-bg-default">
         <AppBar>
           <AppBarItem position="left">
             <AppBarBackButton onClick={() => navigate(-1)} />
@@ -116,7 +116,7 @@ export default function AdminAllowList() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-default">
+    <div className="min-h-dvh bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate(-1)} />

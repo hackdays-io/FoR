@@ -50,7 +50,7 @@ export default function App() {
     <QueryProvider>
       <AppPrivyProvider>
         <ActiveWalletProvider>
-          <div className="mx-auto w-full max-w-md min-h-screen">
+          <div className="mx-auto w-full max-w-md min-h-dvh">
             <ChainMismatchBanner />
             <AuthGate />
           </div>

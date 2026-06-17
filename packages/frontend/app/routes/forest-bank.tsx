@@ -74,7 +74,7 @@ export default function ForestBank() {
   const recentContributions = contributions?.slice(0, RECENT_DISPLAY_LIMIT);
 
   return (
-    <div className="min-h-screen bg-bg-default pb-[160px]">
+    <div className="min-h-dvh bg-bg-default pb-[160px]">
       <AppBar>
         <AppBarItem position="left">
           <AppBarLogo />
