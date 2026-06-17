@@ -114,13 +114,9 @@ export default function Receive() {
         </Typography>
 
         {/* QR Card */}
-        <div className="relative rounded-[10px] bg-background p-20">
+        <div className="rounded-[10px] bg-background p-20">
           {/* Logo */}
-          <img
-            src={logoCircle}
-            alt="FoR"
-            className="absolute top-20 left-20 size-32"
-          />
+          <img src={logoCircle} alt="FoR" className="size-32" />
 
           {/* QR Code */}
           <div className="flex justify-center">
