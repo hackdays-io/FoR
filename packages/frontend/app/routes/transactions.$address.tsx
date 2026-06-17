@@ -197,13 +197,23 @@ export default function TransactionDetail({
   const avatarSrc = profile?.text_records?.avatar;
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg-default">
+    <div className="flex min-h-dvh flex-col bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate(-1)} />
         </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>{displayName}</AppBarTitle>
+        </AppBarItem>
+        <AppBarItem position="right">
+          <button
+            type="button"
+            aria-label={`${displayName}のプロフィール`}
+            onClick={() => navigate(`/users/${peer}`)}
+            className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Avatar src={avatarSrc} alt={displayName} size="sm" />
+          </button>
         </AppBarItem>
       </AppBar>
 

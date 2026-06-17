@@ -13,6 +13,8 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   avatarAlt?: string;
   /** アバターを非表示にする（例: 集計値の行など人物に紐づかない行） */
   hideAvatar?: boolean;
+  /** アバタークリック時のハンドラ（指定時はアバターをボタン化し、行の onClick へは伝播させない） */
+  onAvatarClick?: () => void;
   /** 名前（1行目左） */
   name: string;
   /** メッセージ（2行目左） */
@@ -40,6 +42,7 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
       avatarSrc,
       avatarAlt = "",
       hideAvatar = false,
+      onAvatarClick,
       name,
       message,
       date,
@@ -62,7 +65,19 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
         data-slot="list-row"
         {...props}
       >
-        {hideAvatar ? null : (
+        {hideAvatar ? null : onAvatarClick ? (
+          <button
+            type="button"
+            aria-label={`${name}のプロフィール`}
+            onClick={(event) => {
+              event.stopPropagation();
+              onAvatarClick();
+            }}
+            className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Avatar src={avatarSrc} alt={avatarAlt} size="sm" />
+          </button>
+        ) : (
           <Avatar src={avatarSrc} alt={avatarAlt} size="sm" />
         )}
 

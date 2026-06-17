@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import { ListRow } from "~/components/ui/list-row";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { shortenAddress } from "~/lib/utils";
@@ -27,6 +28,7 @@ export function ProfileListRow({
   onClick,
   className,
 }: ProfileListRowProps) {
+  const navigate = useNavigate();
   const { data: profile } = useProfileByAddress(address);
   const displayName =
     profile?.text_records?.display || profile?.name || shortenAddress(address);
@@ -39,6 +41,7 @@ export function ProfileListRow({
       date={date}
       amount={amount}
       onClick={onClick}
+      onAvatarClick={() => navigate(`/users/${address}`)}
       className={className}
     />
   );
