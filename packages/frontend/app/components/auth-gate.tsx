@@ -1,5 +1,5 @@
 import { usePrivy } from "@privy-io/react-auth";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useIsAllowListed } from "~/hooks/useAllowList";
@@ -16,10 +16,13 @@ const PROFILE_EXEMPT = new Set<string>([
   "/profile/create",
 ]);
 
+// authenticated だが接続ウォレットが無い状態が確定するまでの猶予時間
+const NO_WALLET_LOGOUT_TIMEOUT_MS = 5000;
+
 export function AuthGate() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { ready, authenticated } = usePrivy();
+  const { ready, authenticated, logout } = usePrivy();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
   const { data: isListed } = useIsAllowListed(address);
   // プロフィールは react-query でキャッシュ管理。allowlist チェックと同じ仕組みで、
@@ -37,6 +40,24 @@ export function AuthGate() {
   // react-query の data は初回取得が完了するまで undefined
   const profileKnown = !!address && profile !== undefined;
   const bothResolved = allowlistKnown && profileKnown;
+
+  // authenticated だが接続ウォレットが無い（MetaMask 切断後などで Privy
+  // セッションだけ残った）状態では address が永久に null のままになり、
+  // 下の `isWalletLoading || !address` で読み込み中から抜け出せなくなる。
+  // ウォレット初期化が落ち着いても（!isWalletLoading）address が来なければ
+  // 自動ログアウトして LoginScreen へ戻す。logout は再レンダリングごとに
+  // 識別子が変わりうるため依存に入れず ref 経由で呼ぶ。
+  const noWalletStuck =
+    ready && authenticated && !isFullyPublic && !isWalletLoading && !address;
+  const logoutRef = useRef(logout);
+  logoutRef.current = logout;
+  useEffect(() => {
+    if (!noWalletStuck) return;
+    const timer = setTimeout(() => {
+      void logoutRef.current();
+    }, NO_WALLET_LOGOUT_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [noWalletStuck]);
 
   // 両方解決してから allowlist → profile の順に遷移
   useEffect(() => {

@@ -1,11 +1,10 @@
 import { useLogin, usePrivy } from "@privy-io/react-auth";
-import { useEffect, useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router";
 import { formatUnits } from "viem";
 import logoMain from "~/assets/images/logo/logo-main.png";
 import logoTagline from "~/assets/images/logo/logo-tagline.png";
-import { PresentIcon, QRIcon, ScanIcon, SendIcon } from "~/components/icons";
 import { LoadingScreen } from "~/components/loading-screen";
+import { MainBottomNavigation } from "~/components/main-bottom-navigation";
 import { OsusowakeCards } from "~/components/osusowake-cards";
 import { ProfileListRow } from "~/components/profile-list-row";
 import {
@@ -15,20 +14,16 @@ import {
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
-import {
-  BottomNavigation,
-  BottomNavigationItem,
-} from "~/components/ui/bottom-navigation";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { SectionTitle } from "~/components/ui/section-title";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useForTokenBalance } from "~/hooks/useForToken";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import { loadOsusowakeItems } from "~/lib/osusowake.server";
+import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/home";
 
@@ -36,23 +31,6 @@ export async function loader() {
   // defer: Promise のまま返してストリーミングする
   // （home 本体の描画・遷移を Google Sheets 取得でブロックしない）
   return { osusowakeItems: loadOsusowakeItems() };
-}
-
-const WALLET_INIT_TIMEOUT_MS = 5000;
-
-function WalletErrorScreen({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-16 bg-bg-default px-20">
-      <Typography variant="ui-13" className="text-center text-text-default">
-        ウォレットの準備に時間がかかっています。
-        <br />
-        再度ログインしてお試しください。
-      </Typography>
-      <Button onClick={onRetry} className="w-full">
-        再ログイン
-      </Button>
-    </div>
-  );
 }
 
 export function meta(_args: Route.MetaArgs) {
@@ -95,11 +73,8 @@ function LoginScreen() {
   );
 }
 
-const ICON_SIZE = 32;
-
 function AuthenticatedHome() {
   const navigate = useNavigate();
-  const { logout } = usePrivy();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
   const { data: balance, isLoading: isBalanceLoading } =
     useForTokenBalance(address);
@@ -107,29 +82,7 @@ function AuthenticatedHome() {
     useTransfersViaRouter(address, 3);
   // プロフィール表示用（AuthGate と同じ react-query キャッシュを共有）
   const { data: profile } = useProfileByAddress(address);
-  const [walletTimedOut, setWalletTimedOut] = useState(false);
   const { osusowakeItems } = useLoaderData<typeof loader>();
-
-  useEffect(() => {
-    if (address) {
-      setWalletTimedOut(false);
-      return;
-    }
-    const timer = setTimeout(
-      () => setWalletTimedOut(true),
-      WALLET_INIT_TIMEOUT_MS,
-    );
-    return () => clearTimeout(timer);
-  }, [address]);
-
-  const handleRelogin = async () => {
-    await logout();
-    setWalletTimedOut(false);
-  };
-
-  if (!address && walletTimedOut) {
-    return <WalletErrorScreen onRetry={handleRelogin} />;
-  }
 
   if (isWalletLoading || !address) {
     return <LoadingScreen />;
@@ -212,10 +165,13 @@ function AuthenticatedHome() {
                   const signedAmount =
                     (isSent ? -1 : 1) *
                     Number(formatUnits(BigInt(shownAmount), 18));
+                  const memo =
+                    parseMessagePayload(tx.message)?.memo || undefined;
                   return (
                     <ProfileListRow
                       key={tx.id}
                       address={counterparty}
+                      message={memo}
                       date={formatTimestamp(tx.timestamp)}
                       amount={signedAmount}
                       onClick={() => navigate(`/transactions/${counterparty}`)}
@@ -243,28 +199,7 @@ function AuthenticatedHome() {
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNavigation>
-        <BottomNavigationItem
-          icon={<SendIcon width={ICON_SIZE} height={ICON_SIZE} />}
-          label="送る"
-          to="/transactions"
-        />
-        <BottomNavigationItem
-          icon={<ScanIcon width={ICON_SIZE} height={ICON_SIZE} />}
-          label="スキャン"
-          to="/scan"
-        />
-        <BottomNavigationItem
-          icon={<QRIcon width={ICON_SIZE} height={ICON_SIZE} />}
-          label="マイコード"
-          to="/receive"
-        />
-        <BottomNavigationItem
-          icon={<PresentIcon width={ICON_SIZE} height={ICON_SIZE} />}
-          label="おすそわけ"
-          to="/osusowake"
-        />
-      </BottomNavigation>
+      <MainBottomNavigation />
     </div>
   );
 }

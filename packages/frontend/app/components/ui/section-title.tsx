@@ -38,7 +38,7 @@ export const SectionTitle = React.forwardRef<HTMLDivElement, SectionTitleProps>(
         <span
           className={cn(
             titleVariantClasses[variant],
-            "line-clamp-1 min-w-0 shrink",
+            "line-clamp-1 min-w-0 shrink font-bold",
           )}
         >
           {children}

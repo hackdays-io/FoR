@@ -1,8 +1,8 @@
-import { Gift, QrCode, Scan, Send } from "lucide-react";
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import { formatUnits } from "viem";
 
+import { MainBottomNavigation } from "~/components/main-bottom-navigation";
 import { ProfileListRow } from "~/components/profile-list-row";
 import {
   AppBar,
@@ -11,10 +11,6 @@ import {
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
-import {
-  BottomNavigation,
-  BottomNavigationItem,
-} from "~/components/ui/bottom-navigation";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { ListRow } from "~/components/ui/list-row";
@@ -26,6 +22,7 @@ import { useRecentFundContributions } from "~/hooks/useFundContributions";
 import { useFundWalletBalance } from "~/hooks/useFundWallet";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useUser } from "~/hooks/useUser";
+import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/forest-bank";
 
@@ -36,7 +33,6 @@ export function meta(_args: Route.MetaArgs) {
 const RECENT_LIMIT = 50;
 const RECENT_DISPLAY_LIMIT = 3;
 const SENT_TRANSFERS_LIMIT = 1000;
-const ICON_SIZE = 20;
 
 function formatSnapshot(date: Date): string {
   const yyyy = date.getFullYear();
@@ -78,7 +74,7 @@ export default function ForestBank() {
   const recentContributions = contributions?.slice(0, RECENT_DISPLAY_LIMIT);
 
   return (
-    <div className="min-h-screen bg-bg-default pb-[100px]">
+    <div className="min-h-screen bg-bg-default pb-[160px]">
       <AppBar>
         <AppBarItem position="left">
           <AppBarLogo />
@@ -120,6 +116,7 @@ export default function ForestBank() {
 
         <ListRow
           name="あなたの貢献量"
+          hideAvatar
           amount={isUserLoading ? undefined : Number(myContributionDisplay)}
           className="bg-white p-16 border border-black/10"
         />
@@ -139,22 +136,25 @@ export default function ForestBank() {
               </Typography>
             ) : (
               <div className="flex flex-col gap-12">
-                {recentContributions.map((t) => (
-                  <ProfileListRow
-                    key={t.id}
-                    address={t.from.id}
-                    message={t.message ?? undefined}
-                    date={formatTimestamp(t.timestamp)}
-                    amount={Number(formatUnits(BigInt(t.fundAmount), 18))}
-                  />
-                ))}
+                {recentContributions.map((t) => {
+                  const memo =
+                    parseMessagePayload(t.message)?.memo || undefined;
+                  return (
+                    <ProfileListRow
+                      key={t.id}
+                      address={t.from.id}
+                      message={memo}
+                      date={formatTimestamp(t.timestamp)}
+                      amount={Number(formatUnits(BigInt(t.fundAmount), 18))}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
 
         <Button
-          variant="secondary"
           className="w-full"
           onClick={() => navigate("/forest-bank/about")}
         >
@@ -162,28 +162,7 @@ export default function ForestBank() {
         </Button>
       </div>
 
-      <BottomNavigation>
-        <BottomNavigationItem
-          icon={<Send size={ICON_SIZE} />}
-          label="送る"
-          to="/transactions"
-        />
-        <BottomNavigationItem
-          icon={<Scan size={ICON_SIZE} />}
-          label="スキャン"
-          to="/scan"
-        />
-        <BottomNavigationItem
-          icon={<QrCode size={ICON_SIZE} />}
-          label="マイコード"
-          to="/receive"
-        />
-        <BottomNavigationItem
-          icon={<Gift size={ICON_SIZE} />}
-          label="おすそわけ"
-          to="/osusowake"
-        />
-      </BottomNavigation>
+      <MainBottomNavigation />
     </div>
   );
 }

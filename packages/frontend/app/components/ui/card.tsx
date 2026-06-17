@@ -38,7 +38,7 @@ const cardVariantConfig = {
     // 上部 100px（背景画像 + New バッジ）/ 下部 残り 80px（白背景・タイトル + 価格）
     gridRowsClassName: "grid-rows-[100px_1fr]",
     surfaceOverlayColor: "var(--color-alpha-black-25)",
-    surfaceClassName: "h-[180px]",
+    surfaceClassName: "h-[180px] shadow-elevation-1",
   },
 } as const;
 

@@ -2,6 +2,7 @@ import { Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
 import { formatUnits } from "viem";
+import { ProfileListRow } from "~/components/profile-list-row";
 import {
   AppBar,
   AppBarBackButton,
@@ -13,49 +14,14 @@ import { SectionTitle } from "~/components/ui/section-title";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
-import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import { type NameStoneProfile, searchNames } from "~/lib/namestone.server";
 import { parseMessagePayload } from "~/lib/transfer-message";
-import { formatTimestamp, shortenAddress } from "~/lib/utils";
+import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/transactions";
 
 export function meta(_args: Route.MetaArgs) {
   return [{ title: "送る・受け取る | FoR" }];
-}
-
-function TransferHistoryRow({
-  counterparty,
-  message,
-  date,
-  amount,
-  onClick,
-}: {
-  counterparty: string;
-  message?: string;
-  date: string;
-  amount: number;
-  onClick: () => void;
-}) {
-  const { data: profile } = useProfileByAddress(counterparty);
-  const displayName =
-    profile?.text_records?.display ||
-    profile?.name ||
-    shortenAddress(counterparty);
-
-  return (
-    <div className="rounded-lg bg-muted px-16">
-      <ListRow
-        name={displayName}
-        avatarSrc={profile?.text_records?.avatar}
-        message={message}
-        date={date}
-        amount={amount}
-        onClick={onClick}
-        className="cursor-pointer"
-      />
-    </div>
-  );
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -183,13 +149,14 @@ export default function Transactions() {
                   const memo =
                     parseMessagePayload(tx.message)?.memo || undefined;
                   return (
-                    <TransferHistoryRow
+                    <ProfileListRow
                       key={tx.id}
-                      counterparty={counterparty}
+                      address={counterparty}
                       message={memo}
                       date={formatTimestamp(tx.timestamp)}
                       amount={signedAmount}
                       onClick={() => navigate(`/transactions/${counterparty}`)}
+                      className="cursor-pointer"
                     />
                   );
                 })

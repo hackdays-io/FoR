@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/app-bar";
 import { Typography } from "~/components/ui/typography";
 import { useRecentFundContributions } from "~/hooks/useFundContributions";
+import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/forest-bank.contributions";
 
@@ -47,11 +48,12 @@ export default function Contributions() {
         ) : (
           contributions.map((t) => {
             const fundFormatted = Number(formatUnits(BigInt(t.fundAmount), 18));
+            const memo = parseMessagePayload(t.message)?.memo || undefined;
             return (
               <ProfileListRow
                 key={t.id}
                 address={t.from.id}
-                message={t.message ?? undefined}
+                message={memo}
                 date={formatTimestamp(t.timestamp)}
                 amount={fundFormatted}
               />

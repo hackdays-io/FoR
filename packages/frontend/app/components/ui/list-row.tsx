@@ -11,6 +11,8 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   avatarSrc?: string;
   /** アバターのalt */
   avatarAlt?: string;
+  /** アバターを非表示にする（例: 集計値の行など人物に紐づかない行） */
+  hideAvatar?: boolean;
   /** 名前（1行目左） */
   name: string;
   /** メッセージ（2行目左） */
@@ -37,6 +39,7 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
     {
       avatarSrc,
       avatarAlt = "",
+      hideAvatar = false,
       name,
       message,
       date,
@@ -59,7 +62,9 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
         data-slot="list-row"
         {...props}
       >
-        <Avatar src={avatarSrc} alt={avatarAlt} size="sm" />
+        {hideAvatar ? null : (
+          <Avatar src={avatarSrc} alt={avatarAlt} size="sm" />
+        )}
 
         {/* Left content: name + message */}
         <div className="flex min-w-0 flex-1 flex-col gap-4">

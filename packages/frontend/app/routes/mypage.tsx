@@ -95,12 +95,6 @@ export default function Mypage() {
           )}
         </div>
 
-        {/* 設定 */}
-        <div className="flex flex-col">
-          <SectionTitle>設定</SectionTitle>
-          <NavListRow label="言語設定" to="/settings/language" />
-        </div>
-
         {/* その他 */}
         <div className="flex flex-col">
           <SectionTitle>その他</SectionTitle>
