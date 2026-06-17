@@ -391,7 +391,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
             <AppBarBackButton onClick={handleBack} />
           </AppBarItem>
           <AppBarItem position="center">
-            <AppBarTitle>{CURRENCY_LABEL}を送る</AppBarTitle>
+            <AppBarTitle>内容を確認</AppBarTitle>
           </AppBarItem>
         </AppBar>
 
@@ -454,14 +454,41 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           {/* Remaining Balance */}
           <AmountRow label="残高" amount={remainingBalance} bold />
 
-          <Typography variant="ui-13" className="text-muted-foreground">
-            ※ この取引は、キャンセルできません。
-          </Typography>
+          {/* Purpose */}
+          {selectedPurpose && (
+            <div>
+              <Typography variant="ui-16" weight="bold">
+                {CURRENCY_LABEL}の交換用途
+              </Typography>
+              <div className="mt-8 flex flex-wrap gap-8">
+                <Label selected>{selectedPurpose}</Label>
+              </div>
+            </div>
+          )}
+
+          {/* Story */}
+          {story && (
+            <div>
+              <Typography variant="ui-16" weight="bold">
+                ストーリー
+              </Typography>
+              <div className="mt-8">
+                <TextField value={story} readOnly />
+              </div>
+            </div>
+          )}
 
           {error && <ErrorMessage error={error} title="送金に失敗しました" />}
         </div>
 
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
+          <Typography
+            as="p"
+            variant="ui-13"
+            className="mb-[10px] text-center text-muted-foreground"
+          >
+            ※ この取引は、キャンセルできません。
+          </Typography>
           <Button
             className="w-full"
             disabled={isSubmitting || !recipient?.address || isChainMismatched}
