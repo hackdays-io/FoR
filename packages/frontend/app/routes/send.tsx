@@ -358,6 +358,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
         <div className="sticky bottom-0 bg-bg-default px-20 pt-12 pb-32">
           {insufficientBalance && (
             <Typography
+              as="p"
               variant="ui-13"
               className="mb-[10px] text-center text-destructive"
             >
