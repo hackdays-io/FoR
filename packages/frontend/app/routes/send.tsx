@@ -514,20 +514,10 @@ export default function Send({ loaderData }: Route.ComponentProps) {
       </AppBar>
 
       <div className="flex flex-1 flex-col gap-16 px-20 pt-24">
-        {/* Recipient */}
-        {recipient && (
-          <div className="flex flex-col items-center gap-8">
-            <Avatar src={avatarSrc} alt={displayName} size="md" />
-            <Typography variant="ui-16" weight="bold">
-              {displayName}
-            </Typography>
-          </div>
-        )}
-
         <Typography variant="ui-16">{CURRENCY_LABEL}を送りました。</Typography>
 
         {/* Amount Summary */}
-        <div className="rounded-md bg-background p-16">
+        <div className="mt-8 rounded-md bg-background p-16">
           <div className="flex items-center justify-between">
             <Typography variant="ui-13" weight="bold" as="span">
               送った{CURRENCY_LABEL}
