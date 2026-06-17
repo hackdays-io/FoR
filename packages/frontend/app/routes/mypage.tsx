@@ -1,4 +1,5 @@
 import { usePrivy } from "@privy-io/react-auth";
+import { Pencil } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import {
   AppBar,
@@ -8,10 +9,19 @@ import {
 } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { NavListRow } from "~/components/ui/nav-list-row";
+import { SectionTitle } from "~/components/ui/section-title";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import type { Route } from "./+types/mypage";
+
+// 外部リンク（コミュニティ・お問い合わせ）の遷移先
+// TODO: 正式な URL が決まり次第差し替える
+const COMMUNITY_URL =
+  "https://www.figma.com/design/EPgo5kzk5BIHbCGr5WXBxs/FoR-wallet-app";
+const CONTACT_URL =
+  "https://www.figma.com/design/EPgo5kzk5BIHbCGr5WXBxs/FoR-wallet-app";
 
 export function meta(_args: Route.MetaArgs) {
   return [{ title: "マイページ | FoR" }];
@@ -40,7 +50,7 @@ export default function Mypage() {
     profile?.text_records?.display || profile?.name || shortenAddress(address);
 
   return (
-    <div className="min-h-screen bg-bg-default">
+    <div className="min-h-dvh bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate("/")} />
@@ -50,59 +60,57 @@ export default function Mypage() {
         </AppBarItem>
       </AppBar>
 
-      <div className="flex flex-col items-center gap-16 px-20 py-32">
-        <Avatar
-          src={profile?.text_records?.avatar}
-          alt={displayName}
-          size="lg"
-        />
+      <div className="flex flex-col gap-32 px-20 py-32">
+        {/* プロフィールヘッダー */}
+        <div className="flex flex-col gap-16">
+          <div className="flex flex-col items-center gap-16">
+            <Avatar
+              src={profile?.text_records?.avatar}
+              alt={displayName}
+              size="lg"
+            />
+            <Typography variant="headline-m" className="text-text-default">
+              {displayName}
+            </Typography>
+          </div>
 
-        <div className="flex flex-col items-center gap-4">
-          <Typography variant="headline-m" className="text-text-default">
-            {displayName}
-          </Typography>
-          {profile?.name && (
-            <Typography variant="ui-13" className="text-text-subtle">
-              {profile.name}.{profile.domain}
+          {profile?.text_records?.description && (
+            <Typography variant="body-m" className="w-full text-text-subtle">
+              {profile.text_records.description}
             </Typography>
           )}
-          <Typography variant="ui-10" className="text-text-hint">
-            {shortenAddress(address)}
-          </Typography>
+
+          {profile ? (
+            <Link
+              to={`/profile/edit?address=${address}`}
+              className="inline-flex items-center gap-4 self-end text-ui-13 font-bold text-text-default"
+            >
+              <Pencil size={16} aria-hidden="true" />
+              プロフィールを編集
+            </Link>
+          ) : (
+            <Link to="/profile/create" className="self-end">
+              <Button variant="secondary">プロフィールを作成</Button>
+            </Link>
+          )}
         </div>
 
-        {profile?.text_records?.description && (
-          <Typography variant="body-m" className="w-full text-text-default">
-            {profile.text_records.description}
-          </Typography>
-        )}
+        {/* その他 */}
+        <div className="flex flex-col">
+          <SectionTitle>その他</SectionTitle>
+          <NavListRow label="プライバシーポリシー" to="/privacy" />
+          <NavListRow label="利用規約" to="/terms" />
+          <NavListRow label="コミュニティ" href={COMMUNITY_URL} />
+          <NavListRow label="お問い合わせ" href={CONTACT_URL} />
+        </div>
 
-        {profile ? (
-          <Link to={`/profile/edit?address=${address}`} className="w-full">
-            <Button variant="secondary" className="w-full">
-              プロフィールを編集
-            </Button>
-          </Link>
-        ) : (
-          <Link to="/profile/create" className="w-full">
-            <Button className="w-full">プロフィールを作成</Button>
-          </Link>
-        )}
-
-        <Button variant="secondary" className="w-full" onClick={handleLogout}>
+        <Button
+          variant="secondary"
+          className="mt-16 w-full"
+          onClick={handleLogout}
+        >
           ログアウト
         </Button>
-
-        {/* {profile ? (
-          <Link
-            to={`/settings/delete-account?address=${address}`}
-            className="w-full"
-          >
-            <Button variant="ghost" className="w-full text-text-danger-default">
-              アカウントを削除
-            </Button>
-          </Link>
-        ) : null} */}
       </div>
     </div>
   );

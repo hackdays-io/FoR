@@ -4,7 +4,7 @@ import { Await } from "react-router";
 import { Card } from "~/components/ui/card";
 import type { OsusowakeItem } from "~/lib/osusowake.server";
 
-// scroll: ホームの横スクロール / grid: おすそ分け一覧ページの 2 カラム
+// scroll: ホームの横スクロール / grid: おすそわけ一覧ページの 2 カラム
 type OsusowakeLayout = "scroll" | "grid";
 
 const containerClassName: Record<OsusowakeLayout, string> = {
@@ -41,7 +41,9 @@ function OsusowakeCardsView({
 }) {
   if (items.length === 0) {
     return (
-      <p className="py-12 text-ui-13 text-text-hint">おすそ分けがありません</p>
+      <p className="py-12 text-center text-ui-13 text-text-hint">
+        おすそわけがありません
+      </p>
     );
   }
   return (
@@ -76,9 +78,9 @@ function OsusowakeCardsSkeleton({ layout }: { layout: OsusowakeLayout }) {
 }
 
 /**
- * おすそ分けカード一覧。loader が返す未解決の Promise を受け取り、
+ * おすそわけカード一覧。loader が返す未解決の Promise を受け取り、
  * defer ストリーミングで後追い表示する（ページ本体の描画・遷移はブロックしない）。
- * ホーム（layout="scroll"）とおすそ分け一覧ページ（layout="grid"）で共用する。
+ * ホーム（layout="scroll"）とおすそわけ一覧ページ（layout="grid"）で共用する。
  */
 export function OsusowakeCards({
   items,

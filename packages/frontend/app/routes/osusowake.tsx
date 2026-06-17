@@ -1,5 +1,5 @@
-import { Gift } from "lucide-react";
-import { useLoaderData, useNavigate } from "react-router";
+import { Link, useLoaderData, useNavigate } from "react-router";
+import { PresentIcon } from "~/components/icons";
 import { OsusowakeCards } from "~/components/osusowake-cards";
 import {
   AppBar,
@@ -24,7 +24,7 @@ export default function OsusowakeList() {
   const { items } = useLoaderData<typeof loader>();
 
   return (
-    <div className="min-h-screen bg-bg-default">
+    <div className="min-h-dvh bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate(-1)} />
@@ -33,14 +33,13 @@ export default function OsusowakeList() {
           <AppBarTitle>おすそわけ</AppBarTitle>
         </AppBarItem>
         <AppBarItem position="right">
-          <a
-            href="https://forms.gle/BWy74cG4KemRi4DZ7"
-            target="_blank"
-            rel="noreferrer noopener"
+          <Link
+            to="/osusowake/new"
+            aria-label="おすそわけを追加"
             className="inline-flex size-32 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted"
           >
-            <Gift size={20} />
-          </a>
+            <PresentIcon width={20} height={20} />
+          </Link>
         </AppBarItem>
       </AppBar>
 

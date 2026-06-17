@@ -1,20 +1,18 @@
-import { Gift, QrCode, Scan, Send } from "lucide-react";
 import { useMemo } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { formatUnits } from "viem";
 
-import forestWalletCardBackground from "~/assets/images/cards/forest-wallet-card-background.png";
+import { MainBottomNavigation } from "~/components/main-bottom-navigation";
+import { ProfileListRow } from "~/components/profile-list-row";
 import {
   AppBar,
   AppBarItem,
   AppBarLogo,
   AppBarTitle,
 } from "~/components/ui/app-bar";
-import {
-  BottomNavigation,
-  BottomNavigationItem,
-} from "~/components/ui/bottom-navigation";
+import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -22,17 +20,19 @@ import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useRecentFundContributions } from "~/hooks/useFundContributions";
 import { useFundWalletBalance } from "~/hooks/useFundWallet";
+import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useUser } from "~/hooks/useUser";
-import { formatTimestamp, shortenAddress } from "~/lib/utils";
+import { parseMessagePayload } from "~/lib/transfer-message";
+import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/forest-bank";
 
 export function meta(_args: Route.MetaArgs) {
-  return [{ title: "森の共通基金 | FoR" }];
+  return [{ title: "森の再生基金 | FoR" }];
 }
 
 const RECENT_LIMIT = 50;
+const RECENT_DISPLAY_LIMIT = 3;
 const SENT_TRANSFERS_LIMIT = 1000;
-const ICON_SIZE = 20;
 
 function formatSnapshot(date: Date): string {
   const yyyy = date.getFullYear();
@@ -58,6 +58,8 @@ export default function ForestBank() {
   );
   const { data: contributions, isLoading: isContributionsLoading } =
     useRecentFundContributions(RECENT_LIMIT);
+  const { data: profile } = useProfileByAddress(address);
+  const displayName = profile?.text_records?.display || profile?.name || "";
 
   const myContribution = useMemo(() => {
     if (!user?.sentTransfersViaRouter) return 0n;
@@ -67,18 +69,27 @@ export default function ForestBank() {
     );
   }, [user]);
 
-  const balanceDisplay = balance ? balance.formatted : "—";
   const myContributionDisplay = formatUnits(myContribution, 18);
   const snapshot = formatSnapshot(new Date(dataUpdatedAt || Date.now()));
+  const recentContributions = contributions?.slice(0, RECENT_DISPLAY_LIMIT);
 
   return (
-    <div className="min-h-screen bg-bg-default pb-[100px]">
+    <div className="min-h-dvh bg-bg-default pb-[160px]">
       <AppBar>
         <AppBarItem position="left">
           <AppBarLogo />
         </AppBarItem>
         <AppBarItem position="center">
-          <AppBarTitle>森の共通基金</AppBarTitle>
+          <AppBarTitle>森の再生基金</AppBarTitle>
+        </AppBarItem>
+        <AppBarItem position="right">
+          <Link to="/mypage">
+            <Avatar
+              src={profile?.text_records?.avatar}
+              alt={displayName}
+              size="sm"
+            />
+          </Link>
         </AppBarItem>
       </AppBar>
 
@@ -87,46 +98,28 @@ export default function ForestBank() {
           <TabsTrigger value="my-wallet" onClick={() => navigate("/")}>
             あなたのウォレット
           </TabsTrigger>
-          <TabsTrigger value="forest">森の共通基金</TabsTrigger>
+          <TabsTrigger value="forest">森の再生基金</TabsTrigger>
         </TabsList>
       </Tabs>
 
       <div className="flex flex-col gap-24 px-20 pt-20">
-        <div
-          className="relative h-[214px] overflow-hidden rounded-lg bg-cover bg-center shadow-elevation-1"
-          style={{ backgroundImage: `url(${forestWalletCardBackground})` }}
-        >
-          <div className="absolute inset-0 flex flex-col justify-between p-16 text-foreground">
-            <Typography variant="ui-16" weight="bold">
-              Collective Fund
-            </Typography>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-baseline justify-end gap-4">
-                <Typography variant="ui-13" className="text-text-subtle">
-                  Total
-                </Typography>
-                <Typography variant="number-l" weight="bold">
-                  {isBalanceLoading ? "—" : balanceDisplay}
-                </Typography>
-                <Typography variant="ui-16" weight="bold">
-                  KUU
-                </Typography>
-              </div>
-              <div className="flex justify-end">
-                <Typography variant="ui-10" className="text-text-subtle">
-                  {snapshot}
-                </Typography>
-              </div>
-            </div>
-          </div>
+        {/* Collective Fund Card */}
+        <div className="flex flex-col gap-8">
+          <Card
+            variant="fund"
+            amount={isBalanceLoading || !balance ? "--" : balance.formatted}
+          />
+          <Typography variant="ui-10" className="text-right text-text-hint">
+            {snapshot}
+          </Typography>
         </div>
 
-        <div className="rounded-lg bg-background px-16">
-          <ListRow
-            name="あなたの貢献量"
-            amount={isUserLoading ? undefined : Number(myContributionDisplay)}
-          />
-        </div>
+        <ListRow
+          name="あなたの貢献量"
+          hideAvatar
+          amount={isUserLoading ? undefined : Number(myContributionDisplay)}
+          className="bg-white p-16 border border-black/10"
+        />
 
         <div>
           <SectionTitle
@@ -136,57 +129,40 @@ export default function ForestBank() {
             みんなの貢献履歴
           </SectionTitle>
           <div className="mt-8">
-            {isContributionsLoading ? null : !contributions ||
-              contributions.length === 0 ? (
+            {isContributionsLoading ? null : !recentContributions ||
+              recentContributions.length === 0 ? (
               <Typography variant="ui-13" className="py-12 text-text-hint">
                 まだ貢献がありません
               </Typography>
             ) : (
-              contributions.map((t) => {
-                const fundFormatted = Number(
-                  formatUnits(BigInt(t.fundAmount), 18),
-                );
-                return (
-                  <ListRow
-                    key={t.id}
-                    name={shortenAddress(t.from.id)}
-                    message={t.message ?? undefined}
-                    date={formatTimestamp(t.timestamp)}
-                    amount={fundFormatted}
-                  />
-                );
-              })
+              <div className="flex flex-col gap-12">
+                {recentContributions.map((t) => {
+                  const memo =
+                    parseMessagePayload(t.message)?.memo || undefined;
+                  return (
+                    <ProfileListRow
+                      key={t.id}
+                      address={t.from.id}
+                      message={memo}
+                      date={formatTimestamp(t.timestamp)}
+                      amount={Number(formatUnits(BigInt(t.fundAmount), 18))}
+                    />
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>
 
-        <Button variant="secondary" className="w-full" disabled>
-          森の共通基金とは？
+        <Button
+          className="w-full"
+          onClick={() => navigate("/forest-bank/about")}
+        >
+          森の再生基金とは？
         </Button>
       </div>
 
-      <BottomNavigation>
-        <BottomNavigationItem
-          icon={<Send size={ICON_SIZE} />}
-          label="送る"
-          to="/transactions"
-        />
-        <BottomNavigationItem
-          icon={<Scan size={ICON_SIZE} />}
-          label="スキャン"
-          to="/scan"
-        />
-        <BottomNavigationItem
-          icon={<QrCode size={ICON_SIZE} />}
-          label="マイコード"
-          to="/receive"
-        />
-        <BottomNavigationItem
-          icon={<Gift size={ICON_SIZE} />}
-          label="おすそ分け"
-          to="/osusowake"
-        />
-      </BottomNavigation>
+      <MainBottomNavigation />
     </div>
   );
 }

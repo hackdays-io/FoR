@@ -28,6 +28,7 @@ export default [
 
   // 森の貯金箱
   route("forest-bank", "routes/forest-bank.tsx"),
+  route("forest-bank/about", "routes/forest-bank.about.tsx"),
   route("forest-bank/contributions", "routes/forest-bank.contributions.tsx"),
 
   // 送受信履歴
@@ -38,6 +39,7 @@ export default [
   route("users/:address", "routes/users.$address.tsx"),
 
   // API
+  route("api/profile/check", "routes/api.profile.check.ts"),
   route("api/profile/:address", "routes/api.profile.$address.tsx"),
   route("api/allowlist/sign", "routes/api.allowlist.sign.ts"),
 
@@ -46,7 +48,7 @@ export default [
   route("receive", "routes/receive.tsx"),
   route("scan", "routes/scan.tsx"),
 
-  // おすそ分け
+  // おすそわけ
   route("osusowake", "routes/osusowake.tsx"),
   route("osusowake/new", "routes/osusowake.new.tsx"),
   route("osusowake/:id", "routes/osusowake.$id.tsx"),

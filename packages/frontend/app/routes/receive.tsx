@@ -2,6 +2,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { formatUnits, parseUnits } from "viem";
+import logoCircle from "~/assets/images/logo/logo-circle.png";
 import {
   AppBar,
   AppBarBackButton,
@@ -17,11 +18,12 @@ import {
 } from "~/hooks/useDistributionTransfer";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useDistributionRatios } from "~/hooks/useRouter";
+import { CURRENCY_LABEL } from "~/lib/currency";
 import { formatAmount } from "~/lib/format";
 import type { Route } from "./+types/receive";
 
 export function meta(_args: Route.MetaArgs) {
-  return [{ title: "KUUを受け取る | FoR" }];
+  return [{ title: `${CURRENCY_LABEL}を受け取る | FoR` }];
 }
 
 function toBigIntAmount(value: string): bigint {
@@ -95,30 +97,34 @@ export default function Receive() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg-default">
+    <div className="flex min-h-dvh flex-col bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate(-1)} />
         </AppBarItem>
         <AppBarItem position="center">
-          <AppBarTitle>KUUを受け取る</AppBarTitle>
+          <AppBarTitle>{CURRENCY_LABEL}を受け取る</AppBarTitle>
         </AppBarItem>
       </AppBar>
 
       <div className="flex flex-1 flex-col gap-24 px-20 pt-20">
         <Typography variant="body-l">
-          相手にQRコードをスキャンしてもらうと、KUUを受け取ることができます。
+          相手にQRコードをスキャンしてもらうと、{CURRENCY_LABEL}
+          を受け取ることができます。
         </Typography>
 
         {/* QR Card */}
-        <div className="rounded-lg bg-background p-20">
+        <div className="rounded-[10px] bg-background p-20">
+          {/* Logo */}
+          <img src={logoCircle} alt="FoR" className="size-32" />
+
           {/* QR Code */}
           <div className="flex justify-center">
-            <div className="bg-card p-12">
+            <div className="bg-card p-24">
               {receiveUrl ? (
-                <QRCodeSVG value={receiveUrl} size={200} />
+                <QRCodeSVG value={receiveUrl} size={180} />
               ) : (
-                <div className="size-[200px] bg-muted" />
+                <div className="size-[180px] bg-muted" />
               )}
             </div>
           </div>
@@ -127,15 +133,21 @@ export default function Receive() {
           <Typography
             variant="ui-16"
             weight="bold"
-            className="mt-12 text-center"
+            as="p"
+            className="my-16 text-center"
           >
             {displayName}
           </Typography>
 
           {/* Amount input */}
           <div className="mt-16 flex items-baseline gap-8">
-            <Typography variant="ui-13" as="span" className="shrink-0">
-              依頼KUU
+            <Typography
+              variant="ui-13"
+              weight="bold"
+              as="span"
+              className="shrink-0"
+            >
+              依頼{CURRENCY_LABEL}
             </Typography>
             <input
               type="number"
@@ -151,21 +163,21 @@ export default function Receive() {
               as="span"
               className="shrink-0"
             >
-              KUU
+              {CURRENCY_LABEL}
             </Typography>
           </div>
 
           {/* Fund + Burn */}
           <div className="mt-12 flex items-baseline justify-between border-b border-border pb-12">
-            <Typography variant="ui-13" as="span">
-              森の貯金箱
+            <Typography variant="ui-13" weight="bold" as="span">
+              森の再生基金
             </Typography>
             <div className="flex items-baseline gap-4">
               <Typography variant="number-m">
                 {isRatiosLoading ? "--" : formatAmount(fundAndBurn)}
               </Typography>
               <Typography variant="ui-20" weight="bold">
-                KUU
+                {CURRENCY_LABEL}
               </Typography>
             </div>
           </div>
@@ -180,7 +192,7 @@ export default function Receive() {
                 {isRatiosLoading ? "--" : formatAmount(totalAmount)}
               </Typography>
               <Typography variant="ui-20" weight="bold">
-                KUU
+                {CURRENCY_LABEL}
               </Typography>
             </div>
           </div>

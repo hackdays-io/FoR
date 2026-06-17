@@ -72,37 +72,47 @@ function MessageBubble({
   return (
     <div className={`flex items-end gap-8 ${isSent ? "flex-row-reverse" : ""}`}>
       {!isSent && <Avatar src={avatarSrc} size="sm" alt="" />}
-      <div className="flex max-w-[75%] flex-col gap-4 rounded-lg bg-background p-12">
-        <Typography variant="ui-13" weight="bold">
-          {title}
-        </Typography>
-        {usecase && (
-          <span className="self-start rounded-full bg-primary px-12 py-2 text-ui-10 text-primary-foreground">
-            {usecase}
-          </span>
-        )}
-        {memo && (
-          <Typography variant="ui-13" className="text-muted-foreground">
-            {memo}
+      <div className="flex w-[270px] flex-col gap-8 rounded-lg bg-background p-12">
+        {/* Title row: title (left) + explorer link (right) */}
+        <div className="flex items-start justify-between gap-8">
+          <Typography variant="ui-13" weight="bold">
+            {title}
           </Typography>
-        )}
+          {explorerUrl ? (
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label={`${getExplorerName()}で取引を開く`}
+              className="shrink-0 text-muted-foreground hover:text-foreground"
+            >
+              <ExternalLink size={16} aria-hidden="true" />
+            </a>
+          ) : null}
+        </div>
+
         <div className="flex items-end justify-end gap-4">
           <Typography variant="number-m">{formatAmount(amount)}</Typography>
           <Typography variant="ui-16" weight="bold">
             FoR
           </Typography>
         </div>
-        {explorerUrl ? (
-          <a
-            href={explorerUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            aria-label={`${getExplorerName()}で取引を開く`}
-            className="self-end text-muted-foreground hover:text-foreground"
-          >
-            <ExternalLink size={14} aria-hidden="true" />
-          </a>
-        ) : null}
+
+        {/* Message section: category chip + memo on a white frame */}
+        {(usecase || memo) && (
+          <div className="flex flex-col gap-4 rounded-md bg-bg-default p-12">
+            {usecase && (
+              <span className="self-start rounded-full bg-visual-green-3 px-12 py-2 text-ui-10 text-foreground">
+                {usecase}
+              </span>
+            )}
+            {memo && (
+              <Typography variant="ui-13" className="text-foreground">
+                {memo}
+              </Typography>
+            )}
+          </div>
+        )}
       </div>
       <Typography
         variant="ui-10"
@@ -121,7 +131,7 @@ function DateSeparator({ date }: { date: string }) {
       <Typography
         variant="ui-12"
         as="span"
-        className="rounded-full bg-primary px-16 py-4 text-primary-foreground"
+        className="rounded-full bg-button-tertiary-frame px-16 py-4 text-white"
       >
         {date}
       </Typography>
@@ -187,13 +197,23 @@ export default function TransactionDetail({
   const avatarSrc = profile?.text_records?.avatar;
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg-default">
+    <div className="flex min-h-dvh flex-col bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate(-1)} />
         </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>{displayName}</AppBarTitle>
+        </AppBarItem>
+        <AppBarItem position="right">
+          <button
+            type="button"
+            aria-label={`${displayName}のプロフィール`}
+            onClick={() => navigate(`/users/${peer}`)}
+            className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Avatar src={avatarSrc} alt={displayName} size="sm" />
+          </button>
         </AppBarItem>
       </AppBar>
 

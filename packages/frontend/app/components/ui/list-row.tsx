@@ -1,8 +1,9 @@
 import { ExternalLink } from "lucide-react";
 import * as React from "react";
 
+import { Avatar } from "~/components/ui/avatar";
+import { CURRENCY_LABEL } from "~/lib/currency";
 import { formatAmount } from "~/lib/format";
-import { ipfs2https } from "~/lib/ipfs";
 import { cn } from "~/lib/utils";
 
 export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -10,6 +11,10 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   avatarSrc?: string;
   /** アバターのalt */
   avatarAlt?: string;
+  /** アバターを非表示にする（例: 集計値の行など人物に紐づかない行） */
+  hideAvatar?: boolean;
+  /** アバタークリック時のハンドラ（指定時はアバターをボタン化し、行の onClick へは伝播させない） */
+  onAvatarClick?: () => void;
   /** 名前（1行目左） */
   name: string;
   /** メッセージ（2行目左） */
@@ -18,7 +23,7 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   date?: string;
   /** 金額（2行目右、例: 50 or -50） */
   amount?: number;
-  /** 金額の単位（デフォルト: "KUU"） */
+  /** 金額の単位（デフォルト: CURRENCY_LABEL） */
   unit?: string;
   /** 行末に外部リンク（例: ブロックエクスプローラ）を表示する */
   externalUrl?: string;
@@ -36,11 +41,13 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
     {
       avatarSrc,
       avatarAlt = "",
+      hideAvatar = false,
+      onAvatarClick,
       name,
       message,
       date,
       amount,
-      unit = "KUU",
+      unit = CURRENCY_LABEL,
       externalUrl,
       externalUrlLabel = "ブロックエクスプローラで開く",
       className,
@@ -48,28 +55,31 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
     },
     ref,
   ) => {
-    const resolvedAvatarSrc = avatarSrc?.startsWith("ipfs://")
-      ? ipfs2https(avatarSrc)
-      : avatarSrc;
     return (
       <div
         ref={ref}
         className={cn(
-          "flex items-center gap-12 p-14 bg-background rounded-[10px]",
+          "flex items-center gap-12 px-16 py-18 bg-background rounded-[10px]",
           className,
         )}
         data-slot="list-row"
         {...props}
       >
-        {resolvedAvatarSrc ? (
-          <div className="flex size-40 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
-            <img
-              src={resolvedAvatarSrc}
-              alt={avatarAlt}
-              className="size-40 rounded-full object-cover"
-            />
-          </div>
-        ) : null}
+        {hideAvatar ? null : onAvatarClick ? (
+          <button
+            type="button"
+            aria-label={`${name}のプロフィール`}
+            onClick={(event) => {
+              event.stopPropagation();
+              onAvatarClick();
+            }}
+            className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Avatar src={avatarSrc} alt={avatarAlt} size="sm" />
+          </button>
+        ) : (
+          <Avatar src={avatarSrc} alt={avatarAlt} size="sm" />
+        )}
 
         {/* Left content: name + message */}
         <div className="flex min-w-0 flex-1 flex-col gap-4">

@@ -6,12 +6,13 @@ import {
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
-import { getNamesByAddress } from "~/lib/namestone.server";
+import { Button } from "~/components/ui/button";
 import { Typography } from "~/components/ui/typography";
+import { getNamesByAddress } from "~/lib/namestone.server";
 import type { Route } from "./+types/users.$address";
 
 export function meta(_args: Route.MetaArgs) {
-  return [{ title: "ユーザープロフィール | FoR" }];
+  return [{ title: "プロフィール | FoR" }];
 }
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -36,50 +37,47 @@ export default function UserProfile({ loaderData }: Route.ComponentProps) {
 
   const displayName =
     profile?.text_records?.display || profile?.name || shortenAddress(address);
+  const description = profile?.text_records?.description;
 
   return (
-    <div className="min-h-screen bg-bg-default">
+    <div className="flex min-h-dvh flex-col bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate(-1)} />
         </AppBarItem>
         <AppBarItem position="center">
-          <AppBarTitle>プロフィール</AppBarTitle>
+          <AppBarTitle>{displayName}</AppBarTitle>
         </AppBarItem>
       </AppBar>
 
-      <div className="flex flex-col items-center gap-16 px-20 py-32">
+      <div className="flex flex-1 flex-col items-center gap-24 px-20 pt-40">
         <Avatar
           src={profile?.text_records?.avatar}
           alt={displayName}
           size="lg"
         />
 
-        <div className="flex flex-col items-center gap-4">
-          <Typography variant="headline-m" className="text-text-default">
-            {displayName}
-          </Typography>
-          {profile?.name && (
-            <Typography variant="ui-13" className="text-text-subtle">
-              {profile.name}.{profile.domain}
-            </Typography>
-          )}
-          <Typography variant="ui-10" className="text-text-hint">
-            {shortenAddress(address)}
-          </Typography>
-        </div>
+        <Typography variant="headline-m" className="text-text-default">
+          {displayName}
+        </Typography>
 
-        {profile?.text_records?.description && (
-          <Typography variant="body-m" className="w-full text-text-default">
-            {profile.text_records.description}
+        {description && (
+          <Typography
+            variant="body-m"
+            className="w-full whitespace-pre-wrap text-text-default"
+          >
+            {description}
           </Typography>
         )}
+      </div>
 
-        {!profile && (
-          <Typography variant="ui-13" className="text-text-hint">
-            プロフィールが設定されていません
-          </Typography>
-        )}
+      <div className="sticky bottom-0 flex justify-center bg-bg-default px-20 py-16">
+        <Button
+          onClick={() => navigate(`/send?to=${address}`)}
+          className="w-full"
+        >
+          送る
+        </Button>
       </div>
     </div>
   );

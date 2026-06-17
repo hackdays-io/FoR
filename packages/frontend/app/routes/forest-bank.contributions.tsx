@@ -1,16 +1,17 @@
 import { useNavigate } from "react-router";
 import { formatUnits } from "viem";
 
+import { ProfileListRow } from "~/components/profile-list-row";
 import {
   AppBar,
   AppBarBackButton,
   AppBarItem,
   AppBarTitle,
 } from "~/components/ui/app-bar";
-import { ListRow } from "~/components/ui/list-row";
 import { Typography } from "~/components/ui/typography";
 import { useRecentFundContributions } from "~/hooks/useFundContributions";
-import { formatTimestamp, shortenAddress } from "~/lib/utils";
+import { parseMessagePayload } from "~/lib/transfer-message";
+import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/forest-bank.contributions";
 
 const CONTRIBUTIONS_LIMIT = 200;
@@ -25,7 +26,7 @@ export default function Contributions() {
     useRecentFundContributions(CONTRIBUTIONS_LIMIT);
 
   return (
-    <div className="min-h-screen bg-bg-default">
+    <div className="min-h-dvh bg-bg-default">
       <AppBar>
         <AppBarItem position="left">
           <AppBarBackButton onClick={() => navigate(-1)} />
@@ -47,15 +48,15 @@ export default function Contributions() {
         ) : (
           contributions.map((t) => {
             const fundFormatted = Number(formatUnits(BigInt(t.fundAmount), 18));
+            const memo = parseMessagePayload(t.message)?.memo || undefined;
             return (
-              <div key={t.id} className="rounded-lg bg-muted px-16">
-                <ListRow
-                  name={shortenAddress(t.from.id)}
-                  message={t.message ?? undefined}
-                  date={formatTimestamp(t.timestamp)}
-                  amount={fundFormatted}
-                />
-              </div>
+              <ProfileListRow
+                key={t.id}
+                address={t.from.id}
+                message={memo}
+                date={formatTimestamp(t.timestamp)}
+                amount={fundFormatted}
+              />
             );
           })
         )}

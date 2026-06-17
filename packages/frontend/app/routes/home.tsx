@@ -1,12 +1,12 @@
 import { useLogin, usePrivy } from "@privy-io/react-auth";
-import { Gift, QrCode, Scan, Send } from "lucide-react";
-import { useEffect, useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router";
 import { formatUnits } from "viem";
 import logoMain from "~/assets/images/logo/logo-main.png";
 import logoTagline from "~/assets/images/logo/logo-tagline.png";
 import { LoadingScreen } from "~/components/loading-screen";
+import { MainBottomNavigation } from "~/components/main-bottom-navigation";
 import { OsusowakeCards } from "~/components/osusowake-cards";
+import { ProfileListRow } from "~/components/profile-list-row";
 import {
   AppBar,
   AppBarItem,
@@ -14,16 +14,10 @@ import {
   AppBarTitle,
 } from "~/components/ui/app-bar";
 import { Avatar } from "~/components/ui/avatar";
-import {
-  BottomNavigation,
-  BottomNavigationItem,
-} from "~/components/ui/bottom-navigation";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { ListRow } from "~/components/ui/list-row";
 import { SectionTitle } from "~/components/ui/section-title";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useForStatus } from "~/hooks/useForStatus";
 import { useForTokenBalance } from "~/hooks/useForToken";
@@ -31,30 +25,14 @@ import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import { getBadgeImage } from "~/lib/for-status-badges";
 import { loadOsusowakeItems } from "~/lib/osusowake.server";
-import { formatTimestamp, shortenAddress } from "~/lib/utils";
+import { parseMessagePayload } from "~/lib/transfer-message";
+import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/home";
 
 export async function loader() {
   // defer: Promise のまま返してストリーミングする
   // （home 本体の描画・遷移を Google Sheets 取得でブロックしない）
   return { osusowakeItems: loadOsusowakeItems() };
-}
-
-const WALLET_INIT_TIMEOUT_MS = 5000;
-
-function WalletErrorScreen({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-16 bg-bg-default px-20">
-      <Typography variant="ui-13" className="text-center text-text-default">
-        ウォレットの準備に時間がかかっています。
-        <br />
-        再度ログインしてお試しください。
-      </Typography>
-      <Button onClick={onRetry} className="w-full">
-        再ログイン
-      </Button>
-    </div>
-  );
 }
 
 export function meta(_args: Route.MetaArgs) {
@@ -71,18 +49,18 @@ function LoginScreen() {
   const { login } = useLogin();
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg-default px-20">
+    <div className="flex min-h-dvh flex-col bg-bg-default px-20">
       {/* Logo */}
       <div className="flex flex-1 flex-col items-center justify-center gap-16">
         <img
           src={logoMain}
           alt="FoR"
-          className="h-[160px] w-[160px] object-contain"
+          className="h-[75px] w-[75px] object-contain"
         />
         <img
           src={logoTagline}
           alt="ForForest. ForPlanet. ForUs."
-          className="w-[160px] object-contain"
+          className="w-[120px] object-contain"
         />
       </div>
 
@@ -97,40 +75,8 @@ function LoginScreen() {
   );
 }
 
-const ICON_SIZE = 20;
-
-function TransferRow({
-  counterparty,
-  date,
-  amount,
-  onClick,
-}: {
-  counterparty: string;
-  date: string;
-  amount: number;
-  onClick: () => void;
-}) {
-  const { data: profile } = useProfileByAddress(counterparty);
-  const displayName =
-    profile?.text_records?.display ||
-    profile?.name ||
-    shortenAddress(counterparty);
-
-  return (
-    <ListRow
-      name={displayName}
-      avatarSrc={profile?.text_records?.avatar}
-      date={date}
-      amount={amount}
-      onClick={onClick}
-      className="cursor-pointer"
-    />
-  );
-}
-
 function AuthenticatedHome() {
   const navigate = useNavigate();
-  const { logout } = usePrivy();
   const { address, isLoading: isWalletLoading } = useActiveWallet();
   const { data: balance, isLoading: isBalanceLoading } =
     useForTokenBalance(address);
@@ -140,29 +86,7 @@ function AuthenticatedHome() {
   const { status: forStatus } = useForStatus(address);
   // プロフィール表示用（AuthGate と同じ react-query キャッシュを共有）
   const { data: profile } = useProfileByAddress(address);
-  const [walletTimedOut, setWalletTimedOut] = useState(false);
   const { osusowakeItems } = useLoaderData<typeof loader>();
-
-  useEffect(() => {
-    if (address) {
-      setWalletTimedOut(false);
-      return;
-    }
-    const timer = setTimeout(
-      () => setWalletTimedOut(true),
-      WALLET_INIT_TIMEOUT_MS,
-    );
-    return () => clearTimeout(timer);
-  }, [address]);
-
-  const handleRelogin = async () => {
-    await logout();
-    setWalletTimedOut(false);
-  };
-
-  if (!address && walletTimedOut) {
-    return <WalletErrorScreen onRetry={handleRelogin} />;
-  }
 
   if (isWalletLoading || !address) {
     return <LoadingScreen />;
@@ -171,7 +95,7 @@ function AuthenticatedHome() {
   const displayName = profile?.text_records?.display || profile?.name || "";
 
   return (
-    <div className="min-h-screen bg-bg-default pb-[100px]">
+    <div className="min-h-dvh bg-bg-default pb-[100px]">
       {/* Header */}
       <AppBar>
         <AppBarItem position="left">
@@ -199,7 +123,7 @@ function AuthenticatedHome() {
             value="forest-wallet"
             onClick={() => navigate("/forest-bank")}
           >
-            森の共通基金
+            森の再生基金
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -232,26 +156,32 @@ function AuthenticatedHome() {
                 取引履歴がありません
               </p>
             ) : (
-              transfers.map((tx) => {
-                const meLower = address?.toLowerCase() ?? "";
-                const isSent = tx.from.id.toLowerCase() === meLower;
-                const counterparty = isSent ? tx.to.id : tx.from.id;
-                const shownAmount = isSent
-                  ? tx.totalAmount
-                  : tx.recipientAmount;
-                const signedAmount =
-                  (isSent ? -1 : 1) *
-                  Number(formatUnits(BigInt(shownAmount), 18));
-                return (
-                  <TransferRow
-                    key={tx.id}
-                    counterparty={counterparty}
-                    date={formatTimestamp(tx.timestamp)}
-                    amount={signedAmount}
-                    onClick={() => navigate(`/transactions/${counterparty}`)}
-                  />
-                );
-              })
+              <div className="flex flex-col gap-12">
+                {transfers.map((tx) => {
+                  const meLower = address?.toLowerCase() ?? "";
+                  const isSent = tx.from.id.toLowerCase() === meLower;
+                  const counterparty = isSent ? tx.to.id : tx.from.id;
+                  const shownAmount = isSent
+                    ? tx.totalAmount
+                    : tx.recipientAmount;
+                  const signedAmount =
+                    (isSent ? -1 : 1) *
+                    Number(formatUnits(BigInt(shownAmount), 18));
+                  const memo =
+                    parseMessagePayload(tx.message)?.memo || undefined;
+                  return (
+                    <ProfileListRow
+                      key={tx.id}
+                      address={counterparty}
+                      message={memo}
+                      date={formatTimestamp(tx.timestamp)}
+                      amount={signedAmount}
+                      onClick={() => navigate(`/transactions/${counterparty}`)}
+                      className="cursor-pointer"
+                    />
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>
@@ -262,7 +192,7 @@ function AuthenticatedHome() {
             moreLabel="もっとみる"
             onMoreClick={() => navigate("/osusowake")}
           >
-            おすそ分け
+            おすそわけ
           </SectionTitle>
           <div className="mt-8">
             <OsusowakeCards items={osusowakeItems} layout="scroll" />
@@ -271,28 +201,7 @@ function AuthenticatedHome() {
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNavigation>
-        <BottomNavigationItem
-          icon={<Send size={ICON_SIZE} />}
-          label="送る"
-          to="/transactions"
-        />
-        <BottomNavigationItem
-          icon={<Scan size={ICON_SIZE} />}
-          label="スキャン"
-          to="/scan"
-        />
-        <BottomNavigationItem
-          icon={<QrCode size={ICON_SIZE} />}
-          label="マイコード"
-          to="/receive"
-        />
-        <BottomNavigationItem
-          icon={<Gift size={ICON_SIZE} />}
-          label="おすそ分け"
-          to="/osusowake"
-        />
-      </BottomNavigation>
+      <MainBottomNavigation />
     </div>
   );
 }

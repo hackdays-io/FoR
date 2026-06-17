@@ -7,7 +7,7 @@ const textFieldVariantClasses = {
     input: "text-foreground placeholder:text-foreground/30",
     label: "text-foreground",
     message: "text-muted-foreground",
-    root: "border-border bg-card hover:border-foreground/10 focus-within:border-foreground/10",
+    root: "border-text-hint bg-card focus-within:border-foreground",
   },
   error: {
     input: "text-foreground placeholder:text-foreground/30",
@@ -98,8 +98,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
         ) : null}
         <div
           className={cn(
-            "flex w-full items-center rounded-md border transition-colors",
-            "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
+            "flex w-full items-center rounded-[4px] border transition-colors",
             variantClasses.root,
             sizeClasses.root,
             disabled && "border-border bg-muted text-muted-foreground",
