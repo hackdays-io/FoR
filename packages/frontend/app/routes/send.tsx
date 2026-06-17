@@ -456,7 +456,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
 
           {/* Purpose */}
           {selectedPurpose && (
-            <div>
+            <div className="mt-16">
               <Typography variant="ui-16" weight="bold">
                 {CURRENCY_LABEL}の交換用途
               </Typography>
