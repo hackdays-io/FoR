@@ -105,6 +105,8 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   const [amount, setAmount] = useState(loaderData.initialAmount);
   const [selectedPurpose, setSelectedPurpose] = useState<string | null>(null);
   const [story, setStory] = useState(loaderData.initialStory);
+  // 送金完了時刻（ms）。完了画面のランクに「今送った決済」を楽観的に反映するために使う。
+  const [completedAtMs, setCompletedAtMs] = useState<number | null>(null);
 
   const { address } = useActiveWallet();
   const { data: balance, isLoading: isBalanceLoading } =
@@ -114,7 +116,15 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   const { isMismatched: isChainMismatched, expectedChainName } =
     useChainMismatch();
   // 完了画面で表示する FoR Status（ランク）。
-  const { status: forStatus } = useForStatus(address);
+  // 送金直後は subgraph 反映前なので、今送った tx を楽観的に加えて即時反映する。
+  const optimisticPayment = useMemo(
+    () =>
+      txHash && completedAtMs
+        ? { transactionHash: txHash, timestampMs: completedAtMs }
+        : null,
+    [txHash, completedAtMs],
+  );
+  const { status: forStatus } = useForStatus(address, optimisticPayment);
 
   // ユーザー入力 = 受取人が受け取る額（送る額）。
   // Router へは grossUp した total を渡して、分配後に recipient 部分が input に一致するようにする。
@@ -189,6 +199,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
         totalAmountBigInt,
         payload,
       );
+      setCompletedAtMs(Date.now());
       setStep("complete");
     } catch {
       // エラーは hook の error に反映

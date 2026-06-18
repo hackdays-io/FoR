@@ -36,6 +36,24 @@ export const GET_MY_TRANSFERS_VIA_ROUTER = graphql(`
   }
 `);
 
+// FoR Status（ランク）算出用。決済 = 送信のみ（from === me）に限定し、
+// ランク再構成に必要な最小限のフィールド（時刻と tx ハッシュ）だけを取得する。
+export const GET_MY_SENT_PAYMENTS = graphql(`
+  query GetMySentPayments($me: String!, $first: Int!, $skip: Int!) {
+    transferViaRouters(
+      first: $first
+      skip: $skip
+      orderBy: timestamp
+      orderDirection: asc
+      where: { from: $me }
+    ) {
+      id
+      timestamp
+      transactionHash
+    }
+  }
+`);
+
 export const GET_USER = graphql(`
   query GetUser($id: ID!, $first: Int!) {
     user(id: $id) {
