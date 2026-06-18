@@ -9,6 +9,7 @@
     "start": "react-router-serve ./build/server/index.js",
     "typegen": "react-router typegen",
     "check": "biome check",
+    "test": "vitest run",
     "codegen": "graphql-codegen",
     "ladle:serve": "ladle serve --viteConfig .ladle/vite.config.ts",
     "ladle:build": "ladle build --viteConfig .ladle/vite.config.ts"
@@ -50,6 +51,7 @@
     "typescript": "^5.9.2",
     "vite": "^7.1.7",
     "vite-plugin-svgr": "^5.2.0",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.1.8"
   }
 }

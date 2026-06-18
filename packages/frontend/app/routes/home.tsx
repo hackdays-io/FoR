@@ -19,9 +19,11 @@ import { Card } from "~/components/ui/card";
 import { SectionTitle } from "~/components/ui/section-title";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
+import { useForStatus } from "~/hooks/useForStatus";
 import { useForTokenBalance } from "~/hooks/useForToken";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
+import { getBadgeImage } from "~/lib/for-status-badges";
 import { loadOsusowakeItems } from "~/lib/osusowake.server";
 import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp } from "~/lib/utils";
@@ -80,6 +82,8 @@ function AuthenticatedHome() {
     useForTokenBalance(address);
   const { data: transfers, isLoading: isTransfersLoading } =
     useTransfersViaRouter(address, 3);
+  // FoR Status（ランク）。決済履歴からティアを再構成しバッジを表示する。
+  const { status: forStatus } = useForStatus(address);
   // プロフィール表示用（AuthGate と同じ react-query キャッシュを共有）
   const { data: profile } = useProfileByAddress(address);
   const { osusowakeItems } = useLoaderData<typeof loader>();
@@ -132,11 +136,11 @@ function AuthenticatedHome() {
           amount={
             isBalanceLoading ? "--" : balance ? Number(balance.formatted) : 0
           }
-          topProps={
-            {
-              // badgeImage: "",
-            }
-          }
+          topProps={{
+            badgeImage: forStatus
+              ? getBadgeImage(forStatus.tier, forStatus.progress)
+              : undefined,
+          }}
         />
 
         {/* Transaction History */}

@@ -21,10 +21,12 @@ import {
   grossUpFromRecipient,
   useDistributionTransfer,
 } from "~/hooks/useDistributionTransfer";
+import { useForStatus } from "~/hooks/useForStatus";
 import { useForTokenBalance } from "~/hooks/useForToken";
 import { useDistributionRatios } from "~/hooks/useRouter";
 import { CURRENCY_LABEL } from "~/lib/currency";
 import { getExplorerName, getExplorerTxUrl } from "~/lib/explorer";
+import { getBadgeImage } from "~/lib/for-status-badges";
 import { formatAmount } from "~/lib/format";
 import { getNamesByAddress } from "~/lib/namestone.server";
 import { buildMessagePayload } from "~/lib/transfer-message";
@@ -103,6 +105,8 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   const [amount, setAmount] = useState(loaderData.initialAmount);
   const [selectedPurpose, setSelectedPurpose] = useState<string | null>(null);
   const [story, setStory] = useState(loaderData.initialStory);
+  // 送金完了時刻（ms）。完了画面のランクに「今送った決済」を楽観的に反映するために使う。
+  const [completedAtMs, setCompletedAtMs] = useState<number | null>(null);
 
   const { address } = useActiveWallet();
   const { data: balance, isLoading: isBalanceLoading } =
@@ -111,6 +115,16 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   const { executeTransfer, status, txHash, error } = useDistributionTransfer();
   const { isMismatched: isChainMismatched, expectedChainName } =
     useChainMismatch();
+  // 完了画面で表示する FoR Status（ランク）。
+  // 送金直後は subgraph 反映前なので、今送った tx を楽観的に加えて即時反映する。
+  const optimisticPayment = useMemo(
+    () =>
+      txHash && completedAtMs
+        ? { transactionHash: txHash, timestampMs: completedAtMs }
+        : null,
+    [txHash, completedAtMs],
+  );
+  const { status: forStatus } = useForStatus(address, optimisticPayment);
 
   // ユーザー入力 = 受取人が受け取る額（送る額）。
   // Router へは grossUp した total を渡して、分配後に recipient 部分が input に一致するようにする。
@@ -185,6 +199,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
         totalAmountBigInt,
         payload,
       );
+      setCompletedAtMs(Date.now());
       setStep("complete");
     } catch {
       // エラーは hook の error に反映
@@ -578,20 +593,34 @@ export default function Send({ loaderData }: Route.ComponentProps) {
           );
         })()}
 
-        {/* Rank
-        <div className="flex flex-col items-center gap-8 pt-8">
-          <Typography variant="ui-16" weight="bold" className="w-full">
-            あなたのランク
-          </Typography>
-          <div className="h-[100px] w-[100px] rounded-lg bg-background" />
-          <Typography variant="ui-16" weight="bold">
-            ランク2
-          </Typography>
-          <Typography variant="ui-13" className="text-visual-green-4">
-            あと○回交換すると、ランク3にアップ！
-          </Typography>
-        </div>
-        */}
+        {/* Status（ランク） */}
+        {forStatus && (
+          <div className="flex flex-col gap-8 pt-8">
+            <Typography variant="ui-16" weight="bold">
+              あなたのステータス
+            </Typography>
+            <div className="flex flex-col items-center gap-12 rounded-md bg-background px-16 py-24">
+              <img
+                src={getBadgeImage(forStatus.tier, forStatus.progress)}
+                alt={forStatus.nameEn}
+                className="h-[120px] w-[120px] object-contain"
+              />
+              <Typography variant="display-m">{forStatus.nameEn}</Typography>
+              <Typography variant="ui-16" className="text-muted-foreground">
+                {forStatus.nameJa}
+              </Typography>
+              {forStatus.upgradeMessage && (
+                <Typography
+                  variant="ui-16"
+                  weight="bold"
+                  className="text-visual-green-4"
+                >
+                  {forStatus.upgradeMessage}
+                </Typography>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="bg-bg-default px-20 pt-12 pb-32">
