@@ -45,7 +45,7 @@ export const GET_MY_SENT_PAYMENTS = graphql(`
       skip: $skip
       orderBy: timestamp
       orderDirection: asc
-      where: { from: $me }
+      where: { from: $me, to_not: $me }
     ) {
       id
       timestamp
