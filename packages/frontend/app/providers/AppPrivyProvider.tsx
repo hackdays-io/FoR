@@ -1,4 +1,5 @@
 import { PrivyProvider as BasePrivyProvider } from "@privy-io/react-auth";
+import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
 import type { ReactNode } from "react";
 
 import { currentChain } from "../lib/viem";
@@ -34,7 +35,9 @@ export function AppPrivyProvider({ children }: Props): ReactNode {
         },
       }}
     >
-      {children}
+      {/* Privy ネイティブの Smart Wallet（バンドラー/ペイマスターは Privy
+          ダッシュボード側で設定）。embedded wallet を signer として AA を提供する */}
+      <SmartWalletsProvider>{children}</SmartWalletsProvider>
     </BasePrivyProvider>
   );
 }
