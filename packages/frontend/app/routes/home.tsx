@@ -140,6 +140,7 @@ function AuthenticatedHome() {
             badgeImage: forStatus
               ? getBadgeImage(forStatus.tier, forStatus.progress)
               : undefined,
+            badgeTo: forStatus ? "/status" : undefined,
           }}
         />
 

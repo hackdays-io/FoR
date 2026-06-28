@@ -26,6 +26,10 @@ export default [
   // ランク
   route("rank", "routes/rank.tsx"),
 
+  // FoR ステータス
+  route("status", "routes/status.tsx"),
+  route("status/about", "routes/status.about.tsx"),
+
   // 森の貯金箱
   route("forest-bank", "routes/forest-bank.tsx"),
   route("forest-bank/about", "routes/forest-bank.about.tsx"),
