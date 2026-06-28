@@ -18,7 +18,6 @@ import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useChainMismatch } from "~/hooks/useChainMismatch";
 import {
   calculateDistribution,
-  grossUpFromRecipient,
   useDistributionTransfer,
 } from "~/hooks/useDistributionTransfer";
 import { useForStatus } from "~/hooks/useForStatus";
@@ -127,32 +126,24 @@ export default function Send({ loaderData }: Route.ComponentProps) {
   const { status: forStatus } = useForStatus(address, optimisticPayment);
 
   // ユーザー入力 = 受取人が受け取る額（送る額）。
-  // Router へは grossUp した total を渡して、分配後に recipient 部分が input に一致するようにする。
+  // 上乗せ方式: 基金・Burn はこの額に上乗せされ、合計 (total) を支払う。
   const recipientAmountBigInt = useMemo(() => toBigIntAmount(amount), [amount]);
-
-  const totalAmountBigInt = useMemo(
-    () =>
-      ratios
-        ? grossUpFromRecipient(
-            recipientAmountBigInt,
-            ratios.fundRatio,
-            ratios.burnRatio,
-          )
-        : recipientAmountBigInt,
-    [recipientAmountBigInt, ratios],
-  );
 
   const breakdown = useMemo(
     () =>
       ratios
         ? calculateDistribution(
-            totalAmountBigInt,
+            recipientAmountBigInt,
             ratios.fundRatio,
             ratios.burnRatio,
           )
         : null,
-    [totalAmountBigInt, ratios],
+    [recipientAmountBigInt, ratios],
   );
+
+  const totalAmountBigInt = breakdown
+    ? breakdown.totalAmount
+    : recipientAmountBigInt;
 
   const numAmount = Number(amount) || 0;
   // 森の再生基金表示は fund + burn を合算して表示する
@@ -196,6 +187,7 @@ export default function Send({ loaderData }: Route.ComponentProps) {
     try {
       await executeTransfer(
         recipient.address as Address,
+        recipientAmountBigInt,
         totalAmountBigInt,
         payload,
       );

@@ -1,11 +1,10 @@
 import { useCallback, useState } from "react";
-import type { Address } from "viem";
+import { type Address, parseUnits } from "viem";
 import { forTokenAbi } from "~/lib/abis/forTokenAbi";
 import { routerAbi } from "~/lib/abis/routerAbi";
 import { addresses } from "~/lib/contracts";
 import { publicClient } from "~/lib/viem";
 import { useActiveWallet } from "./useActiveWallet";
-import { usePermitSignature } from "./usePermitSignature";
 
 export type TransferStatus =
   | "idle"
@@ -14,40 +13,39 @@ export type TransferStatus =
   | "success"
   | "error";
 
+// 送金のたびに approve するのを避けるため、一度にまとめて承認しておく既定額（1,000,000 FOR）。
+// 既存 allowance がこの額を下回り、かつ必要額に満たない場合のみ再承認する。
+const DEFAULT_APPROVE_AMOUNT = parseUnits("1000000", 18);
+
 export interface DistributionBreakdown {
   fundAmount: bigint;
   burnAmount: bigint;
   recipientAmount: bigint;
-}
-
-export function calculateDistribution(
-  amount: bigint,
-  fundRatio: bigint,
-  burnRatio: bigint,
-): DistributionBreakdown {
-  const fundAmount = (amount * fundRatio) / 10000n;
-  const burnAmount = (amount * burnRatio) / 10000n;
-  const recipientAmount = amount - fundAmount - burnAmount;
-  return { fundAmount, burnAmount, recipientAmount };
+  /** from が支払う合計（= recipientAmount + fundAmount + burnAmount） */
+  totalAmount: bigint;
 }
 
 /**
- * 受取人が受け取る額から、Router に渡すべき総額を逆算する。
- * 総額 * (10000 - fund - burn) / 10000 = recipientAmount を満たす total を返す。
+ * 上乗せ方式の分配額を計算する。
+ *
+ * 入力の `recipientAmount` は「受取人が受け取る額（送る額）」。基金・Burn はこの額に対して
+ * 計算して合計へ上乗せする（合計 = recipientAmount + fund + burn）。Router の
+ * transferWithDistribution / transferWithPermit へ渡す `amount` は recipientAmount で、
+ * 受取人はそれを満額受け取る。allowance / permit は totalAmount を対象にする必要がある。
  */
-export function grossUpFromRecipient(
+export function calculateDistribution(
   recipientAmount: bigint,
   fundRatio: bigint,
   burnRatio: bigint,
-): bigint {
-  const recipientRatio = 10000n - fundRatio - burnRatio;
-  if (recipientRatio <= 0n) return recipientAmount;
-  return (recipientAmount * 10000n) / recipientRatio;
+): DistributionBreakdown {
+  const fundAmount = (recipientAmount * fundRatio) / 10000n;
+  const burnAmount = (recipientAmount * burnRatio) / 10000n;
+  const totalAmount = recipientAmount + fundAmount + burnAmount;
+  return { fundAmount, burnAmount, recipientAmount, totalAmount };
 }
 
 export function useDistributionTransfer() {
   const { wallet, address, isSmartWallet } = useActiveWallet();
-  const { signPermit } = usePermitSignature();
   const [status, setStatus] = useState<TransferStatus>("idle");
   const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -59,7 +57,12 @@ export function useDistributionTransfer() {
   }, []);
 
   const executeTransfer = useCallback(
-    async (recipient: Address, amount: bigint, message = "") => {
+    async (
+      recipient: Address,
+      recipientAmount: bigint,
+      totalAmount: bigint,
+      message = "",
+    ) => {
       if (!wallet) throw new Error("Wallet not connected");
       if (!address) throw new Error("Wallet address not available");
       if (!addresses) throw new Error("Contract addresses not configured");
@@ -68,7 +71,8 @@ export function useDistributionTransfer() {
         isSmartWallet,
         from: address,
         recipient,
-        amount: amount.toString(),
+        recipientAmount: recipientAmount.toString(),
+        totalAmount: totalAmount.toString(),
         router: addresses.router,
         forToken: addresses.forToken,
         walletAccount: wallet.account?.address,
@@ -78,84 +82,65 @@ export function useDistributionTransfer() {
       setTxHash(null);
 
       try {
-        let hash: `0x${string}`;
+        // EOA / AA 共通フロー: 事前 approve（不足時のみ）→ transferWithDistribution。
+        // permit は使わず allowance を使い回すことで、EOA でも 2 回目以降は
+        // 送金トランザクションの署名 1 回だけで完結する（permit 署名が不要）。
+        // approve / allowance は「合計（受取額 + 上乗せ分）」を対象にする。
+        setStatus("signing");
 
-        if (isSmartWallet) {
-          // AA wallet flow: approve → transferWithDistribution
-          setStatus("signing");
+        const currentAllowance = await publicClient.readContract({
+          address: addresses.forToken,
+          abi: forTokenAbi,
+          functionName: "allowance",
+          args: [address, addresses.router],
+        });
 
-          const currentAllowance = await publicClient.readContract({
+        console.log("[FoR/transfer] allowance", {
+          current: currentAllowance.toString(),
+          required: totalAmount.toString(),
+        });
+
+        if (currentAllowance < totalAmount) {
+          // 毎回の approve を避けるため既定額をまとめて承認する。
+          // 合計が既定額を超える場合のみ、その必要額を承認する。
+          const approveAmount =
+            totalAmount > DEFAULT_APPROVE_AMOUNT
+              ? totalAmount
+              : DEFAULT_APPROVE_AMOUNT;
+          console.log("[FoR/transfer] approve start", {
+            approveAmount: approveAmount.toString(),
+          });
+          const approveHash = await wallet.writeContract({
             address: addresses.forToken,
             abi: forTokenAbi,
-            functionName: "allowance",
-            args: [address, addresses.router],
+            functionName: "approve",
+            args: [addresses.router, approveAmount],
+            chain: publicClient.chain,
+            account: wallet.account!,
           });
-
-          console.log("[FoR/transfer] AA allowance", {
-            current: currentAllowance.toString(),
-            required: amount.toString(),
+          console.log("[FoR/transfer] approve sent", { approveHash });
+          const approveReceipt = await publicClient.waitForTransactionReceipt({
+            hash: approveHash,
           });
-
-          if (currentAllowance < amount) {
-            console.log("[FoR/transfer] AA approve start");
-            const approveHash = await wallet.writeContract({
-              address: addresses.forToken,
-              abi: forTokenAbi,
-              functionName: "approve",
-              args: [addresses.router, amount],
-              chain: publicClient.chain,
-              account: wallet.account!,
-            });
-            console.log("[FoR/transfer] AA approve sent", { approveHash });
-            const approveReceipt = await publicClient.waitForTransactionReceipt(
-              {
-                hash: approveHash,
-              },
-            );
-            if (approveReceipt.status !== "success") {
-              throw new Error("Approve transaction reverted");
-            }
-            console.log("[FoR/transfer] AA approve confirmed");
+          if (approveReceipt.status !== "success") {
+            throw new Error("Approve transaction reverted");
           }
-
-          setStatus("pending");
-
-          console.log("[FoR/transfer] AA transferWithDistribution start");
-          hash = await wallet.writeContract({
-            address: addresses.router,
-            abi: routerAbi,
-            functionName: "transferWithDistribution",
-            args: [address, recipient, amount, message],
-            chain: publicClient.chain,
-            account: wallet.account!,
-          });
-          console.log("[FoR/transfer] AA transferWithDistribution sent", {
-            hash,
-          });
-        } else {
-          // EOA wallet flow: permit signature → transferWithPermit
-          setStatus("signing");
-          console.log("[FoR/transfer] EOA signPermit start");
-          const { v, r, s, deadline } = await signPermit(
-            addresses.router,
-            amount,
-          );
-          console.log("[FoR/transfer] EOA signPermit done", {
-            deadline: deadline.toString(),
-          });
-
-          setStatus("pending");
-
-          hash = await wallet.writeContract({
-            address: addresses.router,
-            abi: routerAbi,
-            functionName: "transferWithPermit",
-            args: [address, recipient, amount, deadline, v, r, s, message],
-            chain: publicClient.chain,
-            account: wallet.account!,
-          });
-          console.log("[FoR/transfer] EOA transferWithPermit sent", { hash });
+          console.log("[FoR/transfer] approve confirmed");
         }
+
+        setStatus("pending");
+
+        console.log("[FoR/transfer] transferWithDistribution start");
+        // 契約の amount は「受取人が受け取る額」。基金・Burn は契約側で上乗せされる。
+        const hash = await wallet.writeContract({
+          address: addresses.router,
+          abi: routerAbi,
+          functionName: "transferWithDistribution",
+          args: [address, recipient, recipientAmount, message],
+          chain: publicClient.chain,
+          account: wallet.account!,
+        });
+        console.log("[FoR/transfer] transferWithDistribution sent", { hash });
 
         const receipt = await publicClient.waitForTransactionReceipt({
           hash,
@@ -174,7 +159,7 @@ export function useDistributionTransfer() {
         throw error;
       }
     },
-    [wallet, address, isSmartWallet, signPermit],
+    [wallet, address, isSmartWallet],
   );
 
   return {

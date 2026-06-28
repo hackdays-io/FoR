@@ -31,6 +31,23 @@ describe("Router.transferWithPermit", async () => {
     const nonce = await token.read.nonces([signer.account.address]);
     const chainId = await publicClient.getChainId();
 
+    // 上乗せ方式では、Router が permit で承認を求める額は「受取額 + 上乗せ分(基金/Burn)」の合計。
+    // ここで Router の現在比率を読み、署名する value を合計額に合わせる（amount は受取額のまま）。
+    const ratioAbi = [
+      { type: "function", name: "fundRatio", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+      { type: "function", name: "burnRatio", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+    ] as const;
+    let signedValue = amount;
+    try {
+      const [fund, burn] = await Promise.all([
+        publicClient.readContract({ address: spender, abi: ratioAbi, functionName: "fundRatio" }),
+        publicClient.readContract({ address: spender, abi: ratioAbi, functionName: "burnRatio" }),
+      ]);
+      signedValue = amount + (amount * fund) / 10000n + (amount * burn) / 10000n;
+    } catch {
+      // spender が Router でない場合は amount のまま署名する
+    }
+
     const domain = {
       name: NAME,
       version: "1",
@@ -51,7 +68,7 @@ describe("Router.transferWithPermit", async () => {
     const message = {
       owner: signer.account.address,
       spender: spender,
-      value: amount,
+      value: signedValue,
       nonce: nonce,
       deadline: deadline,
     };
@@ -147,11 +164,9 @@ describe("Router.transferWithPermit", async () => {
 
       await publicClient.waitForTransactionReceipt({ hash });
 
-      // Calculate expected amounts
+      // Calculate expected amounts（上乗せ方式: 受取人は amount を満額受け取る）
       const expectedFundAmount = (amount * fundRatio) / 10000n;
       const expectedBurnAmount = (amount * burnRatio) / 10000n;
-      const expectedRecipientAmount =
-        amount - expectedFundAmount - expectedBurnAmount;
 
       // Verify balances
       assert.equal(
@@ -166,8 +181,8 @@ describe("Router.transferWithPermit", async () => {
       );
       assert.equal(
         await forToken.read.balanceOf([account2.account.address]),
-        expectedRecipientAmount,
-        "Recipient should receive correct amount",
+        amount,
+        "Recipient should receive the full amount",
       );
     });
 
@@ -221,7 +236,7 @@ describe("Router.transferWithPermit", async () => {
       );
     });
 
-    it("Should transfer with maximum ratios (100% total)", async () => {
+    it("Should transfer with 100% markup ratios", async () => {
       const forToken = await viem.deployContract("FoRToken", [
         INITIAL_SUPPLY,
         NAME,
@@ -272,9 +287,10 @@ describe("Router.transferWithPermit", async () => {
         account2.account.address,
       ]);
 
+      // 基金 50% + Burn 50% を amount に上乗せ。受取人は満額（100）を受け取る。
       assert.equal(fundAmount, parseEther("50"));
       assert.equal(burnAmount, parseEther("50"));
-      assert.equal(recipientAmount, 0n);
+      assert.equal(recipientAmount, amount);
     });
   });
 
@@ -331,10 +347,12 @@ describe("Router.transferWithPermit", async () => {
         account2.account.address,
       ]);
 
+      const total =
+        amount + (amount * fundRatio) / 10000n + (amount * burnRatio) / 10000n;
       assert.equal(
         fundAmount + burnAmount + recipientAmount,
-        amount,
-        "Sum of distributions should equal total amount",
+        total,
+        "Sum of distributions should equal total paid",
       );
     });
 
@@ -386,9 +404,14 @@ describe("Router.transferWithPermit", async () => {
         account2.account.address,
       ]);
 
-      assert.ok(
-        fundAmount + burnAmount + recipientAmount <= amount,
-        "Rounding should not cause over-distribution",
+      // 受取人は満額、基金・Burn は切り捨て。合計は受取額 + 上乗せ分に一致。
+      const total =
+        amount + (amount * fundRatio) / 10000n + (amount * burnRatio) / 10000n;
+      assert.equal(recipientAmount, amount, "Recipient receives full amount");
+      assert.equal(
+        fundAmount + burnAmount + recipientAmount,
+        total,
+        "Sum should equal total paid",
       );
     });
   });
@@ -814,8 +837,6 @@ describe("Router.transferWithPermit", async () => {
 
       const expectedFundAmount = (amount * fundRatio) / 10000n;
       const expectedBurnAmount = (amount * burnRatio) / 10000n;
-      const expectedRecipientAmount =
-        amount - expectedFundAmount - expectedBurnAmount;
 
       assert.equal(
         await forToken.read.balanceOf([fundWallet.account.address]),
@@ -827,7 +848,7 @@ describe("Router.transferWithPermit", async () => {
       );
       assert.equal(
         await forToken.read.balanceOf([account2.account.address]),
-        expectedRecipientAmount,
+        amount,
       );
     });
 
@@ -893,8 +914,8 @@ describe("Router.transferWithPermit", async () => {
 
       const expectedFundAmount = (amount * fundRatio) / 10000n;
       const expectedBurnAmount = (amount * burnRatio) / 10000n;
-      const expectedRecipientAmount =
-        amount - expectedFundAmount - expectedBurnAmount;
+      const expectedTotalAmount =
+        amount + expectedFundAmount + expectedBurnAmount;
 
       assert.equal(
         getAddress(decoded.args.sender),
@@ -911,10 +932,10 @@ describe("Router.transferWithPermit", async () => {
         getAddress(account2.account.address),
         "recipient should match target address",
       );
-      assert.equal(decoded.args.totalAmount, amount);
+      assert.equal(decoded.args.totalAmount, expectedTotalAmount);
       assert.equal(decoded.args.fundAmount, expectedFundAmount);
       assert.equal(decoded.args.burnAmount, expectedBurnAmount);
-      assert.equal(decoded.args.recipientAmount, expectedRecipientAmount);
+      assert.equal(decoded.args.recipientAmount, amount);
       assert.equal(decoded.args.message, DEFAULT_MESSAGE);
     });
 
@@ -1101,7 +1122,12 @@ describe("Router.transferWithPermit", async () => {
       await allowListBase(forToken, [account2.account.address]);
 
       const largeAmount = parseEther("500000");
-      await forToken.write.transfer([account1.account.address, largeAmount]);
+      // from は合計（受取額 + 上乗せ分）を保有する必要がある
+      const largeTotal =
+        largeAmount +
+        (largeAmount * fundRatio) / 10000n +
+        (largeAmount * burnRatio) / 10000n;
+      await forToken.write.transfer([account1.account.address, largeTotal]);
 
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
       const { v, r, s } = await createPermitSignature(
@@ -1134,9 +1160,10 @@ describe("Router.transferWithPermit", async () => {
 
       assert.equal(
         fundAmount + burnAmount + recipientAmount,
-        largeAmount,
+        largeTotal,
         "Large amount distribution should be accurate",
       );
+      assert.equal(recipientAmount, largeAmount, "Recipient receives full amount");
     });
 
     it("Should handle relayer pattern (msg.sender != from)", async () => {
