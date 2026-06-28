@@ -1,7 +1,7 @@
 {
   "network": "sepolia",
-  "routerAddress": "0x64c421C8c687756d0E0EaC800E2569cF6Fff60B1",
-  "routerStartBlock": 11015329,
+  "routerAddress": "0x603F628AD82FdF013eED25Cd5a0a0A58435Acd9B",
+  "routerStartBlock": 11158702,
   "forTokenAddress": "0x2433bd35A4A19c7216cC951Ad26C74AbcF85D1bd",
   "forTokenStartBlock": 11015329
 }
