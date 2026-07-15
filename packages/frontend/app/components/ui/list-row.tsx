@@ -103,7 +103,13 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
 
         {/* Right content: date + amount */}
         {date != null || amount != null ? (
-          <div className="flex shrink-0 flex-col items-end gap-2">
+          <div
+            className={cn(
+              "flex shrink-0 flex-col items-end gap-2",
+              // タグ表示時はバッジと日付の隙間を広げる
+              tag && "pt-6",
+            )}
+          >
             {date ? (
               <span className="text-ui-13 text-foreground">{date}</span>
             ) : null}
