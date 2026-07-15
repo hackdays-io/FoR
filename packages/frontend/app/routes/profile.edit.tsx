@@ -65,10 +65,6 @@ export async function action({ request }: Route.ActionArgs) {
 
   if (!name) {
     errors.name = "ユーザー名を入力してください";
-  } else if (name.length < 3) {
-    errors.name = "ユーザー名は3文字以上にしてください";
-  } else if (name.length > 32) {
-    errors.name = "ユーザー名は32文字以内にしてください";
   } else if (/\s/.test(name)) {
     errors.name = "ユーザー名にスペースは使えません";
   } else {
@@ -153,6 +149,9 @@ export default function ProfileEdit() {
   const [username, setUsername] = useState(profile.name);
   const [description, setDescription] = useState(initialDescription);
   const [clientError, setClientError] = useState<string | null>(null);
+  // 送信後にフィールドを編集したかどうか。編集後は前回送信のサーバーエラーが
+  // 古くなる（例: 3文字未満で送信 → エラー → 3文字以上入力しても消えず保存不可）ため無視する。
+  const [editedSinceSubmit, setEditedSinceSubmit] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const previewUrl = imageFile ? URL.createObjectURL(imageFile) : undefined;
@@ -170,12 +169,14 @@ export default function ProfileEdit() {
 
   const displayAvatarSrc = previewUrl ?? initialAvatar ?? undefined;
   const isSubmitting = navigation.state !== "idle" || isUploading;
-  const errors = actionData?.errors;
+  // 送信後に編集したら、前回送信のサーバーエラーは古いので無視する
+  // （例: 既に使用中エラー → 別名に変更しても保存ボタンが押せないのを防ぐ）
+  const errors = editedSinceSubmit ? undefined : actionData?.errors;
 
   const validateAndCheckName = useCallback(
     (value: string) => {
-      // 変更なし、または最低文字数未満はチェック不要
-      if (value === profile.name || !value || value.length < 3) {
+      // 変更なし、または空はチェック不要
+      if (value === profile.name || !value) {
         setClientError(null);
         return;
       }
@@ -208,12 +209,7 @@ export default function ProfileEdit() {
   let nameHelperText: string | undefined;
   let nameErrorText = errors?.name ?? clientError ?? undefined;
 
-  if (
-    !nameErrorText &&
-    nameChanged &&
-    username.length >= 3 &&
-    availabilityData
-  ) {
+  if (!nameErrorText && nameChanged && availabilityData) {
     if (availabilityData.available === true) {
       nameHelperText = "このユーザー名は使用できます";
     } else if (availabilityData.available === false) {
@@ -221,7 +217,7 @@ export default function ProfileEdit() {
     }
   }
 
-  if (fetcher.state === "loading" && nameChanged && username.length >= 3) {
+  if (fetcher.state === "loading" && nameChanged) {
     nameHelperText = "確認中...";
   }
 
@@ -229,6 +225,8 @@ export default function ProfileEdit() {
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!username) return;
+      // 送信するので、これ以降に来るサーバーエラーは有効なものとして扱う
+      setEditedSinceSubmit(false);
 
       let avatarUri = initialAvatar;
       if (imageFile) {
@@ -294,6 +292,7 @@ export default function ProfileEdit() {
             onChange={(e) => {
               const v = e.target.value;
               setUsername(v);
+              setEditedSinceSubmit(true);
               validateAndCheckName(v);
             }}
             errorText={nameErrorText}
@@ -306,7 +305,10 @@ export default function ProfileEdit() {
             label="自己紹介"
             placeholder="自己紹介を入力"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              setEditedSinceSubmit(true);
+            }}
             errorText={errors?.description}
           />
 
