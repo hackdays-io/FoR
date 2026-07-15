@@ -24,6 +24,7 @@ import { useForTokenBalance } from "~/hooks/useForToken";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import { getBadgeImage } from "~/lib/for-status-badges";
+import { getCardBackgroundImage } from "~/lib/for-status-card-backgrounds";
 import { loadOsusowakeItems } from "~/lib/osusowake.server";
 import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp } from "~/lib/utils";
@@ -135,6 +136,9 @@ function AuthenticatedHome() {
           variant="wallet"
           amount={
             isBalanceLoading ? "--" : balance ? Number(balance.formatted) : 0
+          }
+          backgroundImage={
+            forStatus ? getCardBackgroundImage(forStatus.tier) : undefined
           }
           topProps={{
             badgeImage: forStatus
