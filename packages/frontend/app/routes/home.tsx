@@ -100,7 +100,7 @@ function AuthenticatedHome() {
       {/* Header */}
       <AppBar>
         <AppBarItem position="left">
-          <AppBarLogo />
+          <AppBarLogo to="/" />
         </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>{displayName}</AppBarTitle>
