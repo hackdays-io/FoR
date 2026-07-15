@@ -19,6 +19,8 @@ export interface ListRowProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
   /** メッセージ（2行目左） */
   message?: string;
+  /** ユースケースのタグ（右上に濃色バッジで表示、例: "コミュニティ"） */
+  tag?: string;
   /** 日付テキスト（1行目右、例: "10/29 (水)"） */
   date?: string;
   /** 金額（2行目右、例: 50 or -50） */
@@ -45,6 +47,7 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
       onAvatarClick,
       name,
       message,
+      tag,
       date,
       amount,
       unit = CURRENCY_LABEL,
@@ -59,12 +62,17 @@ export const ListRow = React.forwardRef<HTMLDivElement, ListRowProps>(
       <div
         ref={ref}
         className={cn(
-          "flex items-center gap-12 px-16 py-18 bg-background rounded-[10px]",
+          "relative flex items-center gap-12 px-16 py-18 bg-background rounded-[10px]",
           className,
         )}
         data-slot="list-row"
         {...props}
       >
+        {tag ? (
+          <span className="absolute top-0 right-0 rounded-tr-[10px] rounded-bl-[14px] bg-primary px-12 py-3 text-ui-10 font-bold text-primary-foreground">
+            {tag}
+          </span>
+        ) : null}
         {hideAvatar ? null : onAvatarClick ? (
           <button
             type="button"

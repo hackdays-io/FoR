@@ -145,14 +145,15 @@ export default function Transactions() {
                   const signedAmount =
                     (isSent ? -1 : 1) *
                     Number(formatUnits(BigInt(shownAmount), 18));
-                  // リストではコメント（memo）のみ表示し、ユースケースのタグは出さない
-                  const memo =
-                    parseMessagePayload(tx.message)?.memo || undefined;
+                  const parsed = parseMessagePayload(tx.message);
+                  const memo = parsed?.memo || undefined;
+                  const tag = parsed?.usecase || undefined;
                   return (
                     <ProfileListRow
                       key={tx.id}
                       address={counterparty}
                       message={memo}
+                      tag={tag}
                       date={formatTimestamp(tx.timestamp)}
                       amount={signedAmount}
                       onClick={() => navigate(`/transactions/${counterparty}`)}

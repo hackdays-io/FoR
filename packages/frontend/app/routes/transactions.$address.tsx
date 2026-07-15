@@ -72,9 +72,16 @@ function MessageBubble({
   return (
     <div className={`flex items-end gap-8 ${isSent ? "flex-row-reverse" : ""}`}>
       {!isSent && <Avatar src={avatarSrc} size="sm" alt="" />}
-      <div className="flex w-[270px] flex-col gap-8 rounded-lg bg-background p-12">
-        {/* Title row: title (left) + explorer link (right) */}
-        <div className="flex items-start justify-between gap-8">
+      <div className="relative flex w-[270px] flex-col gap-8 rounded-lg bg-background p-12">
+        {/* ユースケースのタグ（右上に濃色バッジで表示） */}
+        {usecase ? (
+          <span className="absolute top-0 right-0 rounded-tr-lg rounded-bl-[14px] bg-primary px-12 py-3 text-ui-10 font-bold text-primary-foreground">
+            {usecase}
+          </span>
+        ) : null}
+
+        {/* Title row: title + explorer link */}
+        <div className="flex items-center gap-4">
           <Typography variant="ui-13" weight="bold">
             {title}
           </Typography>
@@ -98,19 +105,12 @@ function MessageBubble({
           </Typography>
         </div>
 
-        {/* Message section: category chip + memo on a white frame */}
-        {(usecase || memo) && (
+        {/* Message section: memo on a white frame */}
+        {memo && (
           <div className="flex flex-col gap-4 rounded-md bg-bg-default p-12">
-            {usecase && (
-              <span className="self-start rounded-full bg-visual-green-3 px-12 py-2 text-ui-10 text-foreground">
-                {usecase}
-              </span>
-            )}
-            {memo && (
-              <Typography variant="ui-13" className="text-foreground">
-                {memo}
-              </Typography>
-            )}
+            <Typography variant="ui-13" className="text-foreground">
+              {memo}
+            </Typography>
           </div>
         )}
       </div>
