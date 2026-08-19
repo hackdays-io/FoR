@@ -1,19 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import type { NameStoneProfile } from "~/lib/namestone.server";
+import type { NameProfile } from "~/lib/namespace.server";
 
 interface ProfileResponse {
-  profile: NameStoneProfile | null;
+  profile: NameProfile | null;
 }
 
 /** プロフィールキャッシュの queryKey。invalidate 時にもこれを使う */
 export function profileQueryKey(address: string | undefined | null) {
-  return ["namestoneProfile", address?.toLowerCase()] as const;
+  return ["ensProfile", address?.toLowerCase()] as const;
 }
 
 export function useProfileByAddress(address: string | undefined | null) {
   return useQuery({
     queryKey: profileQueryKey(address),
-    queryFn: async (): Promise<NameStoneProfile | null> => {
+    queryFn: async (): Promise<NameProfile | null> => {
       const res = await fetch(`/api/profile/${address}`);
       if (!res.ok) return null;
       const data = (await res.json()) as ProfileResponse;

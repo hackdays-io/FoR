@@ -1,7 +1,7 @@
 import { type Address, isAddress } from "viem";
 import { routerAbi } from "./abis/routerAbi";
 import { addresses } from "./contracts";
-import { searchNames } from "./namestone.server";
+import { getNameByLabel } from "./namespace.server";
 import { publicClient } from "./viem";
 
 const SHEET_CSV_URL =
@@ -160,8 +160,8 @@ export async function resolveRecipientAddress(
   if (recipient) {
     if (isAddress(recipient)) return recipient as Address;
     try {
-      const profiles = await searchNames(recipient, true);
-      const candidate = profiles[0]?.address;
+      const profile = await getNameByLabel(recipient);
+      const candidate = profile?.address;
       if (candidate && isAddress(candidate)) return candidate as Address;
     } catch {
       // fall through to fund wallet

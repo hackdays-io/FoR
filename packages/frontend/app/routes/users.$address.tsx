@@ -8,7 +8,7 @@ import {
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Typography } from "~/components/ui/typography";
-import { getNamesByAddress } from "~/lib/namestone.server";
+import { getNamesByAddress } from "~/lib/namespace.server";
 import type { Route } from "./+types/users.$address";
 
 export function meta(_args: Route.MetaArgs) {
