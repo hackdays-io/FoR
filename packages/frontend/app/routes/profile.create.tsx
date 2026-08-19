@@ -21,7 +21,7 @@ import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { profileQueryKey } from "~/hooks/useProfileByAddress";
 import { useUploadImageFileToIpfs } from "~/hooks/useUploadImageFileToIpfs";
-import { searchNames, setName } from "~/lib/namestone.server";
+import { isNameAvailable, setName } from "~/lib/namespace.server";
 import type { Route } from "./+types/profile.create";
 import type { loader as checkNameLoader } from "./api.profile.check";
 
@@ -40,10 +40,6 @@ export async function action({ request }: Route.ActionArgs) {
 
   if (!name) {
     errors.name = "ユーザー名を入力してください";
-  } else if (name.length < 3) {
-    errors.name = "ユーザー名は3文字以上にしてください";
-  } else if (name.length > 32) {
-    errors.name = "ユーザー名は32文字以内にしてください";
   } else if (/\s/.test(name)) {
     errors.name = "ユーザー名にスペースは使えません";
   } else {
@@ -75,8 +71,8 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   try {
-    const existing = await searchNames(name, true);
-    if (existing.length > 0) {
+    const available = await isNameAvailable(name);
+    if (!available) {
       return { errors: { name: "このユーザー名は既に使用されています" } };
     }
   } catch {
@@ -139,7 +135,7 @@ export default function ProfileCreate() {
 
   const validateAndCheckName = useCallback(
     (value: string) => {
-      if (!value || value.length < 3) {
+      if (!value) {
         setClientError(null);
         return;
       }
@@ -186,7 +182,7 @@ export default function ProfileCreate() {
   let nameHelperText: string | undefined;
   let nameErrorText = errors?.name ?? clientError ?? undefined;
 
-  if (!nameErrorText && username.length >= 3 && availabilityData) {
+  if (!nameErrorText && username.length > 0 && availabilityData) {
     if (availabilityData.available === true) {
       nameHelperText = "このユーザー名は使用できます";
     } else if (availabilityData.available === false) {
@@ -194,7 +190,7 @@ export default function ProfileCreate() {
     }
   }
 
-  if (fetcher.state === "loading" && username.length >= 3) {
+  if (fetcher.state === "loading" && username.length > 0) {
     nameHelperText = "確認中...";
   }
 

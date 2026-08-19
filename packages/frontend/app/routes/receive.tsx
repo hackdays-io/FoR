@@ -12,10 +12,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
-import {
-  calculateDistribution,
-  grossUpFromRecipient,
-} from "~/hooks/useDistributionTransfer";
+import { calculateDistribution } from "~/hooks/useDistributionTransfer";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useDistributionRatios } from "~/hooks/useRouter";
 import { CURRENCY_LABEL } from "~/lib/currency";
@@ -48,30 +45,22 @@ export default function Receive() {
   const displayName = profile?.text_records?.display || profile?.name || "";
 
   const numAmount = Number(amount) || 0;
-  // 依頼FoR = 受取人が受け取る額。送信側が支払う総額 (合計) は gross up。
+  // 依頼FoR = 受取人が受け取る額。送信側が支払う合計は基金・Burn を上乗せした total。
   const recipientAmountBigInt = useMemo(() => toBigIntAmount(amount), [amount]);
-  const totalAmountBigInt = useMemo(
-    () =>
-      ratios
-        ? grossUpFromRecipient(
-            recipientAmountBigInt,
-            ratios.fundRatio,
-            ratios.burnRatio,
-          )
-        : recipientAmountBigInt,
-    [recipientAmountBigInt, ratios],
-  );
   const breakdown = useMemo(
     () =>
       ratios
         ? calculateDistribution(
-            totalAmountBigInt,
+            recipientAmountBigInt,
             ratios.fundRatio,
             ratios.burnRatio,
           )
         : null,
-    [totalAmountBigInt, ratios],
+    [recipientAmountBigInt, ratios],
   );
+  const totalAmountBigInt = breakdown
+    ? breakdown.totalAmount
+    : recipientAmountBigInt;
   const fundAndBurn = breakdown
     ? formatUnits(breakdown.fundAmount + breakdown.burnAmount, 18)
     : "0";

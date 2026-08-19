@@ -77,7 +77,7 @@ export default function ForestBank() {
     <div className="min-h-dvh bg-bg-default pb-[160px]">
       <AppBar>
         <AppBarItem position="left">
-          <AppBarLogo />
+          <AppBarLogo to="/" />
         </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>森の再生基金</AppBarTitle>

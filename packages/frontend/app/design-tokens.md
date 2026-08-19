@@ -18,7 +18,7 @@ Key values reflected from screenshots:
 - Text Default/Subtle/Hint: `rgba(0,0,0,0.8/0.6/0.3)`, Invert: `#ffffff`
 - Background Default/Subtle: `#ffffff` / `#f2f2f2`
 - Background Alpha White 60 / Black 25: `rgba(255,255,255,0.6)` / `rgba(0,0,0,0.25)`
-- Stroke Default: `rgba(0,0,0,0.05)`
+- Stroke Default: `rgba(0,0,0,0.1)`
 - Primary Button Frame: `#454545` (hover `#1a1a1a`, disabled `#b4b4b4`)
 - Danger Base: `#eb3d3d` (hover/pressed `#8b1d1d`, disabled `#fbbdbf`)
 

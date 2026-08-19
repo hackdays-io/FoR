@@ -46,3 +46,12 @@ export function getBadgeImage(tier: Tier, progress: ProgressStep): string {
   }
   return url;
 }
+
+/**
+ * ティアの静的バッジ（進捗リングなし `<level>-<animal>.png`）の画像 URL を返す。
+ * ステータス一覧（種類グリッド）で各ティアの代表アイコンを表示するのに使う。
+ * 画像欠落でも例外を投げず空文字を返す。
+ */
+export function getStaticBadgeImage(tier: Tier): string {
+  return staticBadgeByTier.get(String(tier)) ?? "";
+}

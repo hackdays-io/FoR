@@ -1,18 +1,22 @@
-import { type ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
+import {
+  type ConnectedWallet,
+  usePrivy,
+  useWallets,
+} from "@privy-io/react-auth";
+import {
+  type SmartWalletClientType,
+  useSmartWallets,
+} from "@privy-io/react-auth/smart-wallets";
 import { createContext, type ReactNode } from "react";
 import type { Address } from "viem";
 
-import {
-  type SmartAccountClientType,
-  useSmartAccount,
-} from "~/hooks/useSmartAccount";
 import {
   type EOAWalletClient,
   useHasEmbeddedWallet,
   useWallet,
 } from "~/hooks/useWallet";
 
-export type WalletType = SmartAccountClientType | EOAWalletClient | undefined;
+export type WalletType = SmartWalletClientType | EOAWalletClient | undefined;
 
 export interface ActiveWalletContextValue {
   wallet: WalletType;
@@ -33,11 +37,9 @@ function useHasEmbeddedWalletFromUser(): boolean {
 
 export function ActiveWalletProvider({ children }: { children: ReactNode }) {
   const { walletClient, connectedWallet, address: eoaAddress } = useWallet();
-  const {
-    smartAccountClient,
-    smartAccountAddress,
-    isLoading: isSmartAccountLoading,
-  } = useSmartAccount();
+  // Privy ネイティブの Smart Wallet クライアント。embedded wallet が signer の
+  // とき Privy が AA をプロビジョニングし、ここから client が得られる。
+  const { client: smartWalletClient } = useSmartWallets();
   const { ready: walletsReady } = useWallets();
   const hasEmbeddedFromWallets = useHasEmbeddedWallet();
   const hasEmbeddedFromUser = useHasEmbeddedWalletFromUser();
@@ -45,13 +47,17 @@ export function ActiveWalletProvider({ children }: { children: ReactNode }) {
   const isConnectingEmbeddedWallet =
     hasEmbeddedFromWallets || hasEmbeddedFromUser;
 
-  const wallet = isConnectingEmbeddedWallet ? smartAccountClient : walletClient;
-  const address = isConnectingEmbeddedWallet ? smartAccountAddress : eoaAddress;
+  const wallet = isConnectingEmbeddedWallet ? smartWalletClient : walletClient;
+  const address = isConnectingEmbeddedWallet
+    ? ((smartWalletClient?.account?.address as Address | undefined) ?? null)
+    : eoaAddress;
 
+  // embedded wallet は接続済みだが Smart Wallet client が未プロビジョニングの
+  // 間は読み込み中扱いにする。
   const isLoading =
-    !walletsReady || (isConnectingEmbeddedWallet && isSmartAccountLoading);
+    !walletsReady || (isConnectingEmbeddedWallet && !smartWalletClient);
 
-  const isSmartWallet = !!smartAccountClient;
+  const isSmartWallet = !!smartWalletClient;
 
   const value: ActiveWalletContextValue = {
     wallet,

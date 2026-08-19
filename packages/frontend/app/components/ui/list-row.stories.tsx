@@ -122,6 +122,41 @@ export const List = () => {
 
 List.storyName = "List View";
 
+export const WithTag = () => {
+  return (
+    <StoryFrame>
+      <div className="flex flex-col gap-12">
+        <ListRow
+          avatarSrc={SAMPLE_AVATAR}
+          name="りょうま"
+          message="草刈りありがとう！"
+          tag="コミュニティ"
+          date="10/29 (水)"
+          amount={50}
+        />
+        <ListRow
+          avatarSrc={SAMPLE_AVATAR}
+          name="りょうま"
+          message="草刈りありがとう！"
+          tag="森"
+          date="10/29 (水)"
+          amount={50}
+        />
+        <ListRow
+          avatarSrc={SAMPLE_AVATAR}
+          name="りょうま"
+          message="鹿肉頂きます。"
+          tag="川"
+          date="10/29 (水)"
+          amount={-50}
+        />
+      </div>
+    </StoryFrame>
+  );
+};
+
+WithTag.storyName = "With Tag";
+
 export const WithExternalLink = () => {
   return (
     <StoryFrame>

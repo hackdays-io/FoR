@@ -24,6 +24,7 @@ import { useForTokenBalance } from "~/hooks/useForToken";
 import { useProfileByAddress } from "~/hooks/useProfileByAddress";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
 import { getBadgeImage } from "~/lib/for-status-badges";
+import { getCardBackgroundImage } from "~/lib/for-status-card-backgrounds";
 import { loadOsusowakeItems } from "~/lib/osusowake.server";
 import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp } from "~/lib/utils";
@@ -99,7 +100,7 @@ function AuthenticatedHome() {
       {/* Header */}
       <AppBar>
         <AppBarItem position="left">
-          <AppBarLogo />
+          <AppBarLogo to="/" />
         </AppBarItem>
         <AppBarItem position="center">
           <AppBarTitle>{displayName}</AppBarTitle>
@@ -136,10 +137,14 @@ function AuthenticatedHome() {
           amount={
             isBalanceLoading ? "--" : balance ? Number(balance.formatted) : 0
           }
+          backgroundImage={
+            forStatus ? getCardBackgroundImage(forStatus.tier) : undefined
+          }
           topProps={{
             badgeImage: forStatus
               ? getBadgeImage(forStatus.tier, forStatus.progress)
               : undefined,
+            badgeTo: forStatus ? "/status" : undefined,
           }}
         />
 
@@ -169,13 +174,15 @@ function AuthenticatedHome() {
                   const signedAmount =
                     (isSent ? -1 : 1) *
                     Number(formatUnits(BigInt(shownAmount), 18));
-                  const memo =
-                    parseMessagePayload(tx.message)?.memo || undefined;
+                  const parsed = parseMessagePayload(tx.message);
+                  const memo = parsed?.memo || undefined;
+                  const tag = parsed?.usecase || undefined;
                   return (
                     <ProfileListRow
                       key={tx.id}
                       address={counterparty}
                       message={memo}
+                      tag={tag}
                       date={formatTimestamp(tx.timestamp)}
                       amount={signedAmount}
                       onClick={() => navigate(`/transactions/${counterparty}`)}

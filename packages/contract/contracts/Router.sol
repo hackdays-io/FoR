@@ -77,18 +77,20 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
     );
 
     /**
-     * @dev 分配額を計算する内部関数
-     * @param amount 分配前の総額
-     * @return fundAmount 基金への額
-     * @return burnAmount Burnへの額
-     * @return recipientAmount 受取人への額
+     * @dev 分配額を計算する内部関数（上乗せ方式）
+     * @notice 基金・Burn は受取人が受け取る額に対して計算し、合計に上乗せする。
+     *         受取人は recipientAmount をそのまま受け取り、from は totalAmount を支払う。
+     * @param recipientAmount 受取人が受け取る額（送る額）
+     * @return fundAmount 基金へ上乗せされる額（= recipientAmount * fundRatio / 10000）
+     * @return burnAmount Burnへ上乗せされる額（= recipientAmount * burnRatio / 10000）
+     * @return totalAmount from から引かれる合計額（= recipientAmount + fundAmount + burnAmount）
      */
     function _calculateDistribution(
-        uint256 amount
-    ) internal view returns (uint256 fundAmount, uint256 burnAmount, uint256 recipientAmount) {
-        fundAmount = (amount * fundRatio) / 10000;
-        burnAmount = (amount * burnRatio) / 10000;
-        recipientAmount = amount - fundAmount - burnAmount;
+        uint256 recipientAmount
+    ) internal view returns (uint256 fundAmount, uint256 burnAmount, uint256 totalAmount) {
+        fundAmount = (recipientAmount * fundRatio) / 10000;
+        burnAmount = (recipientAmount * burnRatio) / 10000;
+        totalAmount = recipientAmount + fundAmount + burnAmount;
     }
 
     /**
@@ -128,6 +130,39 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
                 "Recipient transfer failed"
             );
         }
+    }
+
+    /**
+     * @dev 分配額の計算・送金・イベント発行をまとめた内部関数。
+     *      transferWithDistribution / transferWithPermit から共通利用する。
+     *      （emit を独立関数に切り出し、署名引数の多い呼び出し元のスタック深度を抑える目的も兼ねる）
+     * @param from トークン所有者アドレス
+     * @param recipient トークンを受け取るアドレス
+     * @param amount 受取人が受け取る額（基金・Burn はこの額に上乗せ）
+     * @param message 送金時に添付するメッセージ
+     */
+    function _distribute(
+        address from,
+        address recipient,
+        uint256 amount,
+        string calldata message
+    ) internal {
+        (uint256 fundAmount, uint256 burnAmount, uint256 totalAmount) =
+            _calculateDistribution(amount);
+
+        // 受取人は amount をそのまま受け取り、from は totalAmount を支払う
+        _executeDistribution(from, recipient, fundAmount, burnAmount, amount);
+
+        emit TransferWithDistribution(
+            msg.sender,
+            from,
+            recipient,
+            totalAmount,
+            fundAmount,
+            burnAmount,
+            amount,
+            message
+        );
     }
 
     /**
@@ -223,8 +258,8 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
      * @notice permit署名を使用してトークンを送金し、自動分配を実行
      * @dev permitを実行した後、基金・Burn・受取人へトークンを分配
      * @param from トークン所有者アドレス（permit署名と一致する必要あり）
-     * @param recipient 分配後の残りトークンを受け取るアドレス
-     * @param amount 送金総額（分配前）
+     * @param recipient トークンを受け取るアドレス
+     * @param amount 受取人が受け取る額（基金・Burn はこの額に上乗せして引かれる）
      * @param deadline permit署名の有効期限
      * @param v 署名コンポーネント v
      * @param r 署名コンポーネント r
@@ -245,43 +280,28 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
         if (amount == 0) revert InvalidAmount();
         if (recipient == address(0)) revert InvalidRecipient();
 
-        // permitを実行してこのコントラクトを承認
+        // permit は合計額（受取額 + 上乗せ分）を承認する必要がある
+        (, , uint256 totalAmount) = _calculateDistribution(amount);
         IERC20Permit(forToken).permit(
             from,
             address(this),
-            amount,
+            totalAmount,
             deadline,
             v,
             r,
             s
         );
 
-        // 分配額を計算
-        (uint256 fundAmount, uint256 burnAmount, uint256 recipientAmount) =
-            _calculateDistribution(amount);
-
-        // 送金を実行
-        _executeDistribution(from, recipient, fundAmount, burnAmount, recipientAmount);
-
-        // イベントを発行
-        emit TransferWithDistribution(
-            msg.sender,
-            from,
-            recipient,
-            amount,
-            fundAmount,
-            burnAmount,
-            recipientAmount,
-            message
-        );
+        // 分配・送金・イベント発行
+        _distribute(from, recipient, amount, message);
     }
 
     /**
      * @notice 事前承認を前提とした分配送金
      * @dev AAユーザーやEOAの事前approve後の実行用。permitは使用しない。
      * @param from トークン所有者アドレス（approve済みであること）
-     * @param recipient 分配後の残りトークンを受け取るアドレス
-     * @param amount 送金総額（分配前）
+     * @param recipient トークンを受け取るアドレス
+     * @param amount 受取人が受け取る額（基金・Burn はこの額に上乗せして引かれる）
      * @param message 送金時に添付するメッセージ
      */
     function transferWithDistribution(
@@ -294,23 +314,7 @@ contract Router is AccessControl, Pausable, ReentrancyGuard {
         if (amount == 0) revert InvalidAmount();
         if (recipient == address(0)) revert InvalidRecipient();
 
-        // 分配額を計算
-        (uint256 fundAmount, uint256 burnAmount, uint256 recipientAmount) =
-            _calculateDistribution(amount);
-
-        // 送金を実行（approve前提）
-        _executeDistribution(from, recipient, fundAmount, burnAmount, recipientAmount);
-
-        // イベントを発行
-        emit TransferWithDistribution(
-            msg.sender,
-            from,
-            recipient,
-            amount,
-            fundAmount,
-            burnAmount,
-            recipientAmount,
-            message
-        );
+        // 分配・送金・イベント発行（approve前提）
+        _distribute(from, recipient, amount, message);
     }
 }

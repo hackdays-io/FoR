@@ -27,7 +27,7 @@
   --for-shadow-elevation-1: 0px 1px 2px 0px rgb(0 0 0 / 0.2);
 
   /* Semantic Color: Stroke */
-  --for-stroke-default: rgb(0 0 0 / 0.05);
+  --for-stroke-default: rgb(0 0 0 / 0.1);
 
   /* Semantic Color: Button */
   --for-button-primary-frame-default: #1e1e1e;

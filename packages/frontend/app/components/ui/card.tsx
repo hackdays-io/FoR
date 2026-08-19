@@ -47,6 +47,8 @@ type CardVariantConfig = (typeof cardVariantConfig)[CardVariant];
 
 type WalletCardTopInput = {
   badgeImage?: string;
+  /** バッジの遷移先。指定するとバッジが Link になりタップで遷移する */
+  badgeTo?: To;
   qrCodeImage?: string;
 };
 
@@ -111,6 +113,7 @@ type CardSurfaceProps = {
 
 function WalletCardTop({
   badgeImage,
+  badgeTo,
   className,
   qrCodeImage,
 }: WalletCardTopProps) {
@@ -126,13 +129,26 @@ function WalletCardTop({
             />
           </div>
         )}
-        {badgeImage && (
-          <img
-            alt={BADGE_IMAGE_ALT}
-            className="absolute right-0 top-0 h-48 w-48 bg-card object-contain"
-            src={badgeImage}
-          />
-        )}
+        {badgeImage &&
+          (badgeTo ? (
+            <Link
+              to={badgeTo}
+              aria-label={BADGE_IMAGE_ALT}
+              className="absolute right-0 top-0 block h-48 w-48"
+            >
+              <img
+                alt={BADGE_IMAGE_ALT}
+                className="h-full w-full bg-card object-contain"
+                src={badgeImage}
+              />
+            </Link>
+          ) : (
+            <img
+              alt={BADGE_IMAGE_ALT}
+              className="absolute right-0 top-0 h-48 w-48 bg-card object-contain"
+              src={badgeImage}
+            />
+          ))}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Link, useLoaderData, useNavigate } from "react-router";
-import { PresentIcon } from "~/components/icons";
+import { GiftPlusIcon } from "~/components/icons";
 import { OsusowakeCards } from "~/components/osusowake-cards";
 import {
   AppBar,
@@ -36,9 +36,9 @@ export default function OsusowakeList() {
           <Link
             to="/osusowake/new"
             aria-label="おすそわけを追加"
-            className="inline-flex size-32 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted"
+            className="-mr-6 inline-flex size-44 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted"
           >
-            <PresentIcon width={20} height={20} />
+            <GiftPlusIcon width={28} height={28} />
           </Link>
         </AppBarItem>
       </AppBar>

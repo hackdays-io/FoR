@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import * as React from "react";
+import { Link, type To } from "react-router";
 
 import logoBlack from "~/assets/images/logo/logo-black.png";
 import { cn } from "~/lib/utils";
@@ -66,7 +67,9 @@ export const AppBarBackButton = React.forwardRef<
       type="button"
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex size-32 items-center justify-center rounded-md text-foreground transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+        // タップ領域を 44px 確保しつつ、負マージンで矢印の見た目の位置は
+        // 従来の 32px ボタンと揃える（判定がシビアな問題への対応）
+        "-ml-6 inline-flex size-44 items-center justify-center rounded-md text-foreground transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
       {...props}
@@ -77,14 +80,18 @@ export const AppBarBackButton = React.forwardRef<
 });
 AppBarBackButton.displayName = "AppBarBackButton";
 
-export type AppBarLogoProps = React.ImgHTMLAttributes<HTMLImageElement>;
+export type AppBarLogoProps = React.ImgHTMLAttributes<HTMLImageElement> & {
+  /** 指定するとロゴがタップ可能になり、その宛先へ遷移する（例: ホーム "/"） */
+  to?: To;
+};
 
 /**
  * 戻るボタンを持たないヘッダーの左側に表示するロゴ。
+ * `to` を指定するとタップで遷移するリンクになる。
  */
 export const AppBarLogo = React.forwardRef<HTMLImageElement, AppBarLogoProps>(
-  ({ className, alt = "FoR", ...props }, ref) => {
-    return (
+  ({ className, alt = "FoR", to, ...props }, ref) => {
+    const image = (
       <img
         ref={ref}
         src={logoBlack}
@@ -92,6 +99,19 @@ export const AppBarLogo = React.forwardRef<HTMLImageElement, AppBarLogoProps>(
         className={cn("h-28 w-auto object-contain", className)}
         {...props}
       />
+    );
+
+    if (!to) return image;
+
+    return (
+      <Link
+        to={to}
+        aria-label="ホームへ"
+        // タップ領域を確保しつつロゴの見た目の高さは維持する
+        className="-my-8 inline-flex items-center py-8"
+      >
+        {image}
+      </Link>
     );
   },
 );

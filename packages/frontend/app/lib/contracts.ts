@@ -14,8 +14,8 @@ const ADDRESSES: Record<number, ContractAddresses> = {
   },
   // Sepolia
   11155111: {
-    forToken: "0xa747Df53d79805eB05Bc970729c5B61478173b3b",
-    router: "0x4cd440C31a990185759499e6026EB5278D61cCB6",
+    forToken: "0x2433bd35A4A19c7216cC951Ad26C74AbcF85D1bd",
+    router: "0x603F628AD82FdF013eED25Cd5a0a0A58435Acd9B",
   },
 };
 

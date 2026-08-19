@@ -8,6 +8,8 @@ export interface ProfileListRowProps {
   address: string;
   /** メッセージ・コメント（2行目左） */
   message?: string;
+  /** ユースケースのタグ（右上に濃色バッジで表示） */
+  tag?: string;
   /** 日付テキスト（1行目右） */
   date?: string;
   /** 金額（2行目右） */
@@ -23,6 +25,7 @@ export interface ProfileListRowProps {
 export function ProfileListRow({
   address,
   message,
+  tag,
   date,
   amount,
   onClick,
@@ -38,6 +41,7 @@ export function ProfileListRow({
       name={displayName}
       avatarSrc={profile?.text_records?.avatar}
       message={message}
+      tag={tag}
       date={date}
       amount={amount}
       onClick={onClick}
