@@ -1,5 +1,5 @@
 import { data } from "react-router";
-import { getNamesByAddress } from "~/lib/namestone.server";
+import { getNamesByAddress } from "~/lib/namespace.server";
 import type { Route } from "./+types/api.profile.$address";
 
 export async function loader({ params }: Route.LoaderArgs) {

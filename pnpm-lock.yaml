@@ -59,6 +59,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.96.2
         version: 5.96.2(react@19.2.0)
+      '@thenamespace/offchain-manager':
+        specifier: ^1.0.13
+        version: 1.0.13
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -2920,6 +2923,10 @@ packages:
 
   '@tanstack/virtual-core@3.13.18':
     resolution: {integrity: sha512-Mx86Hqu1k39icq2Zusq+Ey2J6dDWTjDvEv43PJtRCoEYTLyfaPnxIQ6iy7YAOK0NV/qOEmZQ/uCufrppZxTgcg==}
+
+  '@thenamespace/offchain-manager@1.0.13':
+    resolution: {integrity: sha512-1IClGbw5zZ2GCluLsK1+B6sol13E8uRrqYmEIADhblo8mv1Gfeg/GeLH4q87Xy9W4wVEZOLgZr72T0xTWhdTmA==}
+    engines: {node: '>=16.0.0'}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -11969,6 +11976,12 @@ snapshots:
       react-dom: 19.2.0(react@19.2.0)
 
   '@tanstack/virtual-core@3.13.18': {}
+
+  '@thenamespace/offchain-manager@1.0.13':
+    dependencies:
+      axios: 1.13.2
+    transitivePeerDependencies:
+      - debug
 
   '@types/babel__core@7.20.5':
     dependencies:

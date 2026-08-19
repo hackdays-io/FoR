@@ -18,7 +18,7 @@ import {
 } from "~/hooks/useTransfersBetween";
 import { getExplorerName, getExplorerTxUrl } from "~/lib/explorer";
 import { formatAmount } from "~/lib/format";
-import { getNamesByAddress } from "~/lib/namestone.server";
+import { getNamesByAddress } from "~/lib/namespace.server";
 import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/transactions.$address";

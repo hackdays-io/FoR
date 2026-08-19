@@ -1,5 +1,5 @@
 import { ens_normalize } from "@adraffy/ens-normalize";
-import { searchNames } from "~/lib/namestone.server";
+import { isNameAvailable } from "~/lib/namespace.server";
 import type { Route } from "./+types/api.profile.check";
 
 // ユーザー名が使用可能かを判定する共有エンドポイント。
@@ -25,8 +25,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   try {
-    const results = await searchNames(name, true);
-    return { available: results.length === 0 };
+    return { available: await isNameAvailable(name) };
   } catch {
     return { available: null };
   }

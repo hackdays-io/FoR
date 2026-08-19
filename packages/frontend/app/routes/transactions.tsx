@@ -15,7 +15,7 @@ import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useTransfersViaRouter } from "~/hooks/useTransfersViaRouter";
-import { type NameStoneProfile, searchNames } from "~/lib/namestone.server";
+import { type NameProfile, searchNames } from "~/lib/namespace.server";
 import { parseMessagePayload } from "~/lib/transfer-message";
 import { formatTimestamp } from "~/lib/utils";
 import type { Route } from "./+types/transactions";
@@ -105,7 +105,7 @@ export default function Transactions() {
                   検索中...
                 </Typography>
               ) : searchResults && searchResults.length > 0 ? (
-                searchResults.map((profile: NameStoneProfile) => (
+                searchResults.map((profile: NameProfile) => (
                   <div key={profile.name} className="rounded-lg bg-muted px-16">
                     <ListRow
                       name={profile.text_records?.display || profile.name}

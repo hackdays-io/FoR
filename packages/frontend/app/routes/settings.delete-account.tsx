@@ -14,8 +14,8 @@ import { Typography } from "~/components/ui/typography";
 import {
   deleteName,
   getNamesByAddress,
-  type NameStoneProfile,
-} from "~/lib/namestone.server";
+  type NameProfile,
+} from "~/lib/namespace.server";
 import type { Route } from "./+types/settings.delete-account";
 
 export function meta(_args: Route.MetaArgs) {
@@ -33,7 +33,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const profile = profiles[0] ?? null;
     return { profile, address };
   } catch {
-    return { profile: null as NameStoneProfile | null, address };
+    return { profile: null as NameProfile | null, address };
   }
 }
 
@@ -120,7 +120,7 @@ export default function SettingsDeleteAccount() {
           </Typography>
           <ul className="ml-16 list-disc text-ui-13 text-text-default">
             <li>プロフィール（名前・アイコン・自己紹介）</li>
-            <li>NameStone 上のドメイン登録</li>
+            <li>ENS サブネームの登録</li>
           </ul>
 
           <Typography variant="ui-13" weight="bold" className="pt-8">

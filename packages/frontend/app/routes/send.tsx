@@ -27,7 +27,7 @@ import { CURRENCY_LABEL } from "~/lib/currency";
 import { getExplorerName, getExplorerTxUrl } from "~/lib/explorer";
 import { getBadgeImage } from "~/lib/for-status-badges";
 import { formatAmount } from "~/lib/format";
-import { getNamesByAddress } from "~/lib/namestone.server";
+import { getNamesByAddress } from "~/lib/namespace.server";
 import { buildMessagePayload } from "~/lib/transfer-message";
 import type { Route } from "./+types/send";
 

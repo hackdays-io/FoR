@@ -24,9 +24,9 @@ import { useUploadImageFileToIpfs } from "~/hooks/useUploadImageFileToIpfs";
 import {
   deleteName,
   getNamesByAddress,
-  searchNames,
+  isNameAvailable,
   setName,
-} from "~/lib/namestone.server";
+} from "~/lib/namespace.server";
 import type { Route } from "./+types/profile.edit";
 import type { loader as checkNameLoader } from "./api.profile.check";
 
@@ -99,8 +99,8 @@ export async function action({ request }: Route.ActionArgs) {
   const isRenaming = name !== currentName;
   if (isRenaming) {
     try {
-      const existing = await searchNames(name, true);
-      if (existing.length > 0) {
+      const available = await isNameAvailable(name);
+      if (!available) {
         return { errors: { name: "このユーザー名は既に使用されています" } };
       }
     } catch {

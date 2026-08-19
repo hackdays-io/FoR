@@ -21,7 +21,7 @@ import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { profileQueryKey } from "~/hooks/useProfileByAddress";
 import { useUploadImageFileToIpfs } from "~/hooks/useUploadImageFileToIpfs";
-import { searchNames, setName } from "~/lib/namestone.server";
+import { isNameAvailable, setName } from "~/lib/namespace.server";
 import type { Route } from "./+types/profile.create";
 import type { loader as checkNameLoader } from "./api.profile.check";
 
@@ -71,8 +71,8 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   try {
-    const existing = await searchNames(name, true);
-    if (existing.length > 0) {
+    const available = await isNameAvailable(name);
+    if (!available) {
       return { errors: { name: "このユーザー名は既に使用されています" } };
     }
   } catch {
