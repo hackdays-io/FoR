@@ -4,6 +4,7 @@ const SUBGRAPH_URLS: Record<number, string> = {
   31337: "http://localhost:8000/subgraphs/name/for/localhost",
   11155111:
     "https://api.goldsky.com/api/public/project_cm5nv64onnxxz01wf8smdgk1e/subgraphs/for-sepolia/0.0.0/gn",
+  8453: "https://api.goldsky.com/api/public/project_cm4r39viziqcd01wo6y96c1r6/subgraphs/for-base/0.0.0/gn",
 };
 
 export const subgraphUrl: string | undefined =

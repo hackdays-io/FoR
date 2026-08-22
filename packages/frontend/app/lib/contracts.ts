@@ -17,6 +17,11 @@ const ADDRESSES: Record<number, ContractAddresses> = {
     forToken: "0x2433bd35A4A19c7216cC951Ad26C74AbcF85D1bd",
     router: "0x603F628AD82FdF013eED25Cd5a0a0A58435Acd9B",
   },
+  // Base
+  8453: {
+    forToken: "0x31eF117090fB10Ea399398a4081D251d8f14D654",
+    router: "0xD34318dD4BE709E3017ACd2138d321D5b962cEbb",
+  },
 };
 
 function pickAddress(
