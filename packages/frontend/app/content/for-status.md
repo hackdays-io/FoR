@@ -2,7 +2,7 @@
 
 ### 「For Forest」な暮らしの証明
 
-![FoR Status](/app/assets/videos/about-collectivefund.mp4)
+![FoR Status](/videos/about-collectivefund.mp4)
 
 FoR Statusは、FoRのエコシステムにおいて、あなたがどれだけ「循環」と「再生」に貢献したかを表す証です。どれだけ森をケアし、交換頻度に応じて、ステータスが付与されます。楽しみながら少しづつFoRを使い続けることが、あなたの暮らしがどのくらい自然と繋がっているか、循環の中で生活しているかの、美しい証明となります。
 
