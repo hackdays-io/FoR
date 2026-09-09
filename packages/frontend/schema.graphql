@@ -102,7 +102,20 @@ type User {
   ratioChanges(first: Int, skip: Int, orderBy: DistributionRatio_orderBy, orderDirection: OrderDirection): [DistributionRatio!]!
 }
 
+type _Block_ {
+  hash: Bytes
+  number: Int!
+  timestamp: Int
+}
+
+type _Meta_ {
+  block: _Block_!
+  deployment: String!
+  hasIndexingErrors: Boolean!
+}
+
 type Query {
+  _meta: _Meta_
   transferViaRouter(id: ID!): TransferViaRouter
   transferViaRouters(first: Int, skip: Int, orderBy: TransferViaRouter_orderBy, orderDirection: OrderDirection, where: TransferViaRouter_filter): [TransferViaRouter!]!
   transfer(id: ID!): Transfer
@@ -114,10 +127,21 @@ type Query {
 }
 
 input TransferViaRouter_filter {
+  id: ID
+  id_in: [ID!]
   from: String
+  from_in: [String!]
   to: String
   to_not: String
+  to_in: [String!]
   sender: String
+  timestamp_gt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lt: BigInt
+  timestamp_lte: BigInt
+  blockNumber_gt: BigInt
+  blockNumber_gte: BigInt
+  transactionHash: Bytes
   and: [TransferViaRouter_filter!]
   or: [TransferViaRouter_filter!]
 }

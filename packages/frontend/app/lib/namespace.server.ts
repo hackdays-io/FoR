@@ -161,6 +161,40 @@ export async function getNamesByAddress(
     .map((dto) => toProfile(dto, parentName));
 }
 
+/**
+ * 親名配下のサブネームを全件取得する。
+ *
+ * Namespace の検索 API は owner の複数指定に対応していないため、
+ * 多数のアドレスをまとめて名前に変換したい用途（MCP の取引一覧など）では
+ * 1 アドレスずつ引くより全件を 1 度舐めてキャッシュする方が往復が少ない。
+ *
+ * @param maxItems 取得上限。超える場合は打ち切り、呼び出し側は不完全として扱う
+ */
+export async function listAllNames(maxItems = 2000): Promise<{
+  profiles: NameProfile[];
+  /** 親名配下の全件を取り切れたか */
+  complete: boolean;
+}> {
+  const { client, parentName } = getContext();
+  const profiles: NameProfile[] = [];
+
+  for (let page = 1; ; page++) {
+    const result = await client.getFilteredSubnames({
+      parentName,
+      page,
+      size: OWNER_PAGE_SIZE,
+    });
+
+    const items = result?.items ?? [];
+    for (const dto of items) profiles.push(toProfile(dto, parentName));
+
+    const total = result?.totalItems ?? profiles.length;
+    if (items.length < OWNER_PAGE_SIZE) return { profiles, complete: true };
+    if (profiles.length >= total) return { profiles, complete: true };
+    if (profiles.length >= maxItems) return { profiles, complete: false };
+  }
+}
+
 /** ラベルの部分一致検索。ユーザー検索用 */
 export async function searchNames(query: string): Promise<NameProfile[]> {
   const { client, parentName } = getContext();
