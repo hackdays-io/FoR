@@ -51,6 +51,12 @@ FoR/
 - ロック期間経過後の分配実行
 - 運営者による引き出し制御
 
+### 3. MCPサーバー (`/api/mcp`)
+AI エージェント向けの読み取り専用 API。フロントエンドの resource route として動く。
+- Goldsky サブグラフの取引データと、Namespace の ENS サブネーム（プロフィール名）を返す
+- 新着取引のカーソル方式ポーリング、アドレス → 表示名の一括変換
+- 実装は `packages/frontend/app/lib/mcp/`、仕様は [docs/mcp.md](./docs/mcp.md)
+
 ## 開発コマンド
 
 ### モノレポ全体
