@@ -46,7 +46,7 @@ npx @modelcontextprotocol/inspector
 | `list_account_transfers` | 特定ユーザーの送受信履歴 |
 | `get_account` | プロフィール + 基金/burn の累計 + 直近 5 件 |
 | `resolve_profiles` | アドレス配列 → プロフィール配列（最大 50 件） |
-| `search_accounts` | ユーザー名の部分一致検索 |
+| `search_accounts` | ユーザー名の部分一致検索（大文字小文字は区別しない） |
 | `get_index_status` | インデックスの鮮度、分配比率、対象チェーン |
 
 `account` を取るツールは、ウォレットアドレス（`0x…`）・フルネーム（`alice.toban.eth`）・
