@@ -69,6 +69,22 @@ const TIER_CONTENT: Record<Tier, TierContent> = {
   },
 };
 
+/**
+ * 一度も到達するまで正体を伏せるシークレットティア。
+ * 一覧グリッドでは、過去最高ティアがこれ未満の間は `SECRET_TIER_CONTENT` を表示する。
+ */
+export const SECRET_TIER: Tier = 6;
+
+/** シークレットティア未到達時に一覧グリッドへ出す伏せ字コピー。 */
+export const SECRET_TIER_CONTENT: Pick<
+  TierContent,
+  "nameEn" | "nameJa" | "tagline"
+> = {
+  nameEn: "???",
+  nameJa: "シークレット",
+  tagline: "森の奥にひそむ、まだ誰も知らない最高位。",
+};
+
 export function getTierContent(tier: Tier): TierContent {
   return TIER_CONTENT[tier];
 }

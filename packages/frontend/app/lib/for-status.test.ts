@@ -201,3 +201,39 @@ describe("computeForStatus - アラート文言と残日数", () => {
     expect(s.nextDecayAtMs).toBe(last + 60 * DAY);
   });
 });
+
+describe("computeForStatus - 過去最高ティア（peakTier）", () => {
+  it("決済なしは peakTier 1", () => {
+    const s = computeForStatus({ paymentTimestampsMs: [], nowMs: NOW });
+    expect(s.peakTier).toBe(1);
+  });
+
+  it("ランクダウンしていなければ peakTier は現在ティアと同じ", () => {
+    const s = computeForStatus({
+      paymentTimestampsMs: dailyPayments(35),
+      nowMs: NOW,
+    });
+    expect(s.tier).toBe(6);
+    expect(s.peakTier).toBe(6);
+  });
+
+  it("Tier 6 到達後にランクダウンしても peakTier は 6 のまま", () => {
+    // 毎日 36 回の決済で Tier 6 到達、最終決済から 20 日放置。
+    // Tier 6 の維持 14 日を過ぎて Tier 5 へ（Tier 5 の維持 21 日はまだ残る）。
+    const s = computeForStatus({
+      paymentTimestampsMs: dailyPayments(35).map((t) => t - 20 * DAY),
+      nowMs: NOW,
+    });
+    expect(s.tier).toBe(5);
+    expect(s.peakTier).toBe(6);
+  });
+
+  it("減衰の連鎖で Tier 1 まで落ちても peakTier は到達時のまま", () => {
+    const s = computeForStatus({
+      paymentTimestampsMs: [daysAgo(102), daysAgo(101), daysAgo(100)],
+      nowMs: NOW,
+    });
+    expect(s.tier).toBe(1);
+    expect(s.peakTier).toBe(3);
+  });
+});
