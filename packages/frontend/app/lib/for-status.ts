@@ -83,6 +83,11 @@ export function getTierInfo(tier: Tier): TierInfo {
 export type ForStatus = {
   /** 現在のティア */
   tier: Tier;
+  /**
+   * 過去に到達した最高ティア（ランクダウン後も下がらない）。
+   * シークレット扱いの Tier 6 を一度到達したユーザーには公開し続けるために使う。
+   */
+  peakTier: Tier;
   nameJa: string;
   nameEn: string;
   /** 現在ティア内の進捗（1〜6）。次ランクへの到達度をバッジの 6 段階で表す */
@@ -286,6 +291,7 @@ export function computeForStatus({
   const payments = [...paymentTimestampsMs].sort((a, b) => a - b);
 
   let tier: Tier = 1;
+  let peakTier: Tier = 1;
   let lastActivity: number | null = null;
   let i = 0;
 
@@ -311,6 +317,7 @@ export function computeForStatus({
       lastActivity = t;
       const q = qualifiedTier(payments.slice(0, i + 1), t);
       if (q > tier) tier = (tier + 1) as Tier; // 一度に 1 段階のみ昇格
+      if (tier > peakTier) peakTier = tier;
       i++;
     } else {
       // 減衰イベント。まだ現在時刻に達していなければ確定（ループ終了）。
@@ -340,6 +347,7 @@ export function computeForStatus({
   const info = TIER_INFO[tier];
   return {
     tier,
+    peakTier,
     nameJa: info.nameJa,
     nameEn: info.nameEn,
     progress,

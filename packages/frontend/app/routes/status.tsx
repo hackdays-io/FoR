@@ -12,8 +12,17 @@ import { SectionTitle } from "~/components/ui/section-title";
 import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { useForStatus } from "~/hooks/useForStatus";
-import { getBadgeImage, getStaticBadgeImage } from "~/lib/for-status-badges";
-import { getTierContent, TIER_CONTENT_LIST } from "~/lib/for-status-content";
+import {
+  getBadgeImage,
+  getSecretBadgeImage,
+  getStaticBadgeImage,
+} from "~/lib/for-status-badges";
+import {
+  getTierContent,
+  SECRET_TIER,
+  SECRET_TIER_CONTENT,
+  TIER_CONTENT_LIST,
+} from "~/lib/for-status-content";
 import type { Route } from "./+types/status";
 
 export function meta(_args: Route.MetaArgs) {
@@ -81,7 +90,8 @@ export default function Status() {
             variant="body-l"
             className="leading-relaxed text-text-default"
           >
-            {content.description} {forStatus.alertMessage && forStatus.alertMessage}
+            {content.description}{" "}
+            {forStatus.alertMessage && forStatus.alertMessage}
           </Typography>
         </div>
 
@@ -89,8 +99,17 @@ export default function Status() {
         <div>
           <SectionTitle>FoRステータスの種類</SectionTitle>
           <div className="mt-12 grid grid-cols-2 gap-12">
-            {TIER_CONTENT_LIST.map((tier) => {
-              const staticBadge = getStaticBadgeImage(tier.tier);
+            {TIER_CONTENT_LIST.map((tierContent) => {
+              // シークレットティアは一度到達するまで伏せる（ランクダウン後は公開のまま）。
+              const isSecret =
+                tierContent.tier === SECRET_TIER &&
+                forStatus.peakTier < SECRET_TIER;
+              const tier = isSecret
+                ? { ...tierContent, ...SECRET_TIER_CONTENT }
+                : tierContent;
+              const staticBadge = isSecret
+                ? getSecretBadgeImage()
+                : getStaticBadgeImage(tier.tier);
               return (
                 <div
                   key={tier.tier}
@@ -111,9 +130,11 @@ export default function Status() {
                     >
                       {tier.nameEn}
                     </Typography>
-                    <Typography variant="ui-13"
+                    <Typography
+                      variant="ui-13"
                       weight="bold"
-                      className="text-text-default">
+                      className="text-text-default"
+                    >
                       {tier.nameJa}
                     </Typography>
                   </div>
