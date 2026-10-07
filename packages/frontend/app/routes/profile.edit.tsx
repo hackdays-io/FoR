@@ -1,4 +1,3 @@
-import { ens_normalize } from "@adraffy/ens-normalize";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   redirect,
@@ -21,6 +20,7 @@ import { TextArea } from "~/components/ui/text-area";
 import { TextField } from "~/components/ui/text-field";
 import { Typography } from "~/components/ui/typography";
 import { useUploadImageFileToIpfs } from "~/hooks/useUploadImageFileToIpfs";
+import { isSameLabel, normalizeLabel } from "~/lib/label";
 import {
   deleteName,
   getNamesByAddress,
@@ -55,7 +55,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
-  const name = (formData.get("name") as string)?.trim();
+  const rawName = (formData.get("name") as string)?.trim();
   const currentName = (formData.get("currentName") as string)?.trim();
   const address = formData.get("address") as string;
   const avatar = (formData.get("avatar") as string)?.trim();
@@ -63,13 +63,15 @@ export async function action({ request }: Route.ActionArgs) {
 
   const errors: Record<string, string> = {};
 
-  if (!name) {
+  // 登録するラベルは ENS 正規化後の文字列（小文字）。作成画面と同じ規則。
+  let name = "";
+  if (!rawName) {
     errors.name = "ユーザー名を入力してください";
-  } else if (/\s/.test(name)) {
+  } else if (/\s/.test(rawName)) {
     errors.name = "ユーザー名にスペースは使えません";
   } else {
     try {
-      ens_normalize(name);
+      name = normalizeLabel(rawName);
     } catch {
       errors.name = "使用できない文字が含まれています";
     }
@@ -95,8 +97,11 @@ export async function action({ request }: Route.ActionArgs) {
     return { errors };
   }
 
-  // ユーザー名が変更された場合のみ、使用可否を再チェックする
-  const isRenaming = name !== currentName;
+  // ユーザー名が変更された場合のみ、使用可否を再チェックする。
+  // 大文字小文字だけの違い（例: 既存の `Alice` を `alice` と入力）は変更とみなさず、
+  // 既存レコードのラベルをそのまま使う。既に大文字で登録済みの名前は移行せず許容する方針。
+  const isRenaming = !isSameLabel(name, currentName);
+  const label = isRenaming ? name : currentName;
   if (isRenaming) {
     try {
       const available = await isNameAvailable(name);
@@ -110,7 +115,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   try {
     await setName({
-      name,
+      name: label,
       address,
       textRecords: {
         avatar: avatar || undefined,
@@ -126,6 +131,20 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   return redirect("/mypage");
+}
+
+/**
+ * 入力が正規化で変わる場合（例: `Alice` → `alice`）に、実際に登録される名前を返す。
+ * 変わらない、または正規化できない場合は null。
+ */
+function previewRegisteredName(input: string): string | null {
+  if (!input) return null;
+  try {
+    const normalized = normalizeLabel(input);
+    return normalized !== input.trim() ? normalized : null;
+  } catch {
+    return null;
+  }
 }
 
 export default function ProfileEdit() {
@@ -175,8 +194,8 @@ export default function ProfileEdit() {
 
   const validateAndCheckName = useCallback(
     (value: string) => {
-      // 変更なし、または空はチェック不要
-      if (value === profile.name || !value) {
+      // 変更なし（大文字小文字の違いは変更とみなさない）、または空はチェック不要
+      if (!value || isSameLabel(value, profile.name)) {
         setClientError(null);
         return;
       }
@@ -187,7 +206,7 @@ export default function ProfileEdit() {
       }
 
       try {
-        ens_normalize(value);
+        normalizeLabel(value);
         setClientError(null);
       } catch {
         setClientError("使用できない文字が含まれています");
@@ -204,14 +223,17 @@ export default function ProfileEdit() {
     [fetcher, profile.name],
   );
 
-  const nameChanged = username !== profile.name;
+  const nameChanged = !isSameLabel(username, profile.name);
   const availabilityData = fetcher.data;
+  const registeredName = previewRegisteredName(username);
   let nameHelperText: string | undefined;
   let nameErrorText = errors?.name ?? clientError ?? undefined;
 
   if (!nameErrorText && nameChanged && availabilityData) {
     if (availabilityData.available === true) {
-      nameHelperText = "このユーザー名は使用できます";
+      nameHelperText = registeredName
+        ? `「${registeredName}」として登録できます`
+        : "このユーザー名は使用できます";
     } else if (availabilityData.available === false) {
       nameErrorText = "このユーザー名は既に使用されています";
     }

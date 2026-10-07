@@ -1,4 +1,3 @@
-import { ens_normalize } from "@adraffy/ens-normalize";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -21,6 +20,7 @@ import { Typography } from "~/components/ui/typography";
 import { useActiveWallet } from "~/hooks/useActiveWallet";
 import { profileQueryKey } from "~/hooks/useProfileByAddress";
 import { useUploadImageFileToIpfs } from "~/hooks/useUploadImageFileToIpfs";
+import { normalizeLabel } from "~/lib/label";
 import { isNameAvailable, setName } from "~/lib/namespace.server";
 import type { Route } from "./+types/profile.create";
 import type { loader as checkNameLoader } from "./api.profile.check";
@@ -31,20 +31,23 @@ export function meta(_args: Route.MetaArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
-  const name = (formData.get("name") as string)?.trim();
+  const rawName = (formData.get("name") as string)?.trim();
   const address = formData.get("address") as string;
   const avatar = (formData.get("avatar") as string)?.trim();
   const description = (formData.get("description") as string)?.trim();
 
   const errors: Record<string, string> = {};
 
-  if (!name) {
+  // 登録するラベルは ENS 正規化後の文字列（小文字）。
+  // Namespace の検索は大文字小文字を区別するため、入力そのままでは検索で取りこぼす。
+  let name = "";
+  if (!rawName) {
     errors.name = "ユーザー名を入力してください";
-  } else if (/\s/.test(name)) {
+  } else if (/\s/.test(rawName)) {
     errors.name = "ユーザー名にスペースは使えません";
   } else {
     try {
-      ens_normalize(name);
+      name = normalizeLabel(rawName);
     } catch {
       errors.name = "使用できない文字が含まれています";
     }
@@ -93,6 +96,20 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   return { ok: true as const };
+}
+
+/**
+ * 入力が正規化で変わる場合（例: `Alice` → `alice`）に、実際に登録される名前を返す。
+ * 変わらない、または正規化できない場合は null。
+ */
+function previewRegisteredName(input: string): string | null {
+  if (!input) return null;
+  try {
+    const normalized = normalizeLabel(input);
+    return normalized !== input.trim() ? normalized : null;
+  } catch {
+    return null;
+  }
 }
 
 export default function ProfileCreate() {
@@ -146,7 +163,7 @@ export default function ProfileCreate() {
       }
 
       try {
-        ens_normalize(value);
+        normalizeLabel(value);
         setClientError(null);
       } catch {
         setClientError("使用できない文字が含まれています");
@@ -179,12 +196,15 @@ export default function ProfileCreate() {
   }, [isCreated, address, queryClient, navigate]);
 
   const availabilityData = fetcher.data;
+  const registeredName = previewRegisteredName(username);
   let nameHelperText: string | undefined;
   let nameErrorText = errors?.name ?? clientError ?? undefined;
 
   if (!nameErrorText && username.length > 0 && availabilityData) {
     if (availabilityData.available === true) {
-      nameHelperText = "このユーザー名は使用できます";
+      nameHelperText = registeredName
+        ? `「${registeredName}」として登録できます`
+        : "このユーザー名は使用できます";
     } else if (availabilityData.available === false) {
       nameErrorText = "このユーザー名は既に使用されています";
     }
