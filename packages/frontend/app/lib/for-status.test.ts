@@ -41,11 +41,11 @@ describe("computeForStatus - 昇格トリガー", () => {
     expect(s.nameEn).toBe("Squirrel");
   });
 
-  it("Tier 2 → 3: 累計 9 回で Bird（8 回では据え置き）", () => {
+  it("Tier 2 → 3: 累計 9 回で Sparrow（8 回では据え置き）", () => {
     expect(status(dailyPayments(7)).tier).toBe(2); // 8 件
     const s = status(dailyPayments(8)); // 9 件
     expect(s.tier).toBe(3);
-    expect(s.nameEn).toBe("Bird");
+    expect(s.nameEn).toBe("Sparrow");
   });
 
   it("一度に 1 段階のみ昇格: 同日に 9 件でも Tier 3 まで", () => {

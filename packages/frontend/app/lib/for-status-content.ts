@@ -37,8 +37,8 @@ const TIER_CONTENT: Record<Tier, TierContent> = {
   },
   3: {
     tier: 3,
-    nameEn: "Bird",
-    nameJa: "トリ",
+    nameEn: "Sparrow",
+    nameJa: "スズメ",
     tagline: "遠くへ声を届け、点と線をつないでいく森の繋ぎ手",
     description:
       "遠くまで声を届けるように、あなたのつながりが森の点と点を結んでいます。",
