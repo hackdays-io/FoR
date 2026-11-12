@@ -46,7 +46,7 @@ export type TierInfo = {
 const TIER_INFO: Record<Tier, TierInfo> = {
   1: { tier: 1, nameJa: "ミツバチ", nameEn: "Honeybee" },
   2: { tier: 2, nameJa: "リス", nameEn: "Squirrel" },
-  3: { tier: 3, nameJa: "鳥", nameEn: "Bird" },
+  3: { tier: 3, nameJa: "スズメ", nameEn: "Sparrow" },
   4: { tier: 4, nameJa: "鹿", nameEn: "Deer" },
   5: { tier: 5, nameJa: "フクロウ", nameEn: "Owl" },
   6: { tier: 6, nameJa: "オオカミ", nameEn: "Wolf" },
