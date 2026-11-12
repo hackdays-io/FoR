@@ -47,6 +47,9 @@ export default [
   route("api/profile/:address", "routes/api.profile.$address.tsx"),
   route("api/allowlist/sign", "routes/api.allowlist.sign.ts"),
 
+  // MCP（AI エージェント向けの読み取り API）
+  route("api/mcp", "routes/api.mcp.ts"),
+
   // トークン送信・受取・スキャン
   route("send", "routes/send.tsx"),
   route("receive", "routes/receive.tsx"),

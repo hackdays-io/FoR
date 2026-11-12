@@ -1,10 +1,11 @@
+import type { SmartWalletClientType } from "@privy-io/react-auth/smart-wallets";
 import { useCallback, useState } from "react";
-import { type Address, parseUnits } from "viem";
+import { type Address, encodeFunctionData, parseUnits } from "viem";
 import { forTokenAbi } from "~/lib/abis/forTokenAbi";
 import { routerAbi } from "~/lib/abis/routerAbi";
 import { addresses } from "~/lib/contracts";
 import { publicClient } from "~/lib/viem";
-import { useActiveWallet } from "./useActiveWallet";
+import { useActiveWallet, type WalletType } from "./useActiveWallet";
 
 export type TransferStatus =
   | "idle"
@@ -42,6 +43,16 @@ export function calculateDistribution(
   const burnAmount = (recipientAmount * burnRatio) / 10000n;
   const totalAmount = recipientAmount + fundAmount + burnAmount;
   return { fundAmount, burnAmount, recipientAmount, totalAmount };
+}
+
+/**
+ * Privy の Smart Wallet クライアント（AA）かどうかを判定する。
+ * EOA の WalletClient にはバンドラー由来の sendUserOperation が生えていない。
+ */
+function isSmartWalletClient(
+  wallet: NonNullable<WalletType>,
+): wallet is SmartWalletClientType {
+  return "sendUserOperation" in wallet;
 }
 
 export function useDistributionTransfer() {
@@ -100,47 +111,98 @@ export function useDistributionTransfer() {
           required: totalAmount.toString(),
         });
 
-        if (currentAllowance < totalAmount) {
-          // 毎回の approve を避けるため既定額をまとめて承認する。
-          // 合計が既定額を超える場合のみ、その必要額を承認する。
-          const approveAmount =
-            totalAmount > DEFAULT_APPROVE_AMOUNT
-              ? totalAmount
-              : DEFAULT_APPROVE_AMOUNT;
-          console.log("[FoR/transfer] approve start", {
-            approveAmount: approveAmount.toString(),
-          });
-          const approveHash = await wallet.writeContract({
-            address: addresses.forToken,
-            abi: forTokenAbi,
-            functionName: "approve",
-            args: [addresses.router, approveAmount],
-            chain: publicClient.chain,
-            account: wallet.account!,
-          });
-          console.log("[FoR/transfer] approve sent", { approveHash });
-          const approveReceipt = await publicClient.waitForTransactionReceipt({
-            hash: approveHash,
-          });
-          if (approveReceipt.status !== "success") {
-            throw new Error("Approve transaction reverted");
-          }
-          console.log("[FoR/transfer] approve confirmed");
-        }
+        const needsApprove = currentAllowance < totalAmount;
+        // 毎回の approve を避けるため既定額をまとめて承認する。
+        // 合計が既定額を超える場合のみ、その必要額を承認する。
+        const approveAmount =
+          totalAmount > DEFAULT_APPROVE_AMOUNT
+            ? totalAmount
+            : DEFAULT_APPROVE_AMOUNT;
 
-        setStatus("pending");
-
-        console.log("[FoR/transfer] transferWithDistribution start");
         // 契約の amount は「受取人が受け取る額」。基金・Burn は契約側で上乗せされる。
-        const hash = await wallet.writeContract({
-          address: addresses.router,
-          abi: routerAbi,
-          functionName: "transferWithDistribution",
-          args: [address, recipient, recipientAmount, message],
-          chain: publicClient.chain,
-          account: wallet.account!,
-        });
-        console.log("[FoR/transfer] transferWithDistribution sent", { hash });
+        const transferArgs = [
+          address,
+          recipient,
+          recipientAmount,
+          message,
+        ] as const;
+
+        let hash: `0x${string}`;
+
+        if (isSmartWalletClient(wallet)) {
+          // AA: approve と送金を 1 つの UserOperation にまとめる。
+          // 別々の UserOperation に分けると、approve が取り込まれた直後でも
+          // バンドラーが送金側をまだ古い state でシミュレートすることがあり、
+          // ERC20InsufficientAllowance(allowance=0) で revert していた。
+          const calls = [
+            ...(needsApprove
+              ? [
+                  {
+                    to: addresses.forToken,
+                    data: encodeFunctionData({
+                      abi: forTokenAbi,
+                      functionName: "approve",
+                      args: [addresses.router, approveAmount],
+                    }),
+                  },
+                ]
+              : []),
+            {
+              to: addresses.router,
+              data: encodeFunctionData({
+                abi: routerAbi,
+                functionName: "transferWithDistribution",
+                args: transferArgs,
+              }),
+            },
+          ];
+
+          console.log("[FoR/transfer] batched userOp start", {
+            needsApprove,
+            approveAmount: approveAmount.toString(),
+            callCount: calls.length,
+          });
+
+          setStatus("pending");
+          hash = await wallet.sendTransaction({ calls });
+          console.log("[FoR/transfer] batched userOp sent", { hash });
+        } else {
+          // EOA: バッチできないので approve → 送金の 2 トランザクションに分ける。
+          if (needsApprove) {
+            console.log("[FoR/transfer] approve start", {
+              approveAmount: approveAmount.toString(),
+            });
+            const approveHash = await wallet.writeContract({
+              address: addresses.forToken,
+              abi: forTokenAbi,
+              functionName: "approve",
+              args: [addresses.router, approveAmount],
+              chain: publicClient.chain,
+              account: wallet.account,
+            });
+            console.log("[FoR/transfer] approve sent", { approveHash });
+            const approveReceipt = await publicClient.waitForTransactionReceipt(
+              { hash: approveHash },
+            );
+            if (approveReceipt.status !== "success") {
+              throw new Error("Approve transaction reverted");
+            }
+            console.log("[FoR/transfer] approve confirmed");
+          }
+
+          setStatus("pending");
+
+          console.log("[FoR/transfer] transferWithDistribution start");
+          hash = await wallet.writeContract({
+            address: addresses.router,
+            abi: routerAbi,
+            functionName: "transferWithDistribution",
+            args: transferArgs,
+            chain: publicClient.chain,
+            account: wallet.account,
+          });
+          console.log("[FoR/transfer] transferWithDistribution sent", { hash });
+        }
 
         const receipt = await publicClient.waitForTransactionReceipt({
           hash,

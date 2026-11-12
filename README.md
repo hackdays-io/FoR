@@ -194,9 +194,23 @@ pnpm deploy:localhost
 pnpm deploy:sepolia
 ```
 
+## 🤖 MCP サーバー
+
+AI エージェント向けに、取引データとユーザープロフィールを読むための
+[MCP](https://modelcontextprotocol.io) エンドポイントを `/api/mcp` で公開しています。
+新着取引の監視や、ウォレットアドレスから ENS サブネーム（表示名）への変換ができます。
+
+```bash
+claude mcp add --transport http for https://<アプリのドメイン>/api/mcp \
+  --header "Authorization: Bearer <MCP_API_KEY>"
+```
+
+詳しくは [docs/mcp.md](./docs/mcp.md) を参照してください。
+
 ## 📚 ドキュメント
 
 - [開発ガイド](./CLAUDE.md) - 開発の詳細な情報
+- [MCP サーバー](./docs/mcp.md) - AI エージェント向け読み取り API
 - [コントリビューションガイド](./CONTRIBUTING.md) - 貢献方法
 
 ## 🤝 コントリビューション

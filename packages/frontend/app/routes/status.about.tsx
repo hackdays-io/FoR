@@ -72,14 +72,37 @@ export default function StatusAbout() {
                 {children}
               </Typography>
             ),
-            // 画像: width 100% / contain
-            img: ({ src, alt }) => (
-              <img
-                src={typeof src === "string" ? src : undefined}
-                alt={alt ?? ""}
-                className="my-16 h-auto w-full rounded-lg object-contain"
-              />
-            ),
+            // 画像 / 動画: width 100% / contain
+            // Markdown 上は ![alt](...) で書かれるため img として渡ってくる。
+            // 動画拡張子の場合は再生可能な <video> として描画する。
+            img: ({ src, alt }) => {
+              const url = typeof src === "string" ? src : undefined;
+              if (url && /\.(mp4|webm|ogg|mov)$/i.test(url)) {
+                return (
+                  // 装飾用のミュート自動再生（GIF 相当）。
+                  // 動画端の変な線を隠すため、上下左右 2px をクロップする
+                  // （wrapper を overflow-hidden にし、video を 4px 拡大して -2px オフセット）。
+                  <div className="my-16 overflow-hidden rounded-lg">
+                    <video
+                      src={url}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      aria-label={alt ?? undefined}
+                      className="-m-2 block h-auto w-[calc(100%+4px)] max-w-none object-contain"
+                    />
+                  </div>
+                );
+              }
+              return (
+                <img
+                  src={url}
+                  alt={alt ?? ""}
+                  className="my-16 h-auto w-full rounded-lg object-contain"
+                />
+              );
+            },
           }}
         >
           {content}

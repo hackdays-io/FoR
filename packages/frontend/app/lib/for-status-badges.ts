@@ -1,6 +1,7 @@
 // ティア × 進捗 → プログレスバー付きバッジ画像のマッピング。
 // ファイル名は `<level>-<animal>-<progress>.png`（外周リングが 6 段階で埋まる版）。
-// 静的バッジ `<level>-<animal>.png` や locked `6-wolf-locked-*.png` は対象外。
+// 静的バッジ `<level>-<animal>.png` や locked `6-wolf-locked-*.png` は対象外
+// （locked は `getSecretBadgeImage` で別途扱う）。
 import type { ProgressStep, Tier } from "~/lib/for-status";
 
 // 全バッジ画像を一括読み込みし、`<level>-<progress>` キーで引けるようにする。
@@ -24,6 +25,10 @@ for (const [path, url] of Object.entries(badgeModules)) {
   const staticMatch = path.match(STATIC_BADGE_PATTERN);
   if (staticMatch) staticBadgeByTier.set(staticMatch[1], url);
 }
+// 未到達のシークレットティア（Tier 6 オオカミ）用のロックバッジ（進捗リングなし版）。
+const secretBadgeUrl = Object.entries(badgeModules).find(([path]) =>
+  path.endsWith("/6-wolf-locked.png"),
+)?.[1];
 
 /**
  * ティア × 進捗に対応するバッジ画像 URL を返す。
@@ -54,4 +59,12 @@ export function getBadgeImage(tier: Tier, progress: ProgressStep): string {
  */
 export function getStaticBadgeImage(tier: Tier): string {
   return staticBadgeByTier.get(String(tier)) ?? "";
+}
+
+/**
+ * シークレットティア（Tier 6 オオカミ）が未到達のときに表示するロックバッジの画像 URL を返す。
+ * 画像欠落でも例外を投げず空文字を返す。
+ */
+export function getSecretBadgeImage(): string {
+  return secretBadgeUrl ?? "";
 }
