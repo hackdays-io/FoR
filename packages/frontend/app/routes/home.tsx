@@ -3,6 +3,7 @@ import { Link, useLoaderData, useNavigate } from "react-router";
 import { formatUnits } from "viem";
 import logoMain from "~/assets/images/logo/logo-main.png";
 import logoTagline from "~/assets/images/logo/logo-tagline.png";
+import { AllowListFormDialog } from "~/components/allowlist-form-dialog";
 import { LoadingScreen } from "~/components/loading-screen";
 import { MainBottomNavigation } from "~/components/main-bottom-navigation";
 import { OsusowakeCards } from "~/components/osusowake-cards";
@@ -211,6 +212,9 @@ function AuthenticatedHome() {
 
       {/* Bottom Navigation */}
       <MainBottomNavigation />
+
+      {/* allowlist 未登録ならユーザー情報入力フォームへ誘導 */}
+      <AllowListFormDialog address={address} />
     </div>
   );
 }
